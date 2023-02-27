@@ -1,7 +1,6 @@
 import cherrypy
 import json
-from catalog import *
-
+import catalog
 class webCatalog():
     exposed = True
     def __init__(self):
