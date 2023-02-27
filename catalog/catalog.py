@@ -3,8 +3,8 @@ import json
 class catalog():
 
     def __init__(self):
-        self.filename = "LAB05\catalog.json"    #file's json name
-        self.jsonDic = json.load(open(self.filename))   #load json file into a dictionary
+        self.filename = "LAB05\catalog.json"    # file's json name
+        self.jsonDic = json.load(open(self.filename))   # load json file into a dictionary
         
     # Method to receive broker's information
     def brokerInfo(self):
@@ -39,7 +39,6 @@ class catalog():
         devToUpdate = self.findDeviceFromID(id)
         #TODO: insert params to update
 
-    
     def findDeviceFromID(self, id = []):
         devices = self.jsonDic["devicesList"]
         idDevices = []
@@ -47,3 +46,13 @@ class catalog():
             if id.count(device.get('deviceID')) != 0:   
                 idDevices.append(device)
         return idDevices
+    
+    # Retrieve humidity threshold from telegram bot given plant name
+    def thresholdHumidity(self, plantRequest = ""):
+        try:
+            humidityTh = self.jsonDic["humidityThresh"].get(plantRequest)
+            return humidityTh
+        except KeyError:    # if plant not present raise error
+            error_code = -1
+            return error_code
+
