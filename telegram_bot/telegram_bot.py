@@ -4,23 +4,23 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 import json
 import requests
 import time
-import cherrypy
 
 class Telegram_Bot:
     """Some response of the bot"""
 
-    def __init__(self, token):
-        self.tokenBot = token
+    def __init__(self):
+        conf = json.load(open("C:\\Users\\aledi\\Desktop\\Alessandro\\PoliTo\\Magistrale\\Programming_IOT\\Lab5\\setting.json"))
+        self.tokenBot = conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         MessageLoop(self.bot, {'chat': self.on_chat_message}).run_as_thread()
 
     def on_chat_message(self, msg): 
         """This is actually the main of the bot"""
         content_type, chat_type, chat_ID = telepot.glance(msg)
-        #if chat_ID not in self.chatIDs:
+        #if chat_ID not in self.chatIDs:   # this line maybe is needed for security????
         #    self.chatIDs.append(chat_ID)
         message = msg['text']
-        if message == "/help":
+        if message == "/help": #choosing the action to do based on the command received
             self.help(chat_ID)
         elif message == "/start":
             self.start(chat_ID)
@@ -45,7 +45,7 @@ class Telegram_Bot:
                     "- /selectGreenhouse: Get ID info about your greenhouse\n"
                     "- /values: Get environmental info for your plant\n"
                     "- /plant: Get info about your plants\n"
-                    "- /irrigate: Irrigate the selected plants\n")
+                    "- /irrigate: Manually irrigate the selected plants\n")
         self.bot.sendMessage(chat_ID, text=help_message,
                     parse_mode='Markdown')
         
@@ -59,8 +59,6 @@ class Telegram_Bot:
 
 
 if __name__ == "__main__":
-    conf = json.load(open("C:\\Users\\aledi\\Desktop\\Alessandro\\PoliTo\\Magistrale\\Programming_IOT\\Lab5\\setting.json"))
-    token = conf["token"]
-    sb=Telegram_Bot(token)
+    Telegram_Bot()
     while 1:
         time.sleep(10)
