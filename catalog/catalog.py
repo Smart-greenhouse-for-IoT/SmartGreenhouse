@@ -3,8 +3,10 @@ import json
 class catalog():
 
     def __init__(self):
-        self.filename = "LAB05\catalog.json"    # file's json name
-        self.jsonDic = json.load(open(self.filename))   # load json file into a dictionary
+        self.catalogFile = "catalog\catalog.json"    # file's json name
+        self.plantDBFile = "catalog\plantsDatabse.json" # file that works as DB for plants
+        self.jsonDic = json.load(open(self.catalogFile))   # load json file into a dictionary
+        self.plantDB = json.load(open(self.plantDBFile))
         
     # Method to receive broker's information as dictionary
     def brokerInfo(self):
@@ -12,7 +14,7 @@ class catalog():
 
     # Method to receive devices information (ids can be specified)
     def devicesInfo(self, id=[]):
-        devices = self.jsonDic["devicesList"]   
+        devices = self.jsonDic["greenHouses"]   
         if len(id) != 0:    #check if ids are selected
             idDevices = []
             for device in devices:
@@ -23,7 +25,7 @@ class catalog():
 
     def addDevice(self, newDevice):
         fw = open(self.filename, "w")
-        self.jsonDic["devicesList"].append(newDevice)
+        self.jsonDic["greenHouses"].append(newDevice)
         json.dump(self.jsonDic, fw, indent=4)
     
     def addUser(self, newUser):
@@ -37,18 +39,18 @@ class catalog():
         devToUpdate = self.findDeviceFromID(id)
         #TODO: insert params to update
 
-    def findDeviceFromID(self, id = []):
-        devices = self.jsonDic["devicesList"]
-        idDevices = []
-        for device in devices:
-            if id.count(device.get('deviceID')) != 0:   
-                idDevices.append(device)
-        return idDevices
+    def getNumberLots(self, ghID = []):
+        greenhouses = self.jsonDic["greenHouses"]
+        numLots = 0
+        for gh in greenhouses:
+            if ghID.count(gh.get("ghID")) != 0:   
+                numLots = gh.get("numPlants")
+        return numLots
     
     # Retrieve humidity threshold from telegram bot given plant name
     def thresholdHumidity(self, plantRequest = ""):
         try:
-            plantDict = next(item for item in self.jsonDic["humidityThresh"] if item["plant"] == plantRequest)  # find dictionary by plant type
+            plantDict = next(item for item in self.plantDB["humidityThresh"] if item["plant"] == plantRequest)  # find dictionary by plant type in plantDB
             humidityTh = [plantDict.get("th_min"), plantDict.get("th_max")] # list composed of [th_min, th_max]
             return humidityTh
         except KeyError:    # if plant not present raise error

@@ -5,46 +5,90 @@
         "IP": "mqtt.eclipseprojects.io",
         "port": 1883
     },
-    "devicesList": [
+    "greenHouses": [
         {
-            "deviceID": 1,
-            "deviceName": "DHT11",
-            "measureType": [
-                "Temperature",
-                "Humidity"
-            ],
-            "availableServices": [
-                "MQTT",
-                "REST"
-            ],
-            "servicesDetails": [
+            "ghID": "g_001",
+            "numPlants": 2,
+            "plantsList": [
                 {
-                    "serviceType": "MQTT",
-                    "topic": [
-                        "SmartGreenHouse/1/temp",
-                        "SmartGreenHouse/1/humidity"
+                    "plantID": "p_001",
+                    "type": "rosmarino",
+                    "measurementType": "humidity",
+                    "devices": [
+                        {
+                            "devID": "d_001",
+                            "type": "humiditySensor",
+                            "topic": "smartGreenhouse/g_001/p_001/d_001"
+                        },
+                        {
+                            "devID": "d_002",
+                            "type": "irrigation",
+                            "topic": "smartGreenhouse/g_001/p_001/d_002"
+                        }
                     ]
+                     
                 },
                 {
-                    "serviceType": "REST",
-                    "serviceIP": "dht11.org:8080"
+                    "plantID": "p_002",
+                    "type": "basilico",
+                    "devices": [
+                        {
+                            "devID": "d_001",
+                            "type": "humiditySensor",
+                            "topic": "smartGreenhouse/g_001/p_002/d_001"
+                        },
+                        {
+                            "devID": "d_002",
+                            "type": "irrigation",
+                            "topic": "smartGreenhouse/g_001/p_002/d_002"
+                        }
+                    ]
+                }
+            ],
+            "lastUpdate": "2020-03-30"
+        },
+        {
+            "ghID": "g_002",
+            "numPlants": 2,
+            "plantsList": [
+                {
+                    "plantID": "p_001",
+                    "type": "rosmarino",
+                    "measurementType": "humidity",
+                    "devices": [
+                        {
+                            "devID": "d_001",
+                            "type": "humiditySensor",
+                            "topic": "smartGreenhouse/g_002/p_001/d_001"
+                        },
+                        {
+                            "devID": "d_002",
+                            "type": "irrigation",
+                            "topic": "smartGreenhouse/g_002/p_001/d_002"
+                        }
+                    ]
+                     
+                },
+                {
+                    "plantID": "p_002",
+                    "type": "basilico",
+                    "devices": [
+                        {
+                            "devID": "d_001",
+                            "type": "humiditySensor",
+                            "topic": "smartGreenhouse/g_002/p_002/d_001"
+                        },
+                        {
+                            "devID": "d_002",
+                            "type": "irrigation",
+                            "topic": "smartGreenhouse/g_002/p_002/d_002"
+                        }
+                    ]
                 }
             ],
             "lastUpdate": "2020-03-30"
         }
-    ],
-
-    "humidityThresh": [
-        {
-            "plant": "basilico",
-            "th_min": 0.3,
-            "th_max": 0.6
-        },
-        {
-            "plant": "cactus",
-            "th_min": 0.1,
-            "th_max": 0.2
-        }
-        
     ]
+
+    
 }

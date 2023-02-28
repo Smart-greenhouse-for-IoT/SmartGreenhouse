@@ -1,0 +1,15 @@
+{
+    "humidityThresh": [
+        {
+            "plant": "basilico",
+            "th_min": 0.3,
+            "th_max": 0.6
+        },
+        {
+            "plant": "cactus",
+            "th_min": 0.1,
+            "th_max": 0.2
+        }
+        
+    ]
+}
