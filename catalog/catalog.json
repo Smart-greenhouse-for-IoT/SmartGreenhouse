@@ -1,8 +1,36 @@
 {
-    "devices": [
+    "projectName": "SmartGreenHouse",
+    "lastUpdate": "2020-03-30 12:58",
+    "broker": {
+        "IP": "mqtt.eclipseprojects.io",
+        "port": 1883
+    },
+    "devicesList": [
         {
-            "id": 1,
-            "plant": "basilico"
+            "deviceID": 1,
+            "deviceName": "DHT11",
+            "measureType": [
+                "Temperature",
+                "Humidity"
+            ],
+            "availableServices": [
+                "MQTT",
+                "REST"
+            ],
+            "servicesDetails": [
+                {
+                    "serviceType": "MQTT",
+                    "topic": [
+                        "SmartGreenHouse/1/temp",
+                        "SmartGreenHouse/1/humidity"
+                    ]
+                },
+                {
+                    "serviceType": "REST",
+                    "serviceIP": "dht11.org:8080"
+                }
+            ],
+            "lastUpdate": "2020-03-30"
         }
     ],
 

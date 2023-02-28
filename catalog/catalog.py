@@ -6,11 +6,9 @@ class catalog():
         self.filename = "LAB05\catalog.json"    # file's json name
         self.jsonDic = json.load(open(self.filename))   # load json file into a dictionary
         
-    # Method to receive broker's information
+    # Method to receive broker's information as dictionary
     def brokerInfo(self):
-        ip = self.jsonDic["broker"]["ip"]
-        port = self.jsonDic["broker"]["port"]
-        return ip, port
+        return self.jsonDic["broker"]   
 
     # Method to receive devices information (ids can be specified)
     def devicesInfo(self, id=[]):
@@ -50,7 +48,8 @@ class catalog():
     # Retrieve humidity threshold from telegram bot given plant name
     def thresholdHumidity(self, plantRequest = ""):
         try:
-            humidityTh = self.jsonDic["humidityThresh"].get(plantRequest)
+            plantDict = next(item for item in self.jsonDic["humidityThresh"] if item["plant"] == plantRequest)  # find dictionary by plant type
+            humidityTh = [plantDict.get("th_min"), plantDict.get("th_max")] # list composed of [th_min, th_max]
             return humidityTh
         except KeyError:    # if plant not present raise error
             error_code = -1

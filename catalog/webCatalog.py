@@ -7,11 +7,9 @@ class webCatalog():
         self.catObj = catalog() #define catalog object
     
     def GET(self, *uri, **params):
-        # BROKER INFO
+        # return broker info as json string
         if uri[0] == "broker":
-            ip, port = self.catObj.brokerInfo()
-            toReturn = f"BROKER INFO:\nIP: {ip}\nPORT: {port}"
-            return toReturn
+            return json.dumps(self.catObj.brokerInfo())
         
         # DEVICES INFO
         elif uri[0] == "devicesList":
@@ -20,7 +18,13 @@ class webCatalog():
                 idDevices = self.catObj.devicesInfo(ids)
                 return json.dumps(idDevices) 
             devices = self.catObj.devicesInfo()
-            return json.dumps(devices)      
+            return json.dumps(devices)
+
+        # retrieve humidity threshold given ID 
+        # /getThresholds?plant=basilico
+        elif uri[0] == "getThresholds":
+            humidityTh = self.catObj.thresholdHumidity(params.get("plant")) # retrieve humidity threshold given plant name
+            return humidityTh   # return a list containing min and max thresholds 
     
     def POST(self, *uri, **params):
         bodyAsString = cherrypy.request.body.read()
