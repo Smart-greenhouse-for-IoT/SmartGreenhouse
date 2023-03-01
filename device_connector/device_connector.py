@@ -2,6 +2,7 @@
 
 import requests
 import json
+from MyMQTT import *
 import sys
 import time
 import datetime
@@ -25,37 +26,45 @@ class Device_Connector(object):
         string = "http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/topics" #URL for GET
         top_dict = json.loads(requests.get(string))  #GET from catalog the topics that i have to subscribe and publish form 
         return top_dict
-    
-class MyPublisher(object): 
-    """MQTT Publisher."""
 
-    def __init__(self, clientID, serverIP, port):
-        """Initialise MQTT client."""
+class pub():
+    def __init__(self, clientID, broker, port, topic):
+        self.broker = broker
+        self.port = port
+        self.topic = topic
         self.clientID = clientID
-        self.devID = clientID
-        self.port = int(port)
-        self.messageBroker = serverIP
-        self._paho_mqtt = PahoMQTT.Client(clientID, False)
-        self._paho_mqtt.on_connect = self.my_on_connect
-        self.loop_flag = 1
-
-    def start(self):
-        """Start publisher."""
-        self._paho_mqtt.connect(self.messageBroker, self.port)
-        self._paho_mqtt.loop_start()
-
-    def stop(self):
-        """Stop publisher."""
-        self._paho_mqtt.loop_stop()
-        self._paho_mqtt.disconnect()
-
-    def my_on_connect(self, client, userdata, flags, rc):
-        """Define custom on_connect function."""
-        print("P - Connected to %s - Res code: %d" % (self.messageBroker, rc))
-        self.loop_flag = 0
-
-    def my_publish(self, message, topic):
-        """Define custom publish function."""
+        self.client = MyMQTT(self.clientID, self.broker, self.port,self)
     
+    def startPub(self):
+        """Starting the publisher"""
+        self.client.start()
+        time.sleep(3) #we want to be sure to do that commands in order
+        
+    def pubEvent(self):
+        """Publish event"""
+        self.client.myPublish(self.topic)
+
+class sub():
+    def __init__(self, clientID, broker, port, topic):
+        self.broker = broker
+        self.port = port
+        self.topic = topic
+        self.clientID = clientID
+        self.client = MyMQTT(self.clientID, self.broker, self.port,self)
+
+    def startSub(self):
+        """Starting the subscriber"""
+        self.client.start()
+        time.sleep(3) #we want to be sure to do that commands in order
+        self.client.mySubscribe(self.topic) #subscribing to the selected topic
+
+    def notify(self,topic,payload):
+        """Receiving the topic"""
+        #{"status":value}
+        self.temperature=json.loads(payload) #load the payload and take the status
+        print(f"{self.temperature}")
+
 if __name__=='__main__':
-    pass
+    
+    while True:
+        time.sleep(1)
