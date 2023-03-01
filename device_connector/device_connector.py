@@ -60,11 +60,9 @@ class sub():
 
     def notify(self,topic,payload):
         """Receiving the topic"""
-        #{"status":value}
-        self.temperature=json.loads(payload) #load the payload and take the status
-        print(f"{self.temperature}")
+        
 
 if __name__=='__main__':
-    
+
     while True:
         time.sleep(1)
