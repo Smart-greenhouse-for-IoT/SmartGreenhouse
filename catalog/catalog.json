@@ -1,22 +1,73 @@
 {
-    "devices": [
+    "projectName": "SmartGreenHouse",
+    "lastUpdate": "2020-03-30 12:58",
+    "broker": {
+        "IP": "mqtt.eclipseprojects.io",
+        "port": 1883,
+        "clientID":"pastaalsaleconpomodorinidimelanzane"
+    },
+    "greenhouses": [
         {
-            "id": 1,
-            "plant": "basilico"
-        }
-    ],
-
-    "humidityThresh": [
-        {
-            "plant": "basilico",
-            "th_min": 0.3,
-            "th_max": 0.6
+            "ghID": "g_001",
+            "numPlants": 2,
+            "plantsList": [
+                {
+                    "plantID": "p_001",
+                    "type": "rosmarino"
+                     
+                },
+                {
+                    "plantID": "p_002",
+                    "type": "basilico"
+                    
+                }
+            ],
+            "lastUpdate": "2020-03-30"
         },
         {
-            "plant": "cactus",
-            "th_min": 0.1,
-            "th_max": 0.2
+            "ghID": "g_002",
+            "numPlants": 1,
+            "plantsList": [
+                {
+                    "plantID": "p_001",
+                    "type": "rosmarino"
+                }
+            ],
+            "lastUpdate": "2020-03-30"
         }
-        
+    ],
+    "sensors": [
+        {
+            "devID": "d_001",
+            "type": "humiditySensor",
+            "topic": "smartGreenhouse/g_001/p_001/humidity"
+        },
+        {
+            "devID": "d_002",
+            "type": "irrigation",
+            "topic": "smartGreenhouse/g_001/p_001/irrigation"
+        },
+        {
+            "devID": "d_003",
+            "type": "humiditySensor",
+            "topic": "smartGreenhouse/g_001/p_002/humidity"
+        },
+        {
+            "devID": "d_004",
+            "type": "irrigation",
+            "topic": "smartGreenhouse/g_001/p_002/irrigation"
+        },
+        {
+            "devID": "d_005",
+            "type": "humiditySensor",
+            "topic": "smartGreenhouse/g_002/p_001/humidity"
+        },
+        {
+            "devID": "d_006",
+            "type": "irrigation",
+            "topic": "smartGreenhouse/g_002/p_001/irrigation"
+        }
     ]
+
+    
 }
