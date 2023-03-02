@@ -1,0 +1,7 @@
+{
+    "brokerIP": "mqtt.eclipseprojects.io",
+    "brokerPort": "1883",
+    "mqttTopic": "iot/aleSSa/",
+    "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
+    "telegramPort": "8086"
+}
