@@ -16,9 +16,8 @@ class Device_Connector(object):
         self.conf = json.load(open("device_connector\\conf.json"))
         self.devices = json.load(open("device_connector\\devices.json"))
         broker_dict = self.get_broker()
-        print(broker_dict)
-        print(broker_dict["clientID"])
-        self.client_mqtt = MyMQTT(broker_dict["clientID"],broker_dict["IP"],broker_dict["port"],self)
+        self.client_mqtt = MyMQTT(broker_dict["clientID"],broker_dict["IP"],broker_dict["port"], self)
+        self.client_mqtt.start()
 
     def notify(self,topic,payload): 
         """Where we receive the topic which we are subscribed (plant control microservices)"""
@@ -38,7 +37,7 @@ class Device_Connector(object):
         top_dict = requests.get(string).json()  #GET from catalog the topics that i have to subscribe and publish
         return top_dict
     
-    def post_sensor_Cat(self,id): 
+    def post_sensor_Cat(self): 
         """Post to the catalog all the sensors of this device connector"""
         string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateSensors" #URL for POST
         requests.post(string, json = self.devices)
@@ -53,5 +52,6 @@ class Device_Connector(object):
 
 if __name__=='__main__':
     dc = Device_Connector()
+    dc.post_sensor_Cat()
     while True:
         time.sleep(1)

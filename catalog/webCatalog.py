@@ -52,6 +52,5 @@ if __name__ == "__main__": #Standard configuration to serve the url "localhost:8
 	}
 	webService=webCatalog()
 	cherrypy.tree.mount(webService,'/',conf)
-    #cherrypy.config.update({'server.socket_port': 8181})
 	cherrypy.engine.start()
 	cherrypy.engine.block()

@@ -75,7 +75,7 @@ class catalog():
                 "topic": "/topic/forSensors"
             }
         '''
-        fw = open(self.filename, "w")
+        fw = open(self.catalogFile, "w")
         self.jsonDic["sensors"].clear() # remove previous sensors
         self.jsonDic["sensors"] = sensorsDic    # insert updated list of sensors
         json.dump(self.jsonDic, fw, indent=4)
