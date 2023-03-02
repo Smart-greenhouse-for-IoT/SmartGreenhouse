@@ -9,7 +9,8 @@ import datetime
 import paho.mqtt.client as PahoMQTT
 
 class Device_Connector(object):
-    """Get data from catalog"""
+    """Device connector class:
+            - get info from the catalog"""
 
     def __init__(self):
         self.conf = json.loads(open("setting.json"))
@@ -18,7 +19,10 @@ class Device_Connector(object):
         self.client_mqtt = MyMQTT(broker_dict["clientID"],broker_dict["IP"],broker_dict["port"],self)
 
     def notify(self,topic,payload): 
-        """Where we receive the topic which we are subscribed"""
+        """Where we receive the topic which we are subscribed (plant control microservices)"""
+        self.actuation = json.loads(payload)
+        if self.actuation["action"] == True:
+            self.irrigator() #bisogna passargli il lotto a cui irrigare, lo prendo dal topic???
 
     def get_broker(self): 
         """GET all the broker information"""
@@ -41,9 +45,8 @@ class Device_Connector(object):
 
         pass
 
-    def irrigator(self, action):
-
-        pass
+    def irrigator(self, lot):
+        print(f"Irrigation started on lot : {lot}")
 
 
 if __name__=='__main__':
