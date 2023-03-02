@@ -1,0 +1,17 @@
+{
+    "DeviceConnectorID": "p_001",
+    "devicesList": [
+        {
+            "devID": "d_001",
+            "type": "sensor",
+            "measurementType": "humidity",
+            "topic": "smartGreenhouse/g_001/p_001/d_001"
+        },
+        {
+            "devID": "d_002",
+            "type": "irrigationActuator",
+            "measurementType": "",
+            "topic": "smartGreenhouse/g_001/p_001/d_002"
+        }
+    ]
+}
