@@ -9,7 +9,7 @@ class Telegram_Bot:
     """Some response of the bot"""
 
     def __init__(self):
-        conf = json.load(open("C:\\Users\\aledi\\Desktop\\Alessandro\\PoliTo\\Magistrale\\Programming_IOT\\Lab5\\setting.json"))
+        conf = json.load(open("telegram_bot\setting.json"))
         self.tokenBot = conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         MessageLoop(self.bot, {'chat': self.on_chat_message,
