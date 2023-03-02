@@ -49,6 +49,7 @@ class Telegram_Bot:
             if action == 'Add':
                 if place == 'Plant':
                     self.bot.sendMessage(chat_ID, text=f"Insert the name of the new plant")
+                    self.plantname = True
                 elif place == '':
                     pass
     
