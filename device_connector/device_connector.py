@@ -17,14 +17,14 @@ class Device_Connector(object):
         self.devices = json.load(open("device_connector\\devices.json"))
         broker_dict = self.get_broker()
         print(broker_dict)
-        print(broker_dict["clientID"])
         self.client_mqtt = MyMQTT(broker_dict["clientID"],broker_dict["IP"],broker_dict["port"],self)
+        self.client_mqtt.start()
 
     def notify(self,topic,payload): 
         """Where we receive the topic which we are subscribed (plant control microservices)"""
         self.actuation = json.load(payload)
         if self.actuation["action"] == True:
-            self.irrigator() #bisogna passargli il lotto a cui irrigare, lo prendo dal topic???
+            self.irrigator() #TODO: bisogna passargli il lotto a cui irrigare, lo prendo dal topic???
 
     def get_broker(self): 
         """GET all the broker information"""
@@ -44,7 +44,7 @@ class Device_Connector(object):
         requests.post(string, json = self.devices)
     
     def humiditySens(self):
-
+        
         pass
 
     def irrigator(self, lot):
