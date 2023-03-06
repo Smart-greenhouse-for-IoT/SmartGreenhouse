@@ -22,6 +22,28 @@
                     
                 }
             ],
+            "devicesList": [
+                {
+                    "devID": "d_001",
+                    "type": "humiditySensor",
+                    "topic": "smartGreenhouse/g_001/p_001/humidity"
+                },
+                {
+                    "devID": "d_002",
+                    "type": "irrigation",
+                    "topic": "smartGreenhouse/g_001/p_001/irrigation"
+                },
+                {
+                    "devID": "d_003",
+                    "type": "humiditySensor",
+                    "topic": "smartGreenhouse/g_001/p_002/humidity"
+                },
+                {
+                    "devID": "d_004",
+                    "type": "irrigation",
+                    "topic": "smartGreenhouse/g_001/p_002/irrigation"
+                }
+            ],
             "lastUpdate": "2020-03-30"
         },
         {
@@ -35,39 +57,6 @@
             ],
             "lastUpdate": "2020-03-30"
         }
-    ],
-    "sensors": [
-        {
-            "devID": "d_001",
-            "type": "humiditySensor",
-            "topic": "smartGreenhouse/g_001/p_001/humidity"
-        },
-        {
-            "devID": "d_002",
-            "type": "irrigation",
-            "topic": "smartGreenhouse/g_001/p_001/irrigation"
-        },
-        {
-            "devID": "d_003",
-            "type": "humiditySensor",
-            "topic": "smartGreenhouse/g_001/p_002/humidity"
-        },
-        {
-            "devID": "d_004",
-            "type": "irrigation",
-            "topic": "smartGreenhouse/g_001/p_002/irrigation"
-        },
-        {
-            "devID": "d_005",
-            "type": "humiditySensor",
-            "topic": "smartGreenhouse/g_002/p_001/humidity"
-        },
-        {
-            "devID": "d_006",
-            "type": "irrigation",
-            "topic": "smartGreenhouse/g_002/p_001/irrigation"
-        }
     ]
-
     
 }

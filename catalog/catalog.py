@@ -3,8 +3,8 @@ import json
 class catalog():
 
     def __init__(self):
-        self.catalogFile = "catalog\catalog.json"    # file's json name
-        self.plantDBFile = "catalog\plantsDatabase.json" # file that works as DB for plants
+        self.catalogFile = "catalog/catalog.json"    # file's json name
+        self.plantDBFile = "catalog/plantsDatabase.json" # file that works as DB for plants
         self.jsonDic = json.load(open(self.catalogFile))   # load json file into a dictionary
         self.plantDB = json.load(open(self.plantDBFile))
         
@@ -75,8 +75,9 @@ class catalog():
                 "topic": "/topic/forSensors"
             }
         '''
+        #TODO: da finire
         fw = open(self.catalogFile, "w")
-        self.jsonDic["sensors"].clear() # remove previous sensors
+        self.jsonDic["greenhouses"]["ghID" == sensorsDic["ghID"]]["devicesList"].clear() # remove previous sensors
         self.jsonDic["sensors"] = sensorsDic    # insert updated list of sensors
         json.dump(self.jsonDic, fw, indent=4)
         
