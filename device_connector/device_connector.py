@@ -39,7 +39,7 @@ class Device_Connector(object):
     
     def post_sensor_Cat(self): 
         """Post to the catalog all the sensors of this device connector"""
-        string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateSensors" #URL for POST
+        string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateDevices" #URL for POST
         requests.post(string, json = self.devices)
     
     def humiditySens(self):
