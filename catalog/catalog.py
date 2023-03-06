@@ -63,22 +63,21 @@ class catalog():
             error_code = -1
             return error_code
     
-    def updateSensors(self, sensorsDic):
+    def updateSensors(self, devicesDic):
         ''' 
         Method to update sensors to the catalog json file
         ---
         - Used by device connector to keep the catalog updated
-        - Update sensors in "sensors" key in the format:\n
+        - Update sensors in "devicesList" key in the format:\n
             {
                 "devID": "id",
                 "type": "typeofSensor",
+                "measurementType" = "",
                 "topic": "/topic/forSensors"
             }
         '''
-        #TODO: da finire
         fw = open(self.catalogFile, "w")
-        self.jsonDic["greenhouses"]["ghID" == sensorsDic["ghID"]]["devicesList"].clear() # remove previous sensors
-        self.jsonDic["sensors"] = sensorsDic    # insert updated list of sensors
+        self.jsonDic["greenhouses"]["ghID" == devicesDic["ghID"]]["devicesList"] = devicesDic["devicesList"] # update devices of the given ghID
         json.dump(self.jsonDic, fw, indent=4)
         
     
