@@ -13,8 +13,8 @@ class Device_Connector(object):
             - get info from the catalog"""
 
     def __init__(self):
-        self.conf = json.load(open("device_connector\\conf.json"))
-        self.devices = json.load(open("device_connector\\devices.json"))
+        self.conf = json.load(open("device_connector/conf.json"))
+        self.devices = json.load(open("device_connector/devices.json"))
         broker_dict = self.get_broker()
         self.client_mqtt = MyMQTT(broker_dict["clientID"],broker_dict["IP"],broker_dict["port"], self)
         self.client_mqtt.start()
@@ -39,7 +39,7 @@ class Device_Connector(object):
     
     def post_sensor_Cat(self): 
         """Post to the catalog all the sensors of this device connector"""
-        string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateSensors" #URL for POST
+        string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateDevices" #URL for POST
         requests.post(string, json = self.devices)
     
     def humiditySens(self):

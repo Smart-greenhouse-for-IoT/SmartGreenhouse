@@ -1,5 +1,5 @@
 {
-    "DeviceConnectorID": "p_001",
+    "ghID": "g_001",
     "devicesList": [
         {
             "devID": "d_001",
@@ -9,9 +9,15 @@
         },
         {
             "devID": "d_002",
-            "type": "irrigationActuator",
+            "type": "actuator",
             "measurementType": "",
             "topic": "smartGreenhouse/g_001/p_001/irrigation"
+        },
+        {
+            "devID": "d_003",
+            "type": "sensor",
+            "measurementType":"humidity",
+            "topic": "smartGreenhouse/g_001/p_002/humidity"
         }
     ]
 }

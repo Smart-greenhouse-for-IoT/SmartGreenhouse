@@ -1,7 +1,8 @@
 import cherrypy
 import json
 import catalog
-class webCatalog():
+
+class REST_catalog():
     exposed = True
     def __init__(self):
         self.catObj = catalog.catalog() #define catalog object
@@ -50,7 +51,7 @@ if __name__ == "__main__": #Standard configuration to serve the url "localhost:8
 			'tools.sessions.on': True
 		}
 	}
-	webService=webCatalog()
+	webService=REST_catalog()
 	cherrypy.tree.mount(webService,'/',conf)
 	cherrypy.engine.start()
 	cherrypy.engine.block()
