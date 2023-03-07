@@ -63,6 +63,8 @@ class catalog():
         except KeyError:    # if plant not present raise error
             error_code = -1
             return error_code
+
+    #TODO: funzioni per threshold temperatura, umidita ppm serra
     
     def updateDevices(self, devicesDic):
         ''' 
