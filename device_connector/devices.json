@@ -4,7 +4,7 @@
         {
             "devID": "d_001",
             "type": "sensor",
-            "measurementType": "humidity",
+            "measurementType": ["humidity"],
             "topic": "smartGreenhouse/g_001/p_001/humidity"
         },
         {
@@ -16,8 +16,26 @@
         {
             "devID": "d_003",
             "type": "sensor",
-            "measurementType":"humidity",
+            "measurementType": ["humidity"],
             "topic": "smartGreenhouse/g_001/p_002/humidity"
+        },
+        {
+            "devID": "d_004",
+            "type": "sensor",
+            "measurementType": "",
+            "topic": "smartGreenhouse/g_001/p_002/irrigation"
+        },
+        {
+            "devID": "d_998",
+            "type": "actuator",
+            "measurementType":"",
+            "topic": ["smartGreenhouse/g_001/air_cotrol/fan"]
+        },
+        {
+            "devID": "d_999",
+            "type": "sensor",
+            "measurementType":["temp", "humidity", "ppm"],
+            "topic": ["smartGreenhouse/g_001/air_cotrol/humidity", "smartGreenhouse/g_001/air_cotrol/temp", "smartGreenhouse/g_001/air_cotrol/ppm" ]
         }
     ]
 }
