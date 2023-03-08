@@ -1,5 +1,6 @@
 import json
 import cherrypy
+from datetime import datetime
 
 class catalog():
 
@@ -13,10 +14,9 @@ class catalog():
     def brokerInfo(self):
         return self.catDic["broker"]   
 
-    # Method to retrieve devices information given a greenhouse id
+    # Method to retrieve all devices
     def devicesInfo(self, id: str):
-        ghID_dic = next(gh for gh in self.catDic["greenhouses"] if gh["ghID"] == id)
-        return ghID_dic["devicesList"]
+        return self.catDic["devices"]
     
     def catInfo(self):
         '''
@@ -68,23 +68,42 @@ class catalog():
         except KeyError:    # if plant not present raise error
             error_code = -1
             return error_code
+
+    def searchDic(self, dict, key, value):
+        dic = {}
+        for item in dict:
+            if item[key] == value:
+                dic = item.copy()
+                break
+        return dic
+    
+    
+    def addDevice(self, newDev):
+        '''
+        Method to add a new device under "devices
+        --- 
+        If the new device is added succesfully return 0.\n
+        Return 1 if:
+            - a device with same devID already exist
+        '''
+        if self.searchDic(self.catDic['devices'], "devID", newDev['devID']) == {}:
+            self.catDic["devices"].append(newDev)
+            self.catDic["lastUpdate"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(self.catalogFile, 'w') as fw:
+                json.dump(self.catDic, fw, indent=4)
+            return 0
+        return 1
     
     def updateDevices(self, devicesDic):
         ''' 
         Method to update devices to the catalog json file
         ---
         - Used by device connector to keep the catalog updated
-        - Update devices in "devicesList" key in the format:\n
-            {
-                "devID": "id",
-                "type": "typeofSensor",
-                "measurementType" = "",
-                "topic": "/topic/forSensors"
-            }
+        - Update devices in "devices" key of catalog.json
         '''
-        fw = open(self.catalogFile, "w")
         self.catDic["greenhouses"]["ghID" == devicesDic["ghID"]]["devicesList"] = devicesDic["devicesList"] # update devices of the given ghID
-        json.dump(self.catDic, fw, indent=4)
+        with open(self.catalogFile, "w") as fw:
+            json.dump(self.catDic, fw, indent=4)
 
 
 class REST_catalog(catalog):
@@ -130,6 +149,13 @@ class REST_catalog(catalog):
         # update 
         if uri[0] == "updateDevices":
             self.updateDevices(bodyAsDictionary)
+
+        elif uri[0] == "addDevice":
+            if self.addDevice(bodyAsDictionary) == 0:
+                print('\nNew device added succesfully!')    #NOTE: come aggiungere una response del server che non sia un'eccezione??
+            else:
+                print("The device could not be added")
+                raise cherrypy.HTTPError(400, "The device could not be added!")
 
         elif uri[0] == "user":
             self.addUser(bodyAsDictionary)

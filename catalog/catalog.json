@@ -1,18 +1,15 @@
 {
     "projectName": "SmartGreenHouse",
-    "lastUpdate": "2020-03-30 12:58",
-
+    "lastUpdate": "2023-03-08 22:46:39",
     "catalog": {
         "ip": "127.0.0.1",
         "port": 8080
     },
-
     "broker": {
         "IP": "mqtt.eclipseprojects.io",
         "port": 1883,
         "clientID": "pastaalsaleconpomodorinidimelanzane"
     },
-
     "devices": [
         {
             "devID": "d_001",
@@ -25,7 +22,7 @@
             "endpoints_details": [
                 {
                     "endpoint": "REST",
-                    "address": "http://127.0.0.1:8080",
+                    "address": "http://127.0.0.1:8080"
                 },
                 {
                     "endpoint": "MQTT",
@@ -35,7 +32,7 @@
                     ]
                 }
             ],
-            "resources":{
+            "resources": {
                 "sensors": [
                     {
                         "sensID": "s_001",
@@ -72,12 +69,8 @@
                 ]
             },
             "lastUpdate": ""
-        },
-        {
-
         }
     ],
-
     "greenhouses": [
         {
             "ghID": "g_001",
@@ -108,13 +101,8 @@
             "lastUpdate": ""
         }
     ],
-    
-    "users":[
-        {
-
-        },
-        {
-            
-        }
+    "users": [
+        {},
+        {}
     ]
 }
