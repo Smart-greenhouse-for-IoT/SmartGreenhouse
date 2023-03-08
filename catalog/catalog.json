@@ -1,14 +1,80 @@
 {
     "projectName": "SmartGreenHouse",
-    "lastUpdate": "2020-03-30 12:58",
+    "lastUpdate": "2023-03-08 22:46:39",
+    "catalog": {
+        "ip": "127.0.0.1",
+        "port": 8080
+    },
     "broker": {
         "IP": "mqtt.eclipseprojects.io",
         "port": 1883,
         "clientID": "pastaalsaleconpomodorinidimelanzane"
     },
+    "devices": [
+        {
+            "devID": "d_001",
+            "ghID": "g_001",
+            "name": "raspberry1",
+            "endpoints": [
+                "REST",
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "REST",
+                    "address": "http://127.0.0.1:8080"
+                },
+                {
+                    "endpoint": "MQTT",
+                    "bn": "RaspberryPi3_2",
+                    "topic": [
+                        "smartGreenhouse/d_001"
+                    ]
+                }
+            ],
+            "resources": {
+                "sensors": [
+                    {
+                        "sensID": "s_001",
+                        "devID": "d_001",
+                        "lotID": "l_001",
+                        "measurementType": "humidity",
+                        "topic": "smartGreenhouse/d_001/l_001/humidity",
+                        "lastUpdate": ""
+                    },
+                    {
+                        "sensID": "s_002",
+                        "devID": "d_001",
+                        "lotID": "l_002",
+                        "measurementType": "humidity",
+                        "topic": "smartGreenhouse/d_001/l_002/humidity",
+                        "lastUpdate": ""
+                    }
+                ],
+                "actuators": [
+                    {
+                        "actID": "a_001",
+                        "devID": "d_001",
+                        "lotID": "l_001",
+                        "topic": "smartGreenhouse/d_001/l_001/irrigation",
+                        "lastUpdate": ""
+                    },
+                    {
+                        "actID": "a_002",
+                        "devID": "d_001",
+                        "lotID": "l_002",
+                        "topic": "smartGreenhouse/d_001/l_002/irrigation",
+                        "lastUpdate": ""
+                    }
+                ]
+            },
+            "lastUpdate": ""
+        }
+    ],
     "greenhouses": [
         {
             "ghID": "g_001",
+            "devID": "d_001",
             "numPlants": 2,
             "plantsList": [
                 {
@@ -20,30 +86,11 @@
                     "type": "basilico"
                 }
             ],
-            "devicesList": [
-                {
-                    "devID": "d_001",
-                    "type": "sensor",
-                    "measurementType": "humidity",
-                    "topic": "smartGreenhouse/g_001/p_001/humidity"
-                },
-                {
-                    "devID": "d_002",
-                    "type": "actuator",
-                    "measurementType": "",
-                    "topic": "smartGreenhouse/g_001/p_001/irrigation"
-                },
-                {
-                    "devID": "d_003",
-                    "type": "sensor",
-                    "measurementType": "humidity",
-                    "topic": "smartGreenhouse/g_001/p_002/humidity"
-                }
-            ],
-            "lastUpdate": "2020-03-30"
+            "lastUpdate": ""
         },
         {
             "ghID": "g_002",
+            "devID": "d_002",
             "numPlants": 1,
             "plantsList": [
                 {
@@ -51,7 +98,11 @@
                     "type": "rosmarino"
                 }
             ],
-            "lastUpdate": "2020-03-30"
+            "lastUpdate": ""
         }
+    ],
+    "users": [
+        {},
+        {}
     ]
 }
