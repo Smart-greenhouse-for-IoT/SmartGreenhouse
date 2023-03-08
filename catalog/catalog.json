@@ -40,15 +40,17 @@
                     {
                         "sensID": "s_001",
                         "devID": "d_001",
+                        "lotID": "l_001",
                         "measurementType": "humidity",
-                        "topic": "smartGreenhouse/d_001/s_001/humidity",
+                        "topic": "smartGreenhouse/d_001/l_001/humidity",
                         "lastUpdate": ""
                     },
                     {
                         "sensID": "s_002",
                         "devID": "d_001",
+                        "lotID": "l_002",
                         "measurementType": "humidity",
-                        "topic": "smartGreenhouse/d_001/s_002/humidity",
+                        "topic": "smartGreenhouse/d_001/l_002/humidity",
                         "lastUpdate": ""
                     }
                 ],
@@ -56,13 +58,15 @@
                     {
                         "actID": "a_001",
                         "devID": "d_001",
-                        "topic": "smartGreenhouse/d_001/a_001/irrigation",
+                        "lotID": "l_001",
+                        "topic": "smartGreenhouse/d_001/l_001/irrigation",
                         "lastUpdate": ""
                     },
                     {
                         "actID": "a_002",
                         "devID": "d_001",
-                        "topic": "smartGreenhouse/d_001/a_002/irrigation",
+                        "lotID": "l_002",
+                        "topic": "smartGreenhouse/d_001/l_002/irrigation",
                         "lastUpdate": ""
                     }
                 ]
