@@ -1,41 +1,60 @@
 {
+    "devID": "d_001",
     "ghID": "g_001",
-    "devicesList": [
+    "name": "raspberry1",
+    "endpoints": [
+        "REST",
+        "MQTT"
+    ],
+    "endpoints_details": [
         {
-            "devID": "d_001",
-            "type": "sensor",
-            "measurementType": ["humidity"],
-            "topic": "smartGreenhouse/g_001/p_001/humidity"
+            "endpoint": "REST",
+            "address": "http://127.0.0.1:8080"
         },
         {
-            "devID": "d_002",
-            "type": "actuator",
-            "measurementType": "",
-            "topic": "smartGreenhouse/g_001/p_001/irrigation"
-        },
-        {
-            "devID": "d_003",
-            "type": "sensor",
-            "measurementType": ["humidity"],
-            "topic": "smartGreenhouse/g_001/p_002/humidity"
-        },
-        {
-            "devID": "d_004",
-            "type": "sensor",
-            "measurementType": "",
-            "topic": "smartGreenhouse/g_001/p_002/irrigation"
-        },
-        {
-            "devID": "d_998",
-            "type": "actuator",
-            "measurementType":"",
-            "topic": ["smartGreenhouse/g_001/air_cotrol/fan"]
-        },
-        {
-            "devID": "d_999",
-            "type": "sensor",
-            "measurementType":["temp", "humidity", "ppm"],
-            "topic": ["smartGreenhouse/g_001/air_cotrol/humidity", "smartGreenhouse/g_001/air_cotrol/temp", "smartGreenhouse/g_001/air_cotrol/ppm" ]
+            "endpoint": "MQTT",
+            "bn": "RaspberryPi3_2",
+            "topic": [
+                "smartGreenhouse/d_001"
+            ]
         }
-    ]
+    ],
+    "resources":{
+        "sensors": [
+            {
+                "sensID": "s_001",
+                "devID": "d_001",
+                "lotID": "l_001",
+                "measurementType": "humidity",
+                "topic": "smartGreenhouse/d_001/l_001/humidity",
+                "lastUpdate": ""
+            },
+            {
+                "sensID": "s_002",
+                "devID": "d_001",
+                "lotID": "l_002",
+                "measurementType": "humidity",
+                "topic": "smartGreenhouse/d_001/l_002/humidity",
+                "lastUpdate": ""
+            }
+        ],
+        "actuators": [
+            {
+                "actID": "a_001",
+                "devID": "d_001",
+                "lotID": "l_001",
+                "topic": "smartGreenhouse/d_001/l_001/irrigation",
+                "lastUpdate": ""
+            },
+            {
+                "actID": "a_002",
+                "devID": "d_001",
+                "lotID": "l_002",
+                "topic": "smartGreenhouse/d_001/l_002/irrigation",
+                "lastUpdate": ""
+            }
+        ]
+    },
+    "lastUpdate": ""
+
 }
