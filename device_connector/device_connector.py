@@ -51,36 +51,38 @@ class Device_Connector(object):
     def post_sensor_Cat(self): 
         """Post to the catalog all the sensors of this device connector"""
 
-        self.localtime = datetime.datetime.now() # get struct_time
-        if (self.localtime-self.post_senstor_cat_Time) > datetime.timedelta(seconds=30):
-            string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateSensors" #URL for POST
-            requests.post(string, json = self.devices)
-        self.post_senstor_cat_Time = self.localtime
+        string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateSensors" #URL for POST
+        requests.post(string, json = self.devices)
         
     
     def humiditySens(self):
         """Get the simulated value of the humidity sensor and publish it to the correspondent topic"""
 
-        self.localtime = datetime.datetime.now() # get struct_time
-        if (self.localtime-self.humidity_Time) > datetime.timedelta(minutes=1):
-            for dv in self.devices["devicesList"]:
-                if dv["type"] == "sensor":
-                    #TODO: get the humidity level
-                    #humidity = leggo da un file json?
-                    #self.client_mqtt.myPublish(dv["topic"], humidity) #TODO: quante cose devo mandare? basta topic e umidità?
-                    pass
-        self.humidity_Time = self.localtime
+        for dv in self.devices["devicesList"]:
+            if dv["type"] == "sensor":
+                #TODO: get the humidity level
+                #humidity = leggo da un file json?
+                #self.client_mqtt.myPublish(dv["topic"], humidity) #TODO: quante cose devo mandare? basta topic e umidità?
+                pass
 
     def irrigator(self, lot):
         #TODO: pubblicare al topic dell'attuatore dell'irrigazione?
         pass
 
+    def main(self):
+        last_time = 0
+        refresh_time = 30
+        try:
+            while True:
+                local_time = time.time()
+                if local_time - last_time > refresh_time: 
+                    dc.post_sensor_Cat()
+                    last_time = time.time() 
+                time.sleep(5)
+        except KeyboardInterrupt: #to kill the program
+            pass
 
 if __name__=='__main__':
 
     dc = Device_Connector()
-
-    while True:
-        #dc.humiditySens()
-        dc.post_sensor_Cat()
-        time.sleep(5)
+    dc.main()
