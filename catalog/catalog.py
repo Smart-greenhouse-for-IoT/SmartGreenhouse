@@ -4,7 +4,7 @@ import requests
 from datetime import datetime
 
 class catalog():
-
+    #TODO: cleanup loop: check time to decide which entries to delete
     def __init__(self):
         self.catalogFile = "catalog/catalog.json" 
         self.plantDBFile = "catalog/plantsDatabase.json"
@@ -19,7 +19,7 @@ class catalog():
 
     ######################## DEVICE CATALOG ########################
     def dictInfo(self, key):
-        # Method to retrieve all devices
+        # Method to retrieve value of dictionary given key
         return self.catDic[key]
 
     def searchDict(self, key_lst, key, value):
@@ -79,10 +79,47 @@ class catalog():
     def telegramInfo(self):
         return self.catDic["telegramBot"]
     
-    def addUser(self, newUser):
-        fw = open(self.filename, "w")
-        self.catDic["usersList"].append(newUser)
-        json.dump(self.catDic, fw, indent=4)
+    def addUser(self, newUsr):
+        if self.searchDict("users","usrID", newUsr["usrID"]) == {}:
+            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            newUsr["lastUpdate"] = self.lastUpdate
+            self.catDic["users"].append(newUsr)
+            self.catDic["lastUpdate"] = self.lastUpdate
+            return 0
+        else:
+            return -1
+    
+    def updateUser(self, update_usr):
+        for i, user in enumerate(self.catDic["users"]):
+            if user["usrID"] == update_usr["usrID"]:
+                for key in update_usr.keys():
+                    self.catDic["users"][i][key] = update_usr[key]
+                self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.catDic["users"][i]["lastUpdate"] = self.lastUpdate
+                self.catDic["lastUpdate"] = self.lastUpdate
+                return 0
+        return -1
+    
+    def addGreenhouse(self, newGh):
+        if self.searchDict("greenhouses","ghID", newUsr["ghID"]) == {}:
+            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            newUsr["lastUpdate"] = self.lastUpdate
+            self.catDic["greenhouses"].append(newUsr)
+            self.catDic["lastUpdate"] = self.lastUpdate
+            return 0
+        else:
+            return -1
+    
+    def updateGreenhouse(self, update_gh):
+        for i, greenhouse in enumerate(self.catDic["greenhouses"]):
+            if greenhouse["ghID"] == update_gh["ghID"]:
+                for key in update_gh.keys():
+                    self.catDic["greenhouses"][i][key] = update_gh[key]
+                self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.catDic["greenhouses"][i]["lastUpdate"] = self.lastUpdate
+                self.catDic["lastUpdate"] = self.lastUpdate
+                return 0
+        return -1
 
     def getNumberLots(self, ghID = []):
         greenhouses = self.catDic["greenhouses"]
@@ -121,8 +158,9 @@ class catalog():
             return 0
         return 1
 
-
-
+#############################################################
+#                       WEB SERVICE                         #
+#############################################################
 class REST_catalog(catalog):
     '''
     Child class of catalog that implement REST methods
@@ -155,16 +193,13 @@ class REST_catalog(catalog):
                         return json.dumps(search_dev)
                     else:
                         raise cherrypy.HTTPError(404, f"Device {devID} not found!")
-
                 elif "name" in params:
                     name = params["name"]
                     search_dev = self.searchDict("devices", "name", name)
-
                     if search_dev:
                         return json.dumps(search_dev)
                     else:
                         raise cherrypy.HTTPError(404, f"Device {name} not found!")
-
                 elif params == {}:
                     return json.dumps(self.dictInfo("devices"))
 
@@ -192,23 +227,19 @@ class REST_catalog(catalog):
                         return json.dumps(search_gh)
                     else:
                         raise cherrypy.HTTPError(404, f"Greenhouse {ghID} not found!")
-
                 elif "usrID" in params:
                     usrID = params["usrID"]
                     search_gh = self.searchDict("greenhouses", "usrID", usrID)
-
                     if search_gh:
                         return json.dumps(search_gh)
                     else:
                         raise cherrypy.HTTPError(404, f"No greenhouses associated\
                                                         to user {usrID}")
-
                 elif params == {}:
                     return json.dumps(self.dictInfo("greenhouses"))
-
                 else:
                     cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
-            
+
             elif uri[0] == "user":
                 if "usrID" in params:
                     usrID = params["usrID"]
@@ -224,51 +255,82 @@ class REST_catalog(catalog):
                 else:
                     cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
 
-            # retrieve humidity threshold given ID 
             elif uri[0] == "getThresholds":
                 humidityTh = self.thresholdHumidity(params.get("plant")) # retrieve humidity threshold given plant name
                 return json.dumps(humidityTh)   # return a list containing min and max thresholds
 
-            elif uri[0] == "infoPlantControl":
-                pass
         else:
             return json.dumps(self.methods)
 
     
     def POST(self, *uri, **params):
         # load body of request as dictionary
-        bodyAsString = cherrypy.request.body.read()
-        bodyAsDictionary = json.loads(bodyAsString)
+        bodyAsStr = cherrypy.request.body.read()
+        bodyAsDict = json.loads(bodyAsStr)
 
         if len(uri) >= 1:
             # DEVICE CATALOG
             if uri[0] == "updateDevices":
-                self.updateDevices(bodyAsDictionary)
+                self.updateDevices(bodyAsDict)
                 self.saveJson()
+            
             elif uri[0] == "addDevice":
-                if self.addDevice(bodyAsDictionary) == 0:
+                if self.addDevice(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nNew device added successfully!')    #NOTE: come aggiungere una response del server che non sia un'eccezione??
+                    print('\nNew device added successfully!') 
                 else:
                     print("The device could not be added")
                     raise cherrypy.HTTPError(400, "The device could not be added!")
 
             # SERVICE CATALOG
-            elif uri[0] == "user":
-                self.addUser(bodyAsDictionary)
-    
-    def PUT(self, *uri, **params):  # /device/id?deviceName=DHT11&availableServices=MQTT
+            elif uri[0] == "addUser":
+                if self.addUser(bodyAsDict) == 0:
+                    self.saveJson()
+                    print('\nNew user added successfully!') 
+                else:
+                    print("The user could not be added")
+                    raise cherrypy.HTTPError(400, "The user could not be added!")
+            
+            elif uri[0] == "addGreenhouse":
+                if self.addGreenhouse(bodyAsDict) == 0:
+                    self.saveJson()
+                    print('\nNew greenhouse added successfully!') 
+                else:
+                    print("The greenhouse could not be added")
+                    raise cherrypy.HTTPError(400, "The greenhouse could not be added!")
+            
 
-        bodyAsString = cherrypy.request.body.read()
-        bodyAsDictionary = json.loads(bodyAsString)
+    
+    def PUT(self, *uri, **params):
+
+        bodyAsStr = cherrypy.request.body.read()
+        bodyAsDict = json.loads(bodyAsStr)
         if len(uri) >= 1:
-            if uri[0] == "device":
-                if self.updateDevice(bodyAsDictionary) == 0:
+            if uri[0] == "updateDevice":
+                if self.updateDevice(bodyAsDict) == 0:
                     self.saveJson()
                     print('\nDevice updated successfully')
                 else:
                     print("The device could not be updated")
                     raise cherrypy.HTTPError(400, "The device could not be updated!")
+            
+            if uri[0] == "updateUser":
+                if self.updateUser(bodyAsDict) == 0:
+                    self.saveJson()
+                    print('\nUser updated successfully')
+                else:
+                    print("The user could not be updated")
+                    raise cherrypy.HTTPError(400, "The user could not be updated!")
+            
+            if uri[0] == "updateGreenhouse":
+                if self.updateGreenhouse(bodyAsDict) == 0:
+                    self.saveJson()
+                    print('\nGreenhouse updated successfully')
+                else:
+                    print("The greenhouse could not be updated")
+                    raise cherrypy.HTTPError(400, "The greenhouse could not be updated!")
+    
+    
     
 if __name__ == "__main__": #Standard configuration to serve the url "localhost:8080"
 	
@@ -282,3 +344,10 @@ if __name__ == "__main__": #Standard configuration to serve the url "localhost:8
 	cherrypy.tree.mount(webService,'/',conf)
 	cherrypy.engine.start()
 	cherrypy.engine.block()
+
+            
+
+
+
+
+
