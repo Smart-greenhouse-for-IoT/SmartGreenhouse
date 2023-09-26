@@ -16,6 +16,7 @@ class MyMQTT:
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
+        self._paho_mqtt.on_publish = self.myOnPublish
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.broker, rc))
@@ -23,6 +24,9 @@ class MyMQTT:
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # A new message is received
         self.notifier.notify(msg.topic, msg.payload)
+
+    def myOnPublish(self, paho_mqtt, userdata, mid):
+        print(f"Message {mid} has been delivered")
 
     def myPublish(self, topic, msg):
         # publish a message with a certain topic

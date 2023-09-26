@@ -22,18 +22,32 @@
     "resources":{
         "sensors": [
             {
+                "device_name": "chirp",
                 "sensID": "s_001",
                 "devID": "d_001",
                 "lotID": "l_001",
-                "measurementType": "humidity",
+                "pin": "1",
+                "measurementType": "moisture",
                 "topic": "smartGreenhouse/d_001/l_001/humidity",
                 "lastUpdate": ""
             },
             {
+                "device_name": "chirp",
                 "sensID": "s_002",
                 "devID": "d_001",
                 "lotID": "l_002",
-                "measurementType": "humidity",
+                "pin": "2",
+                "measurementType": "moisture",
+                "topic": "smartGreenhouse/d_001/l_002/humidity",
+                "lastUpdate": ""
+            },
+            {
+                "device_name": "DHT11",
+                "sensID": "s_003",
+                "devID": "d_001",
+                "lotID": "l_001",
+                "pin": "3",
+                "measurementType": ["Temperature","Humidity"],
                 "topic": "smartGreenhouse/d_001/l_002/humidity",
                 "lastUpdate": ""
             }
@@ -43,6 +57,7 @@
                 "actID": "a_001",
                 "devID": "d_001",
                 "lotID": "l_001",
+                "pin": "18",
                 "topic": "smartGreenhouse/d_001/l_001/irrigation",
                 "lastUpdate": ""
             },
@@ -50,6 +65,7 @@
                 "actID": "a_002",
                 "devID": "d_001",
                 "lotID": "l_002",
+                "pin": "19",
                 "topic": "smartGreenhouse/d_001/l_002/irrigation",
                 "lastUpdate": ""
             }
