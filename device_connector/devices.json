@@ -47,7 +47,7 @@
                 "devID": "d_001",
                 "lotID": "l_001",
                 "pin": "3",
-                "measurementType": "humidity",
+                "measurementType": ["Temperature","Humidity"],
                 "topic": "smartGreenhouse/d_001/l_002/humidity",
                 "lastUpdate": ""
             }

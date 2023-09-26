@@ -4,6 +4,7 @@ import requests
 import json
 from sub.MyMQTT import *
 from device_sensors.dht11 import *
+from device_sensors.chirp import *
 import sys
 import time
 import datetime
@@ -12,6 +13,7 @@ import paho.mqtt.client as PahoMQTT
 class Device_Connector(object):
     """
     Device connector class:
+    -----------------------
         - get info from the catalog
         - 
     """
@@ -29,16 +31,31 @@ class Device_Connector(object):
         # Read all the sensors in self.devices list
         # and initialize it all to start obtaining their values
 
-        # At the start the program does not know wich sensor have
+        self.measures = []
+        self.sensors_list = []
+        self.sensor_index = {}
+        count = 0
+
+        # At the start the program check the sensor that are connected to the device connector
         for sensor in self.devices['resources']['sensors']:
             
             if sensor['device_name'] == "chirp":
+                self.sensor_index[str(sensor["sensID"])] = count
+                count += 1
 
-                pass
+                moisture_conf = sensor.copy()
+                self.sensors_list.append(chirp(moisture_conf))
+                
+
             elif sensor['device_name'] == "DHT11":
+                self.sensor_index[str(sensor["sensID"])] = count
+                count += 1
+
                 dht_conf = sensor.copy()
-                DHT11(dht_conf)
+                self.sensors_list.append(DHT11(dht_conf))
+                
         
+        # At the start the program does not know wich actuators have
         for actuators in self.devices['resources']['actuators']:
             pass
 
@@ -110,17 +127,33 @@ class Device_Connector(object):
     
     def updateMeasures(self):
         """
-
+        updateMeasures
+        --------------
+        Function that each time is called will save in a self list all the current measures \n
+        of all the sensors connected to the device connector
         """
-        
+        for sens_id in self.sensor_index.keys():
+            print(f"Measuring with sensor {sens_id}")
+            curr_meas = self.sensors_list[self.sensor_index[sens_id]].measure()
+            print(f"Measure: {curr_meas}")
+
+            # Add the current measure to the list containing all the last measures 
+            # self.measures[self.sensor_index[sens_id]] = curr_meas
 
 
     def loop(self):
+        """
+        Loop
+        ----
+        This function will run continuously until it is stopped.\n
+        At each loop, after a fixed time, the device connector will obtain all the \n
+        measures from its sensors, will send the information to the catalog and ... ???? #NOTE: to be finished
+        """
+
         last_time = 0
         refresh_time = 30
 
         try:
-
             while True:
                 print("looping\n")
                 local_time = time.time()
@@ -131,12 +164,15 @@ class Device_Connector(object):
                 time.sleep(5)
 
         except KeyboardInterrupt: #to kill the program
+            print("Loop manually interrupted")
             pass
+
 
 if __name__=='__main__':
 
     dc = Device_Connector(
         conf_path = "device_connector\conf.json",
-        device_path = "device_connector\devices.json")
+        device_path = "device_connector\devices.json"
+        )
 
     dc.loop()

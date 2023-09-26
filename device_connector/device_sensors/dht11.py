@@ -12,8 +12,8 @@ class DHT11:
 
         """
         self.config = conf
-        self._name = self.config["device_name"]
-        self._pin = int(self.config["pin"])
+        self.name = self.config["device_name"]
+        self.pin = int(self.config["pin"])
 
 
     def measure(self):
