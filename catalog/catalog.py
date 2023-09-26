@@ -1,32 +1,64 @@
 import json
 import cherrypy
+import requests
 from datetime import datetime
 
 class catalog():
 
     def __init__(self):
-        self.catalogFile = "catalog/catalog.json"    # file's json name
-        self.plantDBFile = "catalog/plantsDatabase.json" # file that works as DB for plants
-        self.catDic = json.load(open(self.catalogFile))   # load json file into a dictionary
+        self.catalogFile = "catalog/catalog.json" 
+        self.plantDBFile = "catalog/plantsDatabase.json"
+        self.catDic = json.load(open(self.catalogFile))
         self.plantDB = json.load(open(self.plantDBFile))
-        
-    # Method to receive broker's information as dictionary
+
+        self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.catDic["lastUpdate"] = self.lastUpdate
+
+    ######################## DEVICE CATALOG ########################
+    def devicesInfo(self):
+        # Method to retrieve all devices
+        return self.catDic["devices"]
+
+    def searchDevice(self, key, value):
+        # Search a device given name or ID
+        found_dev = {}
+        for device in self.catDic["devices"]:
+            if device[key] == value:
+                found_dev = device.copy()
+        return found_dev
+    
+    def addDevice(self, newDev):
+        # Add new device in catalog
+        if self.searchDevice("devID", newDev["devID"]) == {}:
+            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            newDev["lastUpdate"] = self.lastUpdate
+            self.catDic["devices"].append(newDev)
+            self.catDic["lastUpdate"] = self.lastUpdate
+            return 0
+        else:
+            return -1
+    
+    def updateDevice(self, update_dev):
+        # Update a device already present in catalog
+        for i, device in enumerate(self.catDic["devices"]):
+            if device["devID"] == update_dev["devID"]:
+                for key in update_dev.keys():
+                    self.catDic["devices"][i][key] = update_dev[key]
+                self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.catDic["devices"][i]["lastUpdate"] = self.lastUpdate
+                self.catDic["lastUpdate"] = self.lastUpdate
+                return 0
+        return -1
+    
+    
+    ######################## SERVICE CATALOG ########################
     def brokerInfo(self):
+        # Method to receive broker's information as dictionary
         return self.catDic["broker"]   
 
-    # Method to retrieve all devices
-    def devicesInfo(self, id: str):
-        return self.catDic["devices"]
     
     def catInfo(self):
-        '''
-        Method to retrieve information related to the catalog such as IP and port
-        ---
-        "catalog": {
-            "ip": "127.0.0.1",
-            "port": 8080
-        }
-        '''
+        # Method to retrieve information related to the catalog such as IP and port
         return self.catDic["catalog"]
     
     def addUser(self, newUser):
@@ -34,11 +66,8 @@ class catalog():
         self.catDic["usersList"].append(newUser)
         json.dump(self.catDic, fw, indent=4)
     
-    def updateDevice(self, id, infoToUpdate = {}):
-        fw = open(self.filename, "w")
-        id = [int(id)]
-        devToUpdate = self.findDeviceFromID(id)
-        #TODO: insert params to update
+
+        
 
     def getNumberLots(self, ghID = []):
         greenhouses = self.catDic["greenhouses"]
@@ -68,42 +97,15 @@ class catalog():
         except KeyError:    # if plant not present raise error
             error_code = -1
             return error_code
-
-    def searchDic(self, dict, key, value):
-        dic = {}
-        for item in dict:
-            if item[key] == value:
-                dic = item.copy()
-                break
-        return dic
     
-    
-    def addDevice(self, newDev):
-        '''
-        Method to add a new device under "devices
-        --- 
-        If the new device is added succesfully return 0.\n
-        Return 1 if:
-            - a device with same devID already exist
-        '''
-        if self.searchDic(self.catDic['devices'], "devID", newDev['devID']) == {}:
-            self.catDic["devices"].append(newDev)
-            self.catDic["lastUpdate"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            with open(self.catalogFile, 'w') as fw:
-                json.dump(self.catDic, fw, indent=4)
+    ######################## GENERAL METHODS ########################
+    def saveJson(self):
+        # Used to save the catalog as a JSON file
+        with open(self.catalogFile, 'w') as fw:
+            json.dump(self.catDic, fw, indent=4)
             return 0
         return 1
-    
-    def updateDevices(self, devicesDic):
-        ''' 
-        Method to update devices to the catalog json file
-        ---
-        - Used by device connector to keep the catalog updated
-        - Update devices in "devices" key of catalog.json
-        '''
-        self.catDic["greenhouses"]["ghID" == devicesDic["ghID"]]["devicesList"] = devicesDic["devicesList"] # update devices of the given ghID
-        with open(self.catalogFile, "w") as fw:
-            json.dump(self.catDic, fw, indent=4)
+
 
 
 class REST_catalog(catalog):
@@ -118,27 +120,46 @@ class REST_catalog(catalog):
         - updateDevices: update devices from device connector
     '''
     
-    exposed = True
-    def GET(self, *uri, **params):
-        
-        if uri[0] == "broker":
-            return json.dumps(self.brokerInfo())    # return broker info as json string
-        
-        # retrieve humidity threshold given ID 
-        elif uri[0] == "getThresholds":
-            humidityTh = self.thresholdHumidity(params.get("plant")) # retrieve humidity threshold given plant name
-            return json.dumps(humidityTh)   # return a list containing min and max thresholds
-        
-        elif uri[0] == "infoPlantControl":
-            pass
+    exposed = True        
 
-        """elif uri[0] == "devicesList":
-            if len(params) != 0:
-                ids = list(map(int,params.get('id')))
-                idDevices = self.devicesInfo(ids)
-                return json.dumps(idDevices) 
-            devices = self.devicesInfo()
-            return json.dumps(devices)"""
+    def GET(self, *uri, **params):
+        if len(uri) >=1:
+            
+            # DEVICE CATALOG
+            if uri[0] == "devices":
+                return json.dumps(self.devicesInfo)
+            
+            elif uri[0] == "device":
+                if "devID" in params:
+                    devID = params["devID"]
+                    search_dev = self.searchDevice("devID", params["devID"])
+                    if search_dev:
+                        return json.dumps(search_dev)
+                    else:
+                        raise cherrypy.HTTPError(404, f"Device {devID} not found!")
+                elif "name" in params:
+                    name = params["name"]
+                    search_dev = self.searchDevice("name", params["name"])
+                    if search_dev:
+                        return json.dumps(search_dev)
+                    else:
+                        raise cherrypy.HTTPError(404, f"Device {name} not found!")
+                else:
+                    cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
+
+            # SERVICE CATALOG
+            elif uri[0] == "broker":
+                return json.dumps(self.brokerInfo())    # return broker info as json string
+
+            # retrieve humidity threshold given ID 
+            elif uri[0] == "getThresholds":
+                humidityTh = self.thresholdHumidity(params.get("plant")) # retrieve humidity threshold given plant name
+                return json.dumps(humidityTh)   # return a list containing min and max thresholds
+
+            elif uri[0] == "infoPlantControl":
+                pass
+        else:
+            return "Waiting for valid URI"
 
     
     def POST(self, *uri, **params):
@@ -146,24 +167,35 @@ class REST_catalog(catalog):
         bodyAsString = cherrypy.request.body.read()
         bodyAsDictionary = json.loads(bodyAsString)
 
-        # update 
-        if uri[0] == "updateDevices":
-            self.updateDevices(bodyAsDictionary)
+        if len(uri) >= 1:
+            # DEVICE CATALOG
+            if uri[0] == "updateDevices":
+                self.updateDevices(bodyAsDictionary)
 
-        elif uri[0] == "addDevice":
-            if self.addDevice(bodyAsDictionary) == 0:
-                print('\nNew device added succesfully!')    #NOTE: come aggiungere una response del server che non sia un'eccezione??
-            else:
-                print("The device could not be added")
-                raise cherrypy.HTTPError(400, "The device could not be added!")
+            elif uri[0] == "addDevice":
+                if self.addDevice(bodyAsDictionary) == 0:
+                    self.saveJson()
+                    print('\nNew device added successfully!')    #NOTE: come aggiungere una response del server che non sia un'eccezione??
+                else:
+                    print("The device could not be added")
+                    raise cherrypy.HTTPError(400, "The device could not be added!")
 
-        elif uri[0] == "user":
-            self.addUser(bodyAsDictionary)
+            # SERVICE CATALOG
+            elif uri[0] == "user":
+                self.addUser(bodyAsDictionary)
     
     def PUT(self, *uri, **params):  # /device/id?deviceName=DHT11&availableServices=MQTT
-        if uri[0] == "device":
-            self.updateDevice(id=uri[1], infoToUpdate=params)
-        
+
+        bodyAsString = cherrypy.request.body.read()
+        bodyAsDictionary = json.loads(bodyAsString)
+        if len(uri) >= 1:
+            if uri[0] == "device":
+                if self.updateDevice(bodyAsDictionary) == 0:
+                    self.saveJson()
+                    print('\nDevice updated successfully')
+                else:
+                    print("The device could not be updated")
+                    raise cherrypy.HTTPError(400, "The device could not be updated!")
     
 if __name__ == "__main__": #Standard configuration to serve the url "localhost:8080"
 	
