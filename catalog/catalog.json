@@ -24,6 +24,7 @@
         {
             "ghID": "g_001",
             "devID": "d_001",
+            "usrID":"u_001",
             "numPlants": 2,
             "plantsList": [
                 {
@@ -40,6 +41,7 @@
         {
             "ghID": "g_002",
             "devID": "d_002",
+            "usrID": "u_002",
             "numPlants": 1,
             "plantsList": [
                 {

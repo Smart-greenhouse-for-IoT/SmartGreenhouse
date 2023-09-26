@@ -20,6 +20,7 @@
         {
             "ghID":,
             "devID":,
+            "usrID":,
             "numPlants":,
             "plantsList": [],
             "lastUpdate":
