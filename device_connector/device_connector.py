@@ -22,13 +22,13 @@ class Device_Connector(object):
 
         # Opening the configuration files
         with open(conf_path) as f:
-            self.conf = json.load(f)
+            self.cat_info = json.load(f)
 
         # Opening the devices file
         with open(device_path) as f:
-            self.devices = json.load(f)
+            self.mydevice = json.load(f)
         
-        # Read all the sensors in self.devices list
+        # Read all the sensors in self.mydevice list
         # and initialize it all to start obtaining their values
 
         self.measures = []
@@ -37,7 +37,7 @@ class Device_Connector(object):
         count = 0
 
         # At the start the program check the sensor that are connected to the device connector
-        for sensor in self.devices['resources']['sensors']:
+        for sensor in self.mydevice['resources']['sensors']:
             
             if sensor['device_name'] == "chirp":
                 self.sensor_index[str(sensor["sensID"])] = count
@@ -56,8 +56,11 @@ class Device_Connector(object):
                 
         
         # At the start the program does not know wich actuators have
-        for actuators in self.devices['resources']['actuators']:
+        for actuators in self.mydevice['resources']['actuators']:
             pass
+        self.registerToCat()
+        # Register to catalog
+
 
         ###############################
         ### MQTT client
@@ -93,13 +96,24 @@ class Device_Connector(object):
         self.client_mqtt.start()
         time.sleep(3) #we want to be sure to do that commands in order
         self.client_mqtt.mySubscribe()
+    
+    def registerToCat(self):
+        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/addDevice"
+        try:
+            req = requests.post(addr, data=json.dumps(self.mydevice))
+            if req.status_code == "200":
+                print(f"Device {self.mydevice['devID']} added successfully!")
+            else:
+                print(f"Device {self.mydevice['devID']} could not be added!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
     def get_broker(self): 
         """
         GET all the broker information
         """
 
-        string = "http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/broker" #URL for GET
+        string = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/broker" #URL for GET
         b_dict = requests.get(string).json()  #GET from catalog #need a .text /.body?
         return b_dict #return a json dict with BrokerIP and BrokerPort
     
@@ -109,8 +123,8 @@ class Device_Connector(object):
         Post to the catalog all the sensors of this device connector
         """
 
-        string = f"http://" + self.conf["CatIP"] + ":" + self.conf["CatPort"] + "/updateSensors" #URL for POST
-        requests.post(string, json = self.devices)
+        string = f"http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateSensors" #URL for POST
+        requests.post(string, json = self.mydevice)
         
     
     def humiditySens(self):
@@ -118,7 +132,7 @@ class Device_Connector(object):
         Get the simulated value of the humidity sensor and publish it to the correspondent topic
         """
 
-        for dv in self.devices["devicesList"]:
+        for dv in self.mydevice["devicesList"]:
             if dv["type"] == "sensor":
                 #TODO: get the humidity level
                 #humidity = leggo da un file json?
@@ -171,8 +185,8 @@ class Device_Connector(object):
 if __name__=='__main__':
 
     dc = Device_Connector(
-        conf_path = "device_connector\conf.json",
-        device_path = "device_connector\devices.json"
+        conf_path = "device_connector/conf.json",
+        device_path = "device_connector/devices.json"
         )
 
     dc.loop()
