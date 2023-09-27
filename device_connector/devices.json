@@ -35,8 +35,8 @@
                     {
                         "service_type": "MQTT",
                         "topic": [
-                            "smartGreenhouse/d_001/s_001/humidity",
-                            "smartGreenhouse/d_001/s_001/temperature"]
+                            "smartGreenhouse/d_001/s_001/temperature",
+                            "smartGreenhouse/d_001/s_001/humidity"]
                     }
                 ],
                 "lastUpdate": ""
