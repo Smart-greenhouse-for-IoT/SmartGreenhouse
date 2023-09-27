@@ -61,23 +61,19 @@ class Device_Connector(object):
         self.registerToCat()
         # Register to catalog
 
-
         ###############################
         ### MQTT client
         # Obtaining the broker information
-        try:
-            broker_dict = self.get_broker()
-        except:
-            raise Exception("Unable to obtain the broker information from the catalog")
-        print(broker_dict)
-
-
+        broker_dict = self.get_broker()
+        
         self.client_mqtt = MyMQTT(
             clientID=broker_dict["clientID"],
             broker=broker_dict["IP"],
             port=broker_dict["port"],
             notifier=self
             )
+        
+        self.client_mqtt.start()
 
     def notify(self,topic,payload): 
         """
@@ -113,8 +109,12 @@ class Device_Connector(object):
         GET all the broker information
         """
 
-        string = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/broker" #URL for GET
-        b_dict = requests.get(string).json()  #GET from catalog #need a .text /.body?
+        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/broker" #URL for GET
+        try:
+            b_dict = requests.get(addr).json()  #GET from catalog #need a .text /.body?
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+
         return b_dict #return a json dict with BrokerIP and BrokerPort
     
     
@@ -163,7 +163,7 @@ class Device_Connector(object):
         At each loop, after a fixed time, the device connector will obtain all the \n
         measures from its sensors, will send the information to the catalog and ... ???? #NOTE: to be finished
         """
-
+        #TODO: every given time update the catalog registration to know DC is alive
         last_time = 0
         refresh_time = 30
 

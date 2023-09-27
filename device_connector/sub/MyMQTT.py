@@ -1,5 +1,5 @@
 import json
-
+import time
 import paho.mqtt.client as PahoMQTT
 
 
@@ -45,6 +45,7 @@ class MyMQTT:
         # manage connection to broker
         self._paho_mqtt.connect(self.broker, self.port)
         self._paho_mqtt.loop_start()
+        time.sleep(3)
 
     def unsubscribe(self):
         if (self._isSubscriber):
