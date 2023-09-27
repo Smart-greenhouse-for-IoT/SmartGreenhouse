@@ -58,6 +58,7 @@ class Device_Connector(object):
         # At the start the program does not know wich actuators have
         for actuators in self.mydevice['resources']['actuators']:
             pass
+        
         self.registerToCat()
         # Register to catalog
 
