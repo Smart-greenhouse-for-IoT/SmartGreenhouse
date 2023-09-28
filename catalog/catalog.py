@@ -3,6 +3,7 @@ import cherrypy
 import requests
 from datetime import datetime
 import time
+from tools import searchDict
 
 class catalog():
     #TODO: cleanup loop: check time to decide which entries to delete
@@ -21,7 +22,7 @@ class catalog():
     ######################## DEVICE CATALOG ########################
     def addDevice(self, newDev):
         # Add new device in catalog
-        if self.searchDict("devices","devID", newDev["devID"]) == {}:
+        if searchDict(self.catDic, "devices","devID", newDev["devID"]) == {}:
             self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             newDev["lastUpdate"] = self.lastUpdate
             self.catDic["devices"].append(newDev)
@@ -68,7 +69,7 @@ class catalog():
         return self.catDic["telegramBot"]
     
     def addUser(self, newUsr):
-        if self.searchDict("users","usrID", newUsr["usrID"]) == {}:
+        if searchDict(self.catDic, "users","usrID", newUsr["usrID"]) == {}:
             self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             newUsr["lastUpdate"] = self.lastUpdate
             self.catDic["users"].append(newUsr)
@@ -89,10 +90,10 @@ class catalog():
         return -1
     
     def addGreenhouse(self, newGh):
-        if self.searchDict("greenhouses","ghID", newUsr["ghID"]) == {}:
+        if searchDict(self.catDic, "greenhouses","ghID", newGh["ghID"]) == {}:
             self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            newUsr["lastUpdate"] = self.lastUpdate
-            self.catDic["greenhouses"].append(newUsr)
+            newGh["lastUpdate"] = self.lastUpdate
+            self.catDic["greenhouses"].append(newGh)
             self.catDic["lastUpdate"] = self.lastUpdate
             return 0
         else:
@@ -150,17 +151,6 @@ class catalog():
         # Method to retrieve value of dictionary given key
         return self.catDic[key]
 
-    def searchDict(self, key_lst, key, value):
-        # Search a device given name or ID
-        #TODO: possible to output different dictionaries associated to key
-        found_dev = {}
-        for device in self.catDic[key_lst]:
-            if device[key] == value:
-                found_dev = device.copy()
-        return found_dev
-    
-
-
 #############################################################
 #                       WEB SERVICE                         #
 #############################################################
@@ -191,14 +181,14 @@ class REST_catalog(catalog):
             if uri[0] == "device":
                 if "devID" in params:
                     devID = params["devID"]
-                    search_dev = self.searchDict("devices", "devID", devID)
+                    search_dev = searchDict(self.catDic, "devices", "devID", devID)
                     if search_dev:
                         return json.dumps(search_dev)
                     else:
                         raise cherrypy.HTTPError(404, f"Device {devID} not found!")
                 elif "name" in params:
                     name = params["name"]
-                    search_dev = self.searchDict("devices", "name", name)
+                    search_dev = searchDict(self.catDic, "devices", "name", name)
                     if search_dev:
                         return json.dumps(search_dev)
                     else:
@@ -225,14 +215,14 @@ class REST_catalog(catalog):
             elif uri[0] == "greenhouse":
                 if "ghID" in params:
                     ghID = params["ghID"]
-                    search_gh = self.searchDict("greenhouses", "ghID", ghID)
+                    search_gh = searchDict(self.catDic, "greenhouses", "ghID", ghID)
                     if search_gh:
                         return json.dumps(search_gh)
                     else:
                         raise cherrypy.HTTPError(404, f"Greenhouse {ghID} not found!")
                 elif "usrID" in params:
                     usrID = params["usrID"]
-                    search_gh = self.searchDict("greenhouses", "usrID", usrID)
+                    search_gh = searchDict(self.catDic, "greenhouses", "usrID", usrID)
                     if search_gh:
                         return json.dumps(search_gh)
                     else:
@@ -246,7 +236,7 @@ class REST_catalog(catalog):
             elif uri[0] == "user":
                 if "usrID" in params:
                     usrID = params["usrID"]
-                    search_usr= self.searchDict("users", "usrID", usrID)
+                    search_usr= searchDict("users", "usrID", usrID)
                     if search_usr:
                         return json.dumps(search_usr)
                     else:

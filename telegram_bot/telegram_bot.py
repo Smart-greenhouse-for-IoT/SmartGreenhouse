@@ -6,28 +6,42 @@ import requests
 import time
 
 class Telegram_Bot:
-    """Some response of the bot"""
+    """
+    Telegram_Bot
+    ------------
+    Some response of the bot
+    """
 
     def __init__(self):
-        conf = json.load(open("telegram_bot\setting.json"))
-        self.tokenBot = conf["token"]
+        self.conf = json.load(open("telegram_bot\setting.json"))
+        self.tokenBot = self.conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         MessageLoop(self.bot, {'chat': self.on_chat_message,
                                'callback_query' : self.on_callback_query}).run_as_thread()
+        self.cat_info = {
+            "ip": self.conf["CatIP"],
+            "port": self.conf["CatPort"]
+        }
+
 
     def on_chat_message(self, msg): 
-        """This is actually the main of the bot"""
+        """
+        on_chat_message
+        ---------------
+        This is actually the main of the bot
+        """
+
         content_type, chat_type, chat_ID = telepot.glance(msg)
         #if chat_ID not in self.chatIDs:   # this line maybe is needed for security????
         #    self.chatIDs.append(chat_ID)
         message = msg['text']
 
         if (message.find('_')>0): #This mean that i have the information that the command is carrying
-            command, Name, userID = message.split('_') 
+            command, Name, usrID = message.split('_') 
 
             if command == "/addUser":            
                 self.newUser = {"username": Name,
-                                "userID": userID}
+                                "usrID": usrID}
                 buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'Add_User_True'), #TODO:trovare un modo per togliere la selezione grafica del pulsante su telegram(davvero brutto da vedere)
                             InlineKeyboardButton(text=f'No', callback_data=f'Add_User_False')]]
                 keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -36,6 +50,35 @@ class Telegram_Bot:
 
             elif command == "/addPlant":
                 pass
+            
+            elif command == "/signin":
+                self.user = {"username": Name,
+                            "usrID": usrID}
+                
+                addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + f"/user?usrID={self.user['usrID']}"
+                req = requests.get(addr)
+                #TOTEST: check what req.json gives as output
+                if req.json == {}:              
+                    exist = False
+                else:
+                    exist = True
+                    
+                if exist:
+                    self.bot.sendMessage(chat_ID, text=f"Logged in with user: {Name} {usrID}")
+                    #TODO: obtain the greenhouses of this user
+                    greenhouses = 0 #fox lo sistemi tu
+                    if greenhouses == 0:
+                        self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse")
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"Select one greenhouse:")
+                        
+                            
+                        
+                else:
+                    self.bot.sendMessage(chat_ID, text=f"User not found, please repeat the command")
+
+
+
         else:
             if message == "/help": #choosing the action to do based on the command received
                 self.help(chat_ID)
@@ -57,10 +100,12 @@ class Telegram_Bot:
                 self.bot.sendMessage(chat_ID, text="C'mon do something")
             elif message.startswith('/'):
                 self.bot.sendMessage(chat_ID, text="Command not supported")
+            else:
+                self.bot.sendMessage(chat_ID, text="Word/words not recognized. Please start with command /start")
             
     def on_callback_query(self, msg):
         """callback query function:
-                - it will elabrate the information when a button is pressed"""
+                - it will elaborate the information when a button is pressed"""
         
         query_ID, chat_ID, query_data = telepot.glance(msg, flavor='callback_query') #query_data is the callback data write in the buttons
         action, place, doing = query_data.split('_')
@@ -79,6 +124,11 @@ class Telegram_Bot:
             
             else:
                 pass
+        if action == 'signin':
+
+            text_Add = ("To sign in into your account write it in this way:\n"
+                            "/signin_Name_ID \n")
+            self.bot.sendMessage(chat_ID, text=text_Add)
 
     def help(self, chat_ID):
         """Send a message when the command /help is received."""
@@ -98,9 +148,14 @@ class Telegram_Bot:
         """Send a message when the command /start is received."""
 
         help_message = ("Welcome to the SmartGreenHouse bot 🌱"
-                        "\nYou can send /help if you need to see al the commands.")
+                        "\nHere you will able to manage your plants and greenhouses."
+                        "\nPlease start with the registration or log in of the user.")
+        buttons = [[InlineKeyboardButton(text=f'Sign up', callback_data=f'Add_User_True'), 
+                    InlineKeyboardButton(text=f'Sign in', callback_data=f'signin_none_none')]]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
         self.bot.sendMessage(chat_ID, text=help_message,
-                    parse_mode='Markdown')
+                    parse_mode='Markdown', reply_markup=keyboard)
+
 
 
 if __name__ == "__main__":
