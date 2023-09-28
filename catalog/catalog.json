@@ -1,22 +1,20 @@
 {
     "projectName": "SmartGreenHouse",
-    
     "catalog": {
         "ip": "127.0.0.1",
         "port": 8080,
-        "methods":[
+        "methods": [
             "GET",
             "POST",
             "PUT"
         ]
     },
-    
     "broker": {
         "IP": "mqtt.eclipseprojects.io",
         "port": 1883,
         "clientID": "pastaalsaleconpomodorinidimelanzane"
     },
-    "telegramBot":{
+    "telegramBot": {
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
         "link": ""
     },
@@ -24,7 +22,7 @@
         {
             "ghID": "g_001",
             "devID": "d_001",
-            "usrID":"u_001",
+            "usrID": "u_001",
             "numPlants": 2,
             "plantsList": [
                 {
@@ -53,84 +51,6 @@
         }
     ],
     "users": [],
-
-
-
-    "devices": [
-        {
-            "devID": "d_001",
-            "ghID": "g_001",
-            "name": "raspberry1",
-            "endpoints": [
-                "REST",
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "REST",
-                    "address": "http://127.0.0.1:8080"
-                },
-                {
-                    "endpoint": "MQTT",
-                    "bn": "RaspberryPi3_2",
-                    "topic": [
-                        "smartGreenhouse/d_001"
-                    ]
-                }
-            ],
-            "resources": {
-                "sensors": [
-                    {
-                        "sensID": "s_001",
-                        "devID": "d_001",
-                        "measurementType": "humidity",
-                        "available_services": [
-                            "MQTT"
-                        ],
-                        "services_details": [
-                            {
-                                "service_type": "MQTT",
-                                "topic": ["smartGreenhouse/d_001/s_001/humidity"]
-                            }
-                        ],
-                        "lastUpdate": ""
-                    },
-                    {
-                        "sensID": "s_002",
-                        "devID": "d_001",
-                        "measurementType": "humidity",
-                        "available_services": [
-                            "MQTT"
-                        ],
-                        "services_details": [
-                            {
-                                "service_type": "MQTT",
-                                "topic": ["smartGreenhouse/d_001/s_002/humidity"]
-                            }
-                        ],
-                        "lastUpdate": ""
-                    }
-                ],
-                "actuators": [
-                    {
-                        "actID": "a_001",
-                        "devID": "d_001",
-                        "available_services": [
-                            "MQTT"
-                        ],
-                        "services_details": [
-                            {
-                                "service_type": "MQTT",
-                                "topic": ["smartGreenhouse/d_001/a_001"]
-                            }
-                        ],
-                        "lastUpdate": ""
-                    }
-                ]
-            },
-            "lastUpdate": ""
-        }
-    ],
-    "lastUpdate": "2023-03-08 22:46:39"
-
+    "devices": [],
+    "lastUpdate": "2023-09-27 17:39:52"
 }

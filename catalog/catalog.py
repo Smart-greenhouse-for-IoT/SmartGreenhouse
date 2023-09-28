@@ -2,6 +2,7 @@ import json
 import cherrypy
 import requests
 from datetime import datetime
+import time
 
 class catalog():
     #TODO: cleanup loop: check time to decide which entries to delete
@@ -18,19 +19,6 @@ class catalog():
         self.catDic["lastUpdate"] = self.lastUpdate
 
     ######################## DEVICE CATALOG ########################
-    def dictInfo(self, key):
-        # Method to retrieve value of dictionary given key
-        return self.catDic[key]
-
-    def searchDict(self, key_lst, key, value):
-        # Search a device given name or ID
-        #TODO: possible to output different dictionaries associated to key
-        found_dev = {}
-        for device in self.catDic[key_lst]:
-            if device[key] == value:
-                found_dev = device.copy()
-        return found_dev
-    
     def addDevice(self, newDev):
         # Add new device in catalog
         if self.searchDict("devices","devID", newDev["devID"]) == {}:
@@ -157,6 +145,21 @@ class catalog():
             json.dump(self.catDic, fw, indent=4)
             return 0
         return 1
+    
+    def dictInfo(self, key):
+        # Method to retrieve value of dictionary given key
+        return self.catDic[key]
+
+    def searchDict(self, key_lst, key, value):
+        # Search a device given name or ID
+        #TODO: possible to output different dictionaries associated to key
+        found_dev = {}
+        for device in self.catDic[key_lst]:
+            if device[key] == value:
+                found_dev = device.copy()
+        return found_dev
+    
+
 
 #############################################################
 #                       WEB SERVICE                         #
@@ -330,20 +333,39 @@ class REST_catalog(catalog):
                     print("The greenhouse could not be updated")
                     raise cherrypy.HTTPError(400, "The greenhouse could not be updated!")
     
-    
+    def cleaning(self, timeout):
+        '''
+        Method to remove devices that are no more active.
+        The inactivity is determined by a timeout. 
+        '''
+        while True:
+            for ind, device in enumerate(self.catDic["devices"]):
+                last_upd = time.mktime(datetime.strptime(device["lastUpdate"],
+                                            "%Y-%m-%d %H:%M:%S").timetuple())
+                current_t = datetime.timestamp(datetime.now())
+                if current_t - last_upd >= timeout:
+                    self.catDic["devices"].pop(ind)
+                    print(f"Device {device['devID']} has been removed due to inactivity!")
+                    self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            self.catDic["lastUpdate"] = self.lastUpdate
+            self.saveJson()
     
 if __name__ == "__main__": #Standard configuration to serve the url "localhost:8080"
 	
-	conf={
-		'/':{
-			'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-			'tools.sessions.on': True
-		}
-	}
-	webService=REST_catalog()
-	cherrypy.tree.mount(webService,'/',conf)
-	cherrypy.engine.start()
-	cherrypy.engine.block()
+    conf={
+    	'/':{
+    		'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+    		'tools.sessions.on': True
+    	}
+    }
+    webService = REST_catalog()
+    cherrypy.tree.mount(webService,'/',conf)
+    cherrypy.engine.start()
+    try:
+        webService.cleaning(5)
+    except KeyboardInterrupt:
+        cherrypy.engine.block()
 
             
 

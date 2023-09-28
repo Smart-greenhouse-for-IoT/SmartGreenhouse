@@ -97,7 +97,7 @@ class Device_Connector(object):
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/addDevice"
         try:
             req = requests.post(addr, data=json.dumps(self.mydevice))
-            if req.status_code == "200":
+            if req.status_code == 200:
                 print(f"Device {self.mydevice['devID']} added successfully!")
             else:
                 print(f"Device {self.mydevice['devID']} could not be added!")
