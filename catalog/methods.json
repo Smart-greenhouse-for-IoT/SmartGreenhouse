@@ -1,0 +1,35 @@
+{
+    "methods":[
+        {
+            "GET":[
+                "device",
+                "device?devID=",
+                "device?name=",
+                "broker",
+                "catalogInfo",
+                "projectInfo",
+                "telegramInfo",
+                "greenhouse",
+                "greenhouse?ghID=",
+                "greenhouse?usrID=",
+                "user",
+                "user?usrID="
+            ]
+        },
+        {
+            "POST":[
+                "updateDevices",
+                "addDevice",
+                "addUser",
+                "addGreenhouse"
+            ]
+        },
+        {
+            "PUT":[
+                "updateDevice",
+                "updateUser",
+                "updateGreenhouse"
+            ]
+        }
+    ]
+}
