@@ -104,6 +104,17 @@ class Device_Connector(object):
                 print(f"Device {self.mydevice['devID']} could not be added!")
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+    
+    def updateToCat(self):
+        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateDevice"
+        try:
+            req = requests.put(addr, data=json.dumps(self.mydevice))
+            if req.status_code == "200":
+                print(f"Device {self.mydevice['devID']} updated successfully!")
+            else:
+                print(f"Device {self.mydevice['devID']} could not be updated!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
     def get_broker(self): 
         """
