@@ -109,7 +109,7 @@ class Device_Connector(object):
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateDevice"
         try:
             req = requests.put(addr, data=json.dumps(self.mydevice))
-            if req.status_code == "200":
+            if req.status_code == 200:
                 print(f"Device {self.mydevice['devID']} updated successfully!")
             else:
                 print(f"Device {self.mydevice['devID']} could not be updated!")
@@ -201,7 +201,7 @@ class Device_Connector(object):
 
 
 
-    def loop(self):
+    def loop(self, refresh_time = 10):
         """
         Loop
         ----
@@ -211,7 +211,6 @@ class Device_Connector(object):
         """
         #TODO: every given time update the catalog registration to know DC is alive
         last_time = 0
-        refresh_time = 30
 
         try:
             while True:
@@ -221,6 +220,7 @@ class Device_Connector(object):
                 if local_time - last_time > refresh_time: 
                     self.updateMeasures()
                     self.publishLastMeas()
+                    self.updateToCat()
                     # self.post_sensor_Cat()
                     last_time = time.time() 
 
@@ -235,7 +235,7 @@ if __name__=='__main__':
 
     dc = Device_Connector(
         conf_path = "device_connector/conf.json",
-        device_path = "device_connector/devices.json"
+        device_path = "device_connector/dev2.json"
         )
 
     dc.loop()
