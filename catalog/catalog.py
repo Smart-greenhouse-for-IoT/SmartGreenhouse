@@ -1,6 +1,5 @@
 import json
 import cherrypy
-import requests
 from datetime import datetime
 import time
 from tools import searchDict
@@ -236,7 +235,7 @@ class REST_catalog(catalog):
             elif uri[0] == "user":
                 if "usrID" in params:
                     usrID = params["usrID"]
-                    search_usr= searchDict("users", "usrID", usrID)
+                    search_usr= searchDict(self.catDic, "users", "usrID", usrID)
                     if search_usr:
                         return json.dumps(search_usr)
                     else:

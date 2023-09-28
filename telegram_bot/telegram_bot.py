@@ -13,7 +13,7 @@ class Telegram_Bot:
     """
 
     def __init__(self):
-        self.conf = json.load(open("telegram_bot\setting.json"))
+        self.conf = json.load(open("telegram_bot/setting.json"))
         self.tokenBot = self.conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         MessageLoop(self.bot, {'chat': self.on_chat_message,
@@ -57,25 +57,23 @@ class Telegram_Bot:
                 
                 addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + f"/user?usrID={self.user['usrID']}"
                 req = requests.get(addr)
-                #TOTEST: check what req.json gives as output
-                if req.json == {}:              
-                    exist = False
-                else:
+                if req.ok:              
                     exist = True
+                    usr = req.json()
+                else:
+                    exist = False
                     
                 if exist:
                     self.bot.sendMessage(chat_ID, text=f"Logged in with user: {Name} {usrID}")
-                    #TODO: obtain the greenhouses of this user
-                    greenhouses = 0 #fox lo sistemi tu
-                    if greenhouses == 0:
+                    
+                    if usr["ghID"] == []:
                         self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse")
                     else:
                         self.bot.sendMessage(chat_ID, text=f"Select one greenhouse:")
                         
-                            
-                        
                 else:
                     self.bot.sendMessage(chat_ID, text=f"User not found, please repeat the command")
+                    #TODO: da qui si può aggiungere un nuovo utente!
 
 
 
