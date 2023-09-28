@@ -78,6 +78,8 @@ class Device_Connector(object):
 
     def notify(self,topic,payload): 
         """
+        notify
+        ------
         Where we receive the topic which we are subscribed (plant control microservices)
         """
 
@@ -87,6 +89,8 @@ class Device_Connector(object):
 
     def subscribe(self):
         """
+        subscribe
+        ---------
         Subscriber to all the irrigator topics of this device connector
         """
 
@@ -95,6 +99,14 @@ class Device_Connector(object):
         self.client_mqtt.mySubscribe()
     
     def registerToCat(self):
+        """
+        registerToCat
+        -------------
+        This function will register the device connector to the catalog.
+        Each time the registration is done all the device of this device connector \n
+        are sent to the catalog.
+        """
+
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/addDevice"
         try:
             req = requests.post(addr, data=json.dumps(self.mydevice))
@@ -106,6 +118,13 @@ class Device_Connector(object):
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
     
     def updateToCat(self):
+        """
+        updateToCat
+        -----------
+        Update all the decice of this device connector to the catalog, to let the catalog \n
+        know that this device connector and its devices are still 'alive'.
+        """
+        
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateDevice"
         try:
             req = requests.put(addr, data=json.dumps(self.mydevice))
@@ -118,6 +137,8 @@ class Device_Connector(object):
 
     def get_broker(self): 
         """
+        get_broker
+        ----------
         GET all the broker information
         """
 
@@ -132,24 +153,14 @@ class Device_Connector(object):
     
     def post_sensor_Cat(self): 
         """
+        post_sensor_Cat
+        ---------------
         Post to the catalog all the sensors of this device connector
         """
 
         string = f"http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateSensors" #URL for POST
         requests.post(string, json = self.mydevice)
         
-    
-    def humiditySens(self):
-        """
-        Get the simulated value of the humidity sensor and publish it to the correspondent topic
-        """
-
-        for dv in self.mydevice["devicesList"]:
-            if dv["type"] == "sensor":
-                #TODO: get the humidity level
-                #humidity = leggo da un file json?
-                #self.client_mqtt.myPublish(dv["topic"], humidity) #TODO: quante cose devo mandare? basta topic e umidità?
-                pass
     
     def updateMeasures(self):
         """
