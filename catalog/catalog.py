@@ -144,7 +144,6 @@ class catalog():
         with open(self.catalogFile, 'w') as fw:
             json.dump(self.catDic, fw, indent=4)
             return 0
-        return 1
     
     def dictInfo(self, key):
         # Method to retrieve value of dictionary given key

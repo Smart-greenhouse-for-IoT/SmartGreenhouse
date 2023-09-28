@@ -52,18 +52,35 @@
     ],
     "users": [
         {
-            "usrID":"u001",
-            "name":"Federico",
-            "ghID":["g001"],
-            "ownedPlants":[
+            "usrID": "u001",
+            "name": "Federico",
+            "ghID": [
+                "g001"
+            ],
+            "ownedPlants": [
                 {
-                    "name":"",
-                    "th_min":"",
-                    "th_max":""
+                    "name": "",
+                    "th_min": "",
+                    "th_max": ""
                 }
             ]
+        },
+        {
+            "usrID": "Ale",
+            "name": "002",
+            "lastUpdate": "2023-09-28 16:40:25"
+        },
+        {
+            "usrID": "u002",
+            "name": "Alessandro",
+            "lastUpdate": "2023-09-28 17:00:47"
+        },
+        {
+            "usrID": "u003",
+            "name": "Pippo",
+            "lastUpdate": "2023-09-28 17:02:45"
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-28 10:05:50"
+    "lastUpdate": "2023-09-28 17:02:45"
 }
