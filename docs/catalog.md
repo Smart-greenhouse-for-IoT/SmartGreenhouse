@@ -53,9 +53,12 @@
             "resources": {
                 "sensors": [
                     {
+                        "device_name": ,
                         "sensID": ,
                         "devID": ,
+                        "pin": 1,
                         "measurementType":,
+                        "units":,
                         "available_services": [
                             "REST",
                             "MQTT"
@@ -75,8 +78,10 @@
                 ],
                 "actuators": [
                     {
+                        "device_name": ,
                         "actID": "a_001",
                         "devID": "d_001",
+                        "pin": 18,
                         "available_services": [
                             "REST",
                             "MQTT"

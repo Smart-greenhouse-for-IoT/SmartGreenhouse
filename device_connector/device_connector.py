@@ -58,18 +58,19 @@ class Device_Connector(object):
         # At the start the program does not know wich actuators have
         for actuators in self.mydevice['resources']['actuators']:
             pass
+
         self.registerToCat()
         # Register to catalog
 
         ###############################
         ### MQTT client
         # Obtaining the broker information
-        broker_dict = self.get_broker()
+        self.broker_dict = self.get_broker()
         
         self.client_mqtt = MyMQTT(
-            clientID=broker_dict["clientID"],
-            broker=broker_dict["IP"],
-            port=broker_dict["port"],
+            clientID = self.broker_dict["clientID"],
+            broker = self.broker_dict["IP"],
+            port = self.broker_dict["port"],
             notifier=self
             )
         
@@ -144,15 +145,49 @@ class Device_Connector(object):
         updateMeasures
         --------------
         Function that each time is called will save in a self list all the current measures \n
-        of all the sensors connected to the device connector
+        of all the sensors connected to the device connector.
         """
+
+        self.measures.clear()
         for sens_id in self.sensor_index.keys():
             print(f"Measuring with sensor {sens_id}")
+            sens = {"sensor": sens_id,
+                    "device": self.mydevice['devID']}
             curr_meas = self.sensors_list[self.sensor_index[sens_id]].measure()
+            for i in range(len(curr_meas)):
+                curr_meas[i].update(sens)
             print(f"Measure: {curr_meas}")
 
-            # Add the current measure to the list containing all the last measures 
+            # Add the current measure to the list containing the last measures 
             # self.measures[self.sensor_index[sens_id]] = curr_meas
+            self.measures.append(curr_meas)
+
+    def publishLastMeas(self):
+        """
+        publishLastMeas
+        ---------------
+        This function will public through MQTT all the values measured to the respective \n
+        microservice and thinkspeak adaptor.
+        """
+
+        # Iteration over all the sensor device to publish on their topic 
+        for sensor in self.mydevice["resources"]["sensors"]:
+
+            if "MQTT" in sensor["available_services"]:
+                measure_list = self.measures[self.sensor_index[sensor["sensID"]]]
+                
+                services = sensor["services_details"][0]
+                for ind, measure in enumerate(measure_list):
+                    if services["service_type"] == "MQTT":
+                        topic_list = services["topic"]
+                        app = topic_list[ind]
+
+                        self.client_mqtt.myPublish(topic = topic_list[ind], msg = measure)
+                    else:
+                        raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
+            else:
+                raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
+
 
 
     def loop(self):
@@ -171,10 +206,13 @@ class Device_Connector(object):
             while True:
                 print("looping\n")
                 local_time = time.time()
+
                 if local_time - last_time > refresh_time: 
                     self.updateMeasures()
+                    self.publishLastMeas()
                     # self.post_sensor_Cat()
                     last_time = time.time() 
+
                 time.sleep(5)
 
         except KeyboardInterrupt: #to kill the program
