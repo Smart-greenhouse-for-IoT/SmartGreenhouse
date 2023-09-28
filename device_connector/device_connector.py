@@ -78,6 +78,8 @@ class Device_Connector(object):
 
     def notify(self,topic,payload): 
         """
+        notify
+        ------
         Where we receive the topic which we are subscribed (plant control microservices)
         """
 
@@ -87,6 +89,8 @@ class Device_Connector(object):
 
     def subscribe(self):
         """
+        subscribe
+        ---------
         Subscriber to all the irrigator topics of this device connector
         """
 
@@ -95,6 +99,14 @@ class Device_Connector(object):
         self.client_mqtt.mySubscribe()
     
     def registerToCat(self):
+        """
+        registerToCat
+        -------------
+        This function will register the device connector to the catalog.
+        Each time the registration is done all the device of this device connector \n
+        are sent to the catalog.
+        """
+
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/addDevice"
         try:
             req = requests.post(addr, data=json.dumps(self.mydevice))
@@ -104,9 +116,29 @@ class Device_Connector(object):
                 print(f"Device {self.mydevice['devID']} could not be added!")
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+    
+    def updateToCat(self):
+        """
+        updateToCat
+        -----------
+        Update all the decice of this device connector to the catalog, to let the catalog \n
+        know that this device connector and its devices are still 'alive'.
+        """
+        
+        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateDevice"
+        try:
+            req = requests.put(addr, data=json.dumps(self.mydevice))
+            if req.status_code == 200:
+                print(f"Device {self.mydevice['devID']} updated successfully!")
+            else:
+                print(f"Device {self.mydevice['devID']} could not be updated!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
     def get_broker(self): 
         """
+        get_broker
+        ----------
         GET all the broker information
         """
 
@@ -121,24 +153,14 @@ class Device_Connector(object):
     
     def post_sensor_Cat(self): 
         """
+        post_sensor_Cat
+        ---------------
         Post to the catalog all the sensors of this device connector
         """
 
         string = f"http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateSensors" #URL for POST
         requests.post(string, json = self.mydevice)
         
-    
-    def humiditySens(self):
-        """
-        Get the simulated value of the humidity sensor and publish it to the correspondent topic
-        """
-
-        for dv in self.mydevice["devicesList"]:
-            if dv["type"] == "sensor":
-                #TODO: get the humidity level
-                #humidity = leggo da un file json?
-                #self.client_mqtt.myPublish(dv["topic"], humidity) #TODO: quante cose devo mandare? basta topic e umidità?
-                pass
     
     def updateMeasures(self):
         """
@@ -190,7 +212,7 @@ class Device_Connector(object):
 
 
 
-    def loop(self):
+    def loop(self, refresh_time = 10):
         """
         Loop
         ----
@@ -200,7 +222,6 @@ class Device_Connector(object):
         """
         #TODO: every given time update the catalog registration to know DC is alive
         last_time = 0
-        refresh_time = 30
 
         try:
             while True:
@@ -210,6 +231,7 @@ class Device_Connector(object):
                 if local_time - last_time > refresh_time: 
                     self.updateMeasures()
                     self.publishLastMeas()
+                    self.updateToCat()
                     # self.post_sensor_Cat()
                     last_time = time.time() 
 
@@ -224,7 +246,7 @@ if __name__=='__main__':
 
     dc = Device_Connector(
         conf_path = "device_connector/conf.json",
-        device_path = "device_connector/devices.json"
+        device_path = "device_connector/dev2.json"
         )
 
     dc.loop()

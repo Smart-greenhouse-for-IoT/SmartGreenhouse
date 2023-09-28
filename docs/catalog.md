@@ -21,8 +21,24 @@
             "ghID":,
             "devID":,
             "usrID":,
-            "numPlants":,
-            "plantsList": [],
+            "maxNumPlants":,
+            "plantsList": [
+                {
+                    "type":,
+                    "sensID":,
+                    "actID":,
+                    "available_services": [
+                    "MQTT"
+                    ],
+                    "services_details": [
+                    {
+                        "service_type": "MQTT",
+                        "topic": []
+                    }
+                ],
+                }
+            ],
+            #TODO: microservice associated to GH
             "lastUpdate":
         },
     ],
@@ -30,7 +46,14 @@
         {
             "usrID":,
             "name":,
-            "ghID":[]
+            "ghID":[],
+            "ownedPlants":[
+                {
+                    "name":
+                    "th_min",
+                    "th_max"
+                }
+            ]
         }
     ],
     "devices":[

@@ -6,7 +6,7 @@ import time
 from tools import searchDict
 
 class catalog():
-    #TODO: cleanup loop: check time to decide which entries to delete
+    #TODO: ID assigned dynamically
     def __init__(self):
         self.catalogFile = "catalog/catalog.json" 
         self.plantDBFile = "catalog/plantsDatabase.json"
@@ -270,27 +270,24 @@ class REST_catalog(catalog):
             elif uri[0] == "addDevice":
                 if self.addDevice(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nNew device added successfully!') 
+                    print(f'\nDevice {bodyAsDict["devID"]} added successfully!') 
                 else:
-                    print("The device could not be added")
-                    raise cherrypy.HTTPError(400, "The device could not be added!")
+                    raise cherrypy.HTTPError(400, f'Device {bodyAsDict["devID"]} could not be added!')
 
             # SERVICE CATALOG
             elif uri[0] == "addUser":
                 if self.addUser(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nNew user added successfully!') 
+                    print(f'\nUser {bodyAsDict["usrID"]} added successfully!') 
                 else:
-                    print("The user could not be added")
-                    raise cherrypy.HTTPError(400, "The user could not be added!")
+                    raise cherrypy.HTTPError(400, f'User {bodyAsDict["usrID"]} could not be added!')
             
             elif uri[0] == "addGreenhouse":
                 if self.addGreenhouse(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nNew greenhouse added successfully!') 
+                    print(f'\nGreenhouse {bodyAsDict["ghID"]} added successfully!') 
                 else:
-                    print("The greenhouse could not be added")
-                    raise cherrypy.HTTPError(400, "The greenhouse could not be added!")
+                    raise cherrypy.HTTPError(400, f'Greenhouse {bodyAsDict["ghID"]} could not be added!')
             
 
     
@@ -302,25 +299,25 @@ class REST_catalog(catalog):
             if uri[0] == "updateDevice":
                 if self.updateDevice(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nDevice updated successfully')
+                    print(f'\nDevice {bodyAsDict["devID"]} updated successfully')
                 else:
-                    print("The device could not be updated")
+                    print('Device {bodyAsDict["devID"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The device could not be updated!")
             
             if uri[0] == "updateUser":
                 if self.updateUser(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nUser updated successfully')
+                    print('\nUser {bodyAsDict["usrID"]} updated successfully')
                 else:
-                    print("The user could not be updated")
+                    print('User {bodyAsDict["devID"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The user could not be updated!")
             
             if uri[0] == "updateGreenhouse":
                 if self.updateGreenhouse(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nGreenhouse updated successfully')
+                    print('\nGreenhouse {bodyAsDict["ghID"]} updated successfully')
                 else:
-                    print("The greenhouse could not be updated")
+                    print('Greenhouse {bodyAsDict["ghID"]}could not be updated')
                     raise cherrypy.HTTPError(400, "The greenhouse could not be updated!")
     
     def cleaning(self, timeout):
@@ -337,9 +334,9 @@ class REST_catalog(catalog):
                     self.catDic["devices"].pop(ind)
                     print(f"Device {device['devID']} has been removed due to inactivity!")
                     self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    self.catDic["lastUpdate"] = self.lastUpdate
+                    self.saveJson()
 
-            self.catDic["lastUpdate"] = self.lastUpdate
-            self.saveJson()
     
 if __name__ == "__main__": #Standard configuration to serve the url "localhost:8080"
 	
@@ -353,7 +350,7 @@ if __name__ == "__main__": #Standard configuration to serve the url "localhost:8
     cherrypy.tree.mount(webService,'/',conf)
     cherrypy.engine.start()
     try:
-        webService.cleaning(5)
+        webService.cleaning(timeout=15)
     except KeyboardInterrupt:
         cherrypy.engine.block()
 
