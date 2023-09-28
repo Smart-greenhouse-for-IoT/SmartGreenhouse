@@ -5,6 +5,11 @@ import time
 from tools import searchDict
 
 class catalog():
+    """
+    Catalog
+    -------
+
+    """
     #TODO: ID assigned dynamically
     def __init__(self):
         self.catalogFile = "catalog/catalog.json" 
@@ -20,7 +25,11 @@ class catalog():
 
     ######################## DEVICE CATALOG ########################
     def addDevice(self, newDev):
-        # Add new device in catalog
+        """
+        addDevice
+        ---------
+        Function used to add a new device in the catalog.
+        """
         if searchDict(self.catDic, "devices","devID", newDev["devID"]) == {}:
             self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             newDev["lastUpdate"] = self.lastUpdate
@@ -31,7 +40,11 @@ class catalog():
             return -1
     
     def updateDevice(self, update_dev):
-        # Update a device already present in catalog
+        """
+        updateDevice
+        ------------
+        Update a device already present in catalog.
+        """
         for i, device in enumerate(self.catDic["devices"]):
             if device["devID"] == update_dev["devID"]:
                 for key in update_dev.keys():
@@ -43,31 +56,55 @@ class catalog():
         return -1
     
     def updateDevices(self, devicesDic):
-        ''' 
-        Method to update devices to the catalog json file
-        ---
+        """
+        updateDevices
+        -------------
+        Method to update devices to the catalog json file.
         - Used by device connector to keep the catalog updated
         - Update devices in "devices" key of catalog.json
-        '''
+        """
         self.catDic["greenhouses"]["ghID" == devicesDic["ghID"]]["devicesList"] = devicesDic["devicesList"]
     
     
     ######################## SERVICE CATALOG ########################
     def brokerInfo(self):
-        # Method to receive broker's information as dictionary
+        """
+        brokerInfo
+        ----------
+        Method to receive broker's information as dictionary.
+        """
         return self.catDic["broker"]   
 
     def catInfo(self):
-        # Method to retrieve information related to the catalog such as IP and port
+        """
+        catInfo
+        -------
+        Method to retrieve information related to the catalog such as IP and port.
+        """
         return self.catDic["catalog"]
     
     def projectName(self):
+        """
+        projectName
+        -----------
+        Return the project name.
+        """
         return self.catDic["projectName"]
     
     def telegramInfo(self):
+        """
+        telegramInfo
+        ------------
+        Return all the telegram info, included the Token.
+        """
         return self.catDic["telegramBot"]
     
     def addUser(self, newUsr):
+        """
+        addUser
+        -------
+        Method to add a new user to the catalog.
+        """
         if searchDict(self.catDic, "users","usrID", newUsr["usrID"]) == {}:
             self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             newUsr["lastUpdate"] = self.lastUpdate
@@ -78,6 +115,11 @@ class catalog():
             return -1
     
     def updateUser(self, update_usr):
+        """
+        updateUser
+        ----------
+        Method to update the information of a user already present in the catalog.
+        """
         for i, user in enumerate(self.catDic["users"]):
             if user["usrID"] == update_usr["usrID"]:
                 for key in update_usr.keys():
@@ -89,6 +131,11 @@ class catalog():
         return -1
     
     def addGreenhouse(self, newGh):
+        """
+        addGreenhouse
+        -------------
+        Method to add a new greenhouse for a specific user to the catalog.
+        """
         if searchDict(self.catDic, "greenhouses","ghID", newGh["ghID"]) == {}:
             self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             newGh["lastUpdate"] = self.lastUpdate
@@ -99,6 +146,11 @@ class catalog():
             return -1
     
     def updateGreenhouse(self, update_gh):
+        """
+        updateGreenhouse
+        ----------------
+        Method to update a greenhouse information in the catalog.
+        """
         for i, greenhouse in enumerate(self.catDic["greenhouses"]):
             if greenhouse["ghID"] == update_gh["ghID"]:
                 for key in update_gh.keys():
@@ -110,6 +162,11 @@ class catalog():
         return -1
 
     def getNumberLots(self, ghID = []):
+        """
+        getNumberLots
+        -------------
+        #FIXME: fox scrivi qualcosa tu
+        """
         greenhouses = self.catDic["greenhouses"]
         numLots = 0
         for gh in greenhouses:
@@ -119,50 +176,63 @@ class catalog():
     
     # Retrieve humidity threshold from telegram bot given plant name
     def thresholdHumidity(self, plantRequest = ""):
-        '''
-        Method to give humidity threshold to plant control
-        ---
-        The threshold are given in the form:\
+        """
+        thresholdHumidity
+        -----------------
+        ### Method to give humidity threshold to plant control
+        The threshold are given in the form:\n
             {
-                "th_min": 0.1,
-                "th_max": 0.2
-            }
+                "th_min": 0.1,\n
+                "th_max": 0.2\n
+            }\n
         If the plant requested is not found the return -1
-        '''
+        """
         try:
-            # find dictionary by plant type in plantDB dictionary
+            # Find dictionary by plant type in plantDB dictionary
             humidityTh = next(item for item in self.plantDB["humidityThresh"] if item["plant"] == plantRequest)
-            humidityTh.pop("plant")  # pop plant key to return only desired thresholds
+            # Pop plant key to return only desired thresholds
+            humidityTh.pop("plant")  
             return humidityTh
-        except KeyError:    # if plant not present raise error
+        
+        # If plant not present raise error
+        except KeyError:    
             error_code = -1
             return error_code
     
     ######################## GENERAL METHODS ########################
     def saveJson(self):
-        # Used to save the catalog as a JSON file
+        """
+        saveJson
+        --------
+        Used to save the catalog as a JSON file.
+        """
         with open(self.catalogFile, 'w') as fw:
             json.dump(self.catDic, fw, indent=4)
             return 0
     
     def dictInfo(self, key):
-        # Method to retrieve value of dictionary given key
+        """
+        dictInfo
+        --------
+        Method to retrieve value of dictionary given key.
+        """
         return self.catDic[key]
 
 #############################################################
 #                       WEB SERVICE                         #
 #############################################################
 class REST_catalog(catalog):
-    '''
-    Child class of catalog that implement REST methods
-    ---
+    """
+    REST_catalog
+    ------------
+    ### Child class of catalog that implement REST methods
     Methods:
     - GET 
         - broker: retrieve broker informations
         - getThresholds: retrieve humidity thresholds given a plant's type 
     - POST
         - updateDevices: update devices from device connector
-    '''
+    """
     
     exposed = True        
 
@@ -173,6 +243,12 @@ class REST_catalog(catalog):
             self.methods = json.load(mf)
 
     def GET(self, *uri, **params):
+        """
+        GET
+        ---
+        Used to obtain information from other devices
+        """
+        
         if len(uri) >=1:
             
             # DEVICE CATALOG
@@ -255,7 +331,13 @@ class REST_catalog(catalog):
 
     
     def POST(self, *uri, **params):
-        # load body of request as dictionary
+        """
+        POST
+        ----
+        Used to add new devices, users or greenhouses
+        """
+
+        # Load body of request as dictionary
         bodyAsStr = cherrypy.request.body.read()
         bodyAsDict = json.loads(bodyAsStr)
 
@@ -290,6 +372,11 @@ class REST_catalog(catalog):
 
     
     def PUT(self, *uri, **params):
+        """
+        PUT
+        ---
+        Used to update devices, users or greenhouses
+        """
 
         bodyAsStr = cherrypy.request.body.read()
         bodyAsDict = json.loads(bodyAsStr)
@@ -319,10 +406,12 @@ class REST_catalog(catalog):
                     raise cherrypy.HTTPError(400, "The greenhouse could not be updated!")
     
     def cleaning(self, timeout):
-        '''
+        """
+        cleaning
+        --------
         Method to remove devices that are no more active.
         The inactivity is determined by a timeout. 
-        '''
+        """
         while True:
             for ind, device in enumerate(self.catDic["devices"]):
                 last_upd = time.mktime(datetime.strptime(device["lastUpdate"],
@@ -336,8 +425,9 @@ class REST_catalog(catalog):
                     self.saveJson()
 
     
-if __name__ == "__main__": #Standard configuration to serve the url "localhost:8080"
+if __name__ == "__main__": 
 	
+    # Standard configuration to serve the url "localhost:8080"
     conf={
     	'/':{
     		'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -351,10 +441,3 @@ if __name__ == "__main__": #Standard configuration to serve the url "localhost:8
         webService.cleaning(timeout=15)
     except KeyboardInterrupt:
         cherrypy.engine.block()
-
-            
-
-
-
-
-

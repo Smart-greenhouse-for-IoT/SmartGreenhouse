@@ -30,7 +30,6 @@ class Device_Connector(object):
         
         # Read all the sensors in self.mydevice list
         # and initialize it all to start obtaining their values
-
         self.measures = []
         self.sensors_list = []
         self.sensor_index = {}
@@ -58,9 +57,9 @@ class Device_Connector(object):
         # At the start the program does not know wich actuators have
         for actuators in self.mydevice['resources']['actuators']:
             pass
-
-        self.registerToCat()
+        
         # Register to catalog
+        self.registerToCat()
 
         ###############################
         ### MQTT client
@@ -74,6 +73,7 @@ class Device_Connector(object):
             notifier=self
             )
         
+        # Start MQTT client
         self.client_mqtt.start()
 
     def notify(self,topic,payload): 
@@ -85,7 +85,8 @@ class Device_Connector(object):
 
         self.actuation = json.load(payload)
         if self.actuation["action"] == True:
-            self.irrigator() #TODO: bisogna passargli il lotto a cui irrigare, lo prendo dal topic???
+            pass
+            #TODO: start irrigation
 
     def subscribe(self):
         """
@@ -95,7 +96,8 @@ class Device_Connector(object):
         """
 
         self.client_mqtt.start()
-        time.sleep(3) #we want to be sure to do that commands in order
+        # We want to be sure to do that commands in order
+        time.sleep(3) 
         self.client_mqtt.mySubscribe()
     
     def registerToCat(self):
@@ -107,8 +109,11 @@ class Device_Connector(object):
         are sent to the catalog.
         """
 
+        # Address of the catalog for adding the devices
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/addDevice"
+
         try:
+            #POST the devices to the catalog
             req = requests.post(addr, data=json.dumps(self.mydevice))
             if req.status_code == 200:
                 print(f"Device {self.mydevice['devID']} added successfully!")
@@ -125,8 +130,10 @@ class Device_Connector(object):
         know that this device connector and its devices are still 'alive'.
         """
         
+        # Address of the catalog for updating the devices
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateDevice"
         try:
+            #PUT the devices to the catalog
             req = requests.put(addr, data=json.dumps(self.mydevice))
             if req.status_code == 200:
                 print(f"Device {self.mydevice['devID']} updated successfully!")
@@ -142,25 +149,15 @@ class Device_Connector(object):
         GET all the broker information
         """
 
-        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/broker" #URL for GET
+        # Address of the catalog for obtaining all the informtions of the MQTT broker
+        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/broker" 
         try:
-            b_dict = requests.get(addr).json()  #GET from catalog #need a .text /.body?
+            b_dict = requests.get(addr).json()  
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
-        return b_dict #return a json dict with BrokerIP and BrokerPort
-    
-    
-    def post_sensor_Cat(self): 
-        """
-        post_sensor_Cat
-        ---------------
-        Post to the catalog all the sensors of this device connector
-        """
-
-        string = f"http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateSensors" #URL for POST
-        requests.post(string, json = self.mydevice)
-        
+        # Return a json dict with BrokerIP and BrokerPort
+        return b_dict        
     
     def updateMeasures(self):
         """
@@ -170,13 +167,21 @@ class Device_Connector(object):
         of all the sensors connected to the device connector.
         """
 
+        # Clear the list containing the old measures
         self.measures.clear()
+
+        # For every active sensor connected to the device connector
         for sens_id in self.sensor_index.keys():
             print(f"Measuring with sensor {sens_id}")
             sens = {"sensor": sens_id,
                     "device": self.mydevice['devID']}
+            
+            # Obtain the measure from the sensor
             curr_meas = self.sensors_list[self.sensor_index[sens_id]].measure()
+
+            # Some sensor can measure more than one value (i.e. temperature and humidity)
             for i in range(len(curr_meas)):
+                # At each measure is attached the origin, sensor_id and device_id
                 curr_meas[i].update(sens)
             print(f"Measure: {curr_meas}")
 
@@ -195,15 +200,18 @@ class Device_Connector(object):
         # Iteration over all the sensor device to publish on their topic 
         for sensor in self.mydevice["resources"]["sensors"]:
 
+            # Check if the sensor have a topic where public the measure
             if "MQTT" in sensor["available_services"]:
                 measure_list = self.measures[self.sensor_index[sensor["sensID"]]]
                 
                 services = sensor["services_details"][0]
                 for ind, measure in enumerate(measure_list):
                     if services["service_type"] == "MQTT":
+                        # Obtain the topic list of this sensor
                         topic_list = services["topic"]
                         app = topic_list[ind]
 
+                        # Publish the measure to the respective topic
                         self.client_mqtt.myPublish(topic = topic_list[ind], msg = measure)
                     else:
                         raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
@@ -216,6 +224,9 @@ class Device_Connector(object):
         """
         Loop
         ----
+        ### Input Parameters:
+        - refresh_time: time to wait before doing another measure of the sensors.
+
         This function will run continuously until it is stopped.\n
         At each loop, after a fixed time, the device connector will obtain all the \n
         measures from its sensors, will send the information to the catalog and ... ???? #NOTE: to be finished
@@ -228,6 +239,7 @@ class Device_Connector(object):
                 print("looping\n")
                 local_time = time.time()
 
+                # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
                     self.updateMeasures()
                     self.publishLastMeas()
