@@ -2,7 +2,7 @@ import json
 import cherrypy
 from datetime import datetime
 import time
-from tools import searchDict
+from tools import searchDict, generateID
 
 class catalog():
     """
@@ -20,6 +20,11 @@ class catalog():
         with open(self.plantDBFile) as pf:
             self.plantDB = json.load(pf)
 
+        # Save the numeric IDs of the catalog
+        self.devIDs = [int(dev["devID"][1:]) for dev in self.catDic["devices"]]
+        self.usrIDs = [int(usr["usrID"][1:]) for usr in self.catDic["users"]]
+        self.ghIDs = [int(gh["ghID"][1:]) for gh in self.catDic["greenhouses"]]
+
         self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.catDic["lastUpdate"] = self.lastUpdate
 
@@ -30,14 +35,15 @@ class catalog():
         ---------
         Function used to add a new device in the catalog.
         """
-        if searchDict(self.catDic, "devices","devID", newDev["devID"]) == {}:
-            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            newDev["lastUpdate"] = self.lastUpdate
-            self.catDic["devices"].append(newDev)
-            self.catDic["lastUpdate"] = self.lastUpdate
-            return 0
-        else:
-            return -1
+        new_id = generateID(self.devIDs)
+        self.devIDs.append(new_id)
+        new_id = "d" + str(new_id)
+        newDev["usrID"] = new_id
+        self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        newDev["lastUpdate"] = self.lastUpdate
+        self.catDic["devices"].append(newDev)
+        self.catDic["lastUpdate"] = self.lastUpdate
+        return 0
     
     def updateDevice(self, update_dev):
         """
@@ -105,14 +111,15 @@ class catalog():
         -------
         Method to add a new user to the catalog.
         """
-        if searchDict(self.catDic, "users","usrID", newUsr["usrID"]) == {}:
-            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            newUsr["lastUpdate"] = self.lastUpdate
-            self.catDic["users"].append(newUsr)
-            self.catDic["lastUpdate"] = self.lastUpdate
-            return 0
-        else:
-            return -1
+        new_id = generateID(self.usrIDs)
+        self.usrIDs.append(new_id)
+        new_id = "u" + str(new_id)
+        newUsr["usrID"] = new_id
+        self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        newUsr["lastUpdate"] = self.lastUpdate
+        self.catDic["users"].append(newUsr)
+        self.catDic["lastUpdate"] = self.lastUpdate
+        return 0
     
     def updateUser(self, update_usr):
         """
@@ -136,14 +143,15 @@ class catalog():
         -------------
         Method to add a new greenhouse for a specific user to the catalog.
         """
-        if searchDict(self.catDic, "greenhouses","ghID", newGh["ghID"]) == {}:
-            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            newGh["lastUpdate"] = self.lastUpdate
-            self.catDic["greenhouses"].append(newGh)
-            self.catDic["lastUpdate"] = self.lastUpdate
-            return 0
-        else:
-            return -1
+        new_id = generateID(self.ghIDs)
+        self.ghIDs.append(new_id)
+        new_id = "g" + str(new_id)
+        newGh["ghID"] = new_id
+        self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        newGh["lastUpdate"] = self.lastUpdate
+        self.catDic["greenhouses"].append(newGh)
+        self.catDic["lastUpdate"] = self.lastUpdate
+        return 0
     
     def updateGreenhouse(self, update_gh):
         """

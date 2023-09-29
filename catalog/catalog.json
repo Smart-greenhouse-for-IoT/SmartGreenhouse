@@ -20,30 +20,30 @@
     },
     "greenhouses": [
         {
-            "ghID": "g001",
-            "devID": "d001",
-            "usrID": "u001",
+            "ghID": "g1",
+            "devID": "d1",
+            "usrID": "u1",
             "numPlants": 2,
             "plantsList": [
                 {
-                    "plantID": "p001",
+                    "plantID": "p1",
                     "type": "rosmarino"
                 },
                 {
-                    "plantID": "p002",
+                    "plantID": "p2",
                     "type": "basilico"
                 }
             ],
             "lastUpdate": ""
         },
         {
-            "ghID": "g002",
-            "devID": "d002",
-            "usrID": "u002",
+            "ghID": "g2",
+            "devID": "d2",
+            "usrID": "u2",
             "numPlants": 1,
             "plantsList": [
                 {
-                    "plantID": "p001",
+                    "plantID": "p1",
                     "type": "rosmarino"
                 }
             ],
@@ -52,10 +52,10 @@
     ],
     "users": [
         {
-            "usrID": "u001",
+            "usrID": "u1",
             "name": "Federico",
             "ghID": [
-                "g001"
+                "g1"
             ],
             "ownedPlants": [
                 {
@@ -66,21 +66,26 @@
             ]
         },
         {
-            "usrID": "Ale",
-            "name": "002",
-            "lastUpdate": "2023-09-28 16:40:25"
-        },
-        {
-            "usrID": "u002",
+            "usrID": "u2",
             "name": "Alessandro",
-            "lastUpdate": "2023-09-28 17:00:47"
+            "lastUpdate": "2023-09-28 17::47"
         },
         {
-            "usrID": "u003",
+            "usrID": "u3",
             "name": "Pippo",
             "lastUpdate": "2023-09-28 17:02:45"
+        },
+        {
+            "name": "Giulio",
+            "usrID": "u4",
+            "lastUpdate": "2023-09-29 11:36:57"
+        },
+        {
+            "usrID": "u5",
+            "name": "Pippo",
+            "lastUpdate": "2023-09-29 12:02:14"
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-28 17:02:45"
+    "lastUpdate": "2023-09-29 12:02:14"
 }
