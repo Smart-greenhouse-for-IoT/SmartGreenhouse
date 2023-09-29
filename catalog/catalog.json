@@ -79,8 +79,15 @@
             "usrID": "u003",
             "name": "Pippo",
             "lastUpdate": "2023-09-28 17:02:45"
+        },
+        {
+            "usrID": "005",
+            "name": "Alex",
+            "ghID": [],
+            "ownedPlants": [],
+            "lastUpdate": "2023-09-29 11:54:51"
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-28 17:02:45"
+    "lastUpdate": "2023-09-29 11:54:51"
 }
