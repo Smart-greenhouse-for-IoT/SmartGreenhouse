@@ -26,18 +26,10 @@ class Telegram_Bot:
             "ip": self.conf["CatIP"],
             "port": self.conf["CatPort"]
         }
-        self.user = {
-            "usrID":  "",
-            "name":  "",
-            "ghID": [],
-            "ownedPlants": [],
-            "lastUpdate": ""
-        }
+        self.user = dict.fromkeys(["usrID", "name", "ghID", 
+                                   "onwedPlants", "lastUpdate"])
                 
             
-        
-
-
     def on_chat_message(self, msg): 
         """
         on_chat_message
@@ -81,7 +73,7 @@ class Telegram_Bot:
                 
                 elif command == "/signin":
                     if self.userConnected == False:            
-                        self.user["usrID"] = parameters[1],
+                        self.user["usrID"] = parameters[1]
                         self.user["name"] = parameters[0]
                         
                         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + f"/user?usrID={self.user['usrID']}"

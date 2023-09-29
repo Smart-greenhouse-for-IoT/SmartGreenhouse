@@ -86,8 +86,22 @@
             "ghID": [],
             "ownedPlants": [],
             "lastUpdate": "2023-09-29 11:54:51"
+        },
+        {
+            "usrID": "Pippo",
+            "name": "u003",
+            "ghID": null,
+            "onwedPlants": null,
+            "lastUpdate": "2023-09-29 12:25:16"
+        },
+        {
+            "usrID": "u3",
+            "name": "Pippo",
+            "ghID": null,
+            "onwedPlants": null,
+            "lastUpdate": "2023-09-29 12:27:14"
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-29 11:54:51"
+    "lastUpdate": "2023-09-29 12:27:14"
 }
