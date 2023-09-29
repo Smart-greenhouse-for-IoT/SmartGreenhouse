@@ -76,16 +76,27 @@
             "lastUpdate": "2023-09-28 17:02:45"
         },
         {
-            "name": "Giulio",
-            "usrID": "u4",
-            "lastUpdate": "2023-09-29 11:36:57"
+            "usrID": "005",
+            "name": "Alex",
+            "ghID": [],
+            "ownedPlants": [],
+            "lastUpdate": "2023-09-29 11:54:51"
         },
         {
-            "usrID": "u5",
+            "usrID": "Pippo",
+            "name": "u003",
+            "ghID": null,
+            "onwedPlants": null,
+            "lastUpdate": "2023-09-29 12:25:16"
+        },
+        {
+            "usrID": "u3",
             "name": "Pippo",
-            "lastUpdate": "2023-09-29 12:02:14"
+            "ghID": null,
+            "onwedPlants": null,
+            "lastUpdate": "2023-09-29 12:27:14"
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-29 12:02:14"
+    "lastUpdate": "2023-09-29 12:27:14"
 }
