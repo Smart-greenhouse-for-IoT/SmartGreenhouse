@@ -26,8 +26,13 @@ class Telegram_Bot:
             "ip": self.conf["CatIP"],
             "port": self.conf["CatPort"]
         }
-        self.user = dict.fromkeys(["usrID", "name", "ghID", 
-                                   "onwedPlants", "lastUpdate"])
+        self.user = {
+            "usrID": "",
+            "name": "",
+            "ghID": "",
+            "ownedPlants": [],
+            "lastUpdate": ""
+        } 
                 
             
     def on_chat_message(self, msg): 
@@ -46,32 +51,30 @@ class Telegram_Bot:
             message = message.split('_')
             command = message.pop(0)
             parameters = message
-
-            if len(parameters) == 2:
-
+            
+            if len(parameters) == 1: 
+                
                 if  command == "/signup":
                     if self.userConnected == False:            
                         newUser = self.user.copy()
-                        newUser["usrID"] = parameters[1]
                         newUser["name"] = parameters[0]
 
                         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
                         
                         try:
-                            req = requests.get(addr  + f"/user?usrID={newUser['usrID']}")
+                            req = requests.post(addr + "/addUser", json.dumps(newUser))
+
                         except:
                             raise Exception("The catalog web service is unreachable!")
-                        
-                        if req.ok:              
-                            self.bot.sendMessage(chat_ID, text=f"The user {parameters[1]} already exist!")
-                        else:
-                            req = requests.post(addr + "/addUser", json.dumps(newUser))
-                            self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} {parameters[1]} correctly created.")
+                            
+                        self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} {parameters[1]} correctly created.")
+                        #FIXME: since the ID is assigned dynamically the user after signup does not know his own ID
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
 
-                
-                elif command == "/signin":
+            if len(parameters) == 2:
+
+                if command == "/signin":
                     if self.userConnected == False:            
                         self.user["usrID"] = parameters[1]
                         self.user["name"] = parameters[0]
@@ -87,15 +90,15 @@ class Telegram_Bot:
                             if usr['name'] == self.user['name']:
                                 self.bot.sendMessage(chat_ID, text=f"Logged in with user: {parameters[0]} {parameters[1]}")
                                 self.userConnected = True
+                                if usr["ghID"] == []:
+                                    self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse."
+                                                                    "\n /addGreenhouse")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectGreenhouse")
                             else:
                                 self.bot.sendMessage(chat_ID, text=f"The name {self.user['name']} does not match\
                                                                                         with the existing user!")
 
-                            if usr["ghID"] == []:
-                                self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse."
-                                                                    "\n /addGreenhouse")
-                            else:
-                                self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectGreenhouse")
                                 
                         else:
                             self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} not found!")
@@ -210,7 +213,7 @@ class Telegram_Bot:
             elif place == 'User': # Adding a new user to the catalog
                 if doing == "True":
                     text_Add = ("To sign up write it in this way:\n"
-                                "/signup_Name_ID \n")
+                                "/signup_Name \n")
                     self.bot.sendMessage(chat_ID, text=text_Add)
                 elif doing == "False":
                     self.bot.sendMessage(chat_ID, text=f"User not added, please repeat the command.")

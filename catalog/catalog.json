@@ -66,28 +66,11 @@
             ]
         },
         {
-            "usrID": "u2",
-            "name": "Alessandro",
-            "lastUpdate": "2023-09-28 17::47"
-        },
-        {
-            "usrID": "u3",
-            "name": "Pippo",
-            "lastUpdate": "2023-09-28 17:02:45"
-        },
-        {
-            "usrID": "005",
+            "usrID": "u5",
             "name": "Alex",
             "ghID": [],
             "ownedPlants": [],
             "lastUpdate": "2023-09-29 11:54:51"
-        },
-        {
-            "usrID": "Pippo",
-            "name": "u003",
-            "ghID": null,
-            "onwedPlants": null,
-            "lastUpdate": "2023-09-29 12:25:16"
         },
         {
             "usrID": "u3",
@@ -95,8 +78,15 @@
             "ghID": null,
             "onwedPlants": null,
             "lastUpdate": "2023-09-29 12:27:14"
+        },
+        {
+            "usrID": "u4",
+            "name": "jesus",
+            "ghID": "",
+            "ownedPlants": [],
+            "lastUpdate": "2023-09-29 12:44:45"
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-29 12:27:14"
+    "lastUpdate": "2023-09-29 12:44:45"
 }
