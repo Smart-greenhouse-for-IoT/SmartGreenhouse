@@ -5,6 +5,8 @@ import json
 import requests
 import time
 
+#FIXME: sometimes a lot of exception arrives and to resolve it the catalog must be restarted. true problem not found
+
 class Telegram_Bot:
     """
     Telegram_Bot
@@ -16,9 +18,6 @@ class Telegram_Bot:
         self.conf = json.load(open("telegram_bot/setting.json"))
         self.tokenBot = self.conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
-
-        self.userConnected = False
-        self.grHselected = False
         
         MessageLoop(self.bot, {'chat': self.on_chat_message,
                                'callback_query' : self.on_callback_query}).run_as_thread()
@@ -29,6 +28,9 @@ class Telegram_Bot:
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
         #TODO: IDEA: taking the basic configuration from the catalog???
+        self.userConnected = False
+        self.grHselected = False
+
         self.user = {
             "usrID": "",
             "name": "",
@@ -64,7 +66,6 @@ class Telegram_Bot:
             parameters = message
             
             if len(parameters) == 1: 
-                
                 if  command == "/signup":
                     if self.userConnected == False:            
                         newUser = self.user.copy()
@@ -82,7 +83,6 @@ class Telegram_Bot:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
 
             if len(parameters) == 2:
-
                 if command == "/signin":
                     if self.userConnected == False:            
                         self.user["usrID"] = parameters[1]
@@ -102,6 +102,7 @@ class Telegram_Bot:
                                     self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse."
                                                                     "\n /addGreenhouse")
                                 else:
+                                    self.user["ghID"] = usr["ghID"]
                                     self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectGreenhouse")
                             else:
                                 self.bot.sendMessage(chat_ID, text=f"The name {self.user['name']} does not match\
@@ -111,25 +112,53 @@ class Telegram_Bot:
                         else:
                             self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} not found!")
                     else:
-
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
                         buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'signout_none_none'), 
                                     InlineKeyboardButton(text=f'No', callback_data=f'none_none_none')]]
                         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
                         self.bot.sendMessage(chat_ID, text=f"Do you want to log out and enter with another user?",
                                                         parse_mode='Markdown', reply_markup=keyboard)
+                        
+                elif command == "/addGreenhouse":
+                    if self.userConnected:
+                        self.greenhouse["usrID"] = self.user["usrID"]#FIXME: need to GET the usrID assigned from the catalog!!!
+                        self.greenhouse["devID"] = parameters[0]
+                        self.greenhouse["maxNumPlants"] = parameters[1]
+                        # TODO: check that maxNumPlants is <= number of plants sensors in device devID
+
+                        try:
+                            req = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
+                        except:
+                            raise Exception("The catalog web service is unreachable!")
+                        #TODO: check if devID already exist (must exist)
+
+                        self.bot.sendMessage(chat_ID, text=f"Greenhouse ... correctly added.")
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"User not connected."
+                                                        "\nTo add a greenhouse first you need to sign in with a user clicking on /start")
+
 
             elif len(parameters) == 3:
                 if self.userConnected == True:
                     if command == "/addPlant":
-                        if parameters[1] >= 0 and parameters[1] <= 1 and parameters[2] >= 0 and parameters[2] <= 1 and parameters[1] < parameters[2]:
-                            newPlant = {
-                                "plant": "",
-                                "th_min": 0,
-                                "th_max": 0
-                            }
-                            #TODO: fox salva la nuova pianta nel catalog
-                            
+                        if parameters[1].isnumeric() and parameters[2].isnumeric():
+                            parameters[1] = int(parameters[1])
+                            parameters[2] = int(parameters[2])
+                            if parameters[1] >= 0 and parameters[1] <= 100 and parameters[2] >= 0 and parameters[2] <= 100:
+                                if parameters[1] < parameters[2]:
+                                    newPlant = {
+                                        "plant": parameters[0],
+                                        "th_min": parameters[1],
+                                        "th_max": parameters[2]
+                                    }
+                                    #TODO: fox salva la nuova pianta nel catalog
+                                    self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} correctly added to the user database.")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text="Low humidity threshold cannot be higher than the high treshold."
+                                                                        "\nPlease reinsert the command.")
+                            else:
+                                self.bot.sendMessage(chat_ID, text="Humidity threshold number out of range."
+                                                                    "\nPlease reinsert the command.")
                         else:
                             self.bot.sendMessage(chat_ID, text="Humidity threshold format not correct."
                                                                 "\nPlease reinsert the command.")
@@ -156,7 +185,7 @@ class Telegram_Bot:
                     # 
                     elif message == "/addGrHousePlant":
                         self.bot.sendMessage(chat_ID, text="C'mon do something")
-
+                        
                 # Help message when the user is connected
                 if message == "/help": 
                     self.help(chat_ID)
@@ -165,25 +194,11 @@ class Telegram_Bot:
                 elif message == "/start": 
                     self.start(chat_ID)
                 
-                # When received this message a new empty greenhouse is istantly created
-                elif command == "/addGreenhouse":
-                    if self.userConnected:
-                        self.greenhouse["usrID"] = self.user["usrID"]#FIXME: need to GET the usrID assigned from the catalog!!!
-                        self.greenhouse["devID"] = parameters[0]
-                        self.greenhouse["maxNumPlants"] = parameters[1]
-                        # TODO: check that maxNumPlants is <= number of plants sensors in device devID
-
-                        try:
-                            req = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
-                        except:
-                            raise Exception("The catalog web service is unreachable!")
-                        #TODO: check if devID already exist (must exist)
-
-
-
-                        self.bot.sendMessage(chat_ID, text=f"Greenhouse ... correctly added.")
-                    else:
-                        self.bot.sendMessage(chat_ID, text=f"Sign in before adding a greenhouse!")
+                # Message for adding a new greenhouse
+                elif message == "/addGreenhouse":
+                    self.bot.sendMessage(chat_ID, text=f"To add a new greenhouse type the command:"
+                                                        "\n/addGreenhouse_devID_maxNumPlants"
+                                                        "\nWith devID as the identifier of the device connector of this specific greenhouse.")
 
                 # 
                 elif message == "/selectGreenhouse":
@@ -196,10 +211,16 @@ class Telegram_Bot:
                                                         "\nPlease write it in this way:"
                                                         "\n/addPlant_Name_lowHumidityTresh_highHumidityTresh"
                                                         "\nWhere the last two data are the level of humidity treshold in %"
-                                                        "\nThe humidity thresold are numbers that goes from 0 to 1")
-                
+                                                        "\nThe humidity thresold are numbers that goes from 0 to 100")
+                    
+                elif message == "/addGrHousePlant" or message == "/values" or message == "/plant" or message == "/irrigate" and self.grHselected == False:
+                    self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
+                                                        "\nPlease first select a greenhouse with /selectGreenhouse"
+                                                        "\nOr create a new one with /addGreenhouse")
+                        
                 elif message.startswith('/'):
                     self.bot.sendMessage(chat_ID, text="Command not supported")
+
                 else:
                     self.bot.sendMessage(chat_ID, text="Word/words not recognized. Please start with command /start")
             else:
@@ -213,7 +234,7 @@ class Telegram_Bot:
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                     
-                elif message == "/addPlant" or message == "/values" or message == "/plant" or message == "/irrigate":
+                elif message == "/addGrHousePlant" or message == "/values" or message == "/plant" or message == "/irrigate":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 else:
@@ -254,7 +275,7 @@ class Telegram_Bot:
             self.userConnected = False
             self.bot.sendMessage(chat_ID, text=f"User correctly signed out."
                                                 "\nPlease sign in with another user clicking on /start")
-        #TODO: help message with format when calling /addGreenhouse (/addGreenhouse_devID_maxNumPlants)
+
         elif action == 'none':
             pass
 
@@ -274,7 +295,7 @@ class Telegram_Bot:
                         "- /addGreenhouse: Add a new empty greenhouse\n")
             
         elif self.userConnected == True and self.grHselected == True:
-            help_message = ("*You can perform the following actions:*\n" #TODO: comandi help fatti un po a caso, sono tutti da decidere
+            help_message = ("*You can perform the following actions:*\n" #FIXME: comandi help da concludere
                         "- /status: Get info about the greenhouse\n"
                         "- /addGrHousePlant: Add new plant to the greenhouse\n"
                         "- /selectGreenhouse: Get ID info about your greenhouse\n"
