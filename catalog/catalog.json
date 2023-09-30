@@ -62,6 +62,16 @@
                     "name": "",
                     "th_min": "",
                     "th_max": ""
+                },
+                {
+                    "plant": "cactus",
+                    "th_min": 7,
+                    "th_max": 9
+                },
+                {
+                    "plant": "cactus",
+                    "th_min": 7,
+                    "th_max": 9
                 }
             ]
         },
@@ -88,5 +98,5 @@
         }
     ],
     "devices": [],
-    "lastUpdate": "2023-09-29 12:44:45"
+    "lastUpdate": "2023-09-30 19:35:08"
 }

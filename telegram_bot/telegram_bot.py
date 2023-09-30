@@ -151,8 +151,16 @@ class Telegram_Bot:
                                         "th_min": parameters[1],
                                         "th_max": parameters[2]
                                     }
-                                    #TODO: fox salva la nuova pianta nel catalog
-                                    self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} correctly added to the user database.")
+                                    try:
+                                        req = requests.post(self.addr_cat + f"/addPlant?usrID={self.user['usrID']}",
+                                                            data=json.dumps(newPlant))
+                                    except:
+                                        raise Exception("The catalog web service is unreachable!")
+                                    if req.ok:
+                                        self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} correctly added to the user database.")
+                                    else:
+                                        self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} has not been added to the user database!.")
+
                                 else:
                                     self.bot.sendMessage(chat_ID, text="Low humidity threshold cannot be higher than the high treshold."
                                                                         "\nPlease reinsert the command.")

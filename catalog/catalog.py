@@ -10,7 +10,7 @@ class catalog():
     -------
 
     """
-    #TODO: ID assigned dynamically
+    #TODO: check on the ID formats
     def __init__(self):
         self.catalogFile = "catalog/catalog.json" 
         self.plantDBFile = "catalog/plantsDatabase.json"
@@ -376,6 +376,17 @@ class REST_catalog(catalog):
                     print(f'\nGreenhouse {bodyAsDict["ghID"]} added successfully!') 
                 else:
                     raise cherrypy.HTTPError(400, f'Greenhouse {bodyAsDict["ghID"]} could not be added!')
+            
+            elif uri[0] == "addPlant":
+                if len(params.keys()) == 1 and params.get("usrID") != None:
+                    #NOTE: decidere se assegnare un ID alle piante
+                    ind_usr, found_usr = searchDict(self.catDic, "users", "usrID", params["usrID"],index=True)
+                    if found_usr and ind_usr is not None:
+                        self.catDic["users"][ind_usr]["ownedPlants"].append(bodyAsDict)
+                        self.saveJson()
+                        print(f"Plant added to user {params['usrID']}")
+                else:
+                    raise cherrypy.HTTPError(400, f'Invalid parameter! Format is /addPlant?usrID=')
             
 
     

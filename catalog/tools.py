@@ -1,11 +1,16 @@
-def searchDict(dict,key_lst, key, value):
+def searchDict(dict,key_lst, key, value, index=False):
         # Search a device given name or ID
         #TODO: possible to output different dictionaries associated to key
         found_dev = {}
-        for device in dict[key_lst]:
+        found_ind = None
+        for ind, device in enumerate(dict[key_lst]):
             if device[key] == value:
                 found_dev = device.copy()
-        return found_dev
+                found_ind = ind
+        if index == True:
+            return found_ind,found_dev
+        else:
+             return found_dev
 
 def generateID(id_lst):
     new_id = id_lst[-1] + 1
