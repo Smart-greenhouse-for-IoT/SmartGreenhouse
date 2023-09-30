@@ -26,6 +26,9 @@ class Telegram_Bot:
             "ip": self.conf["CatIP"],
             "port": self.conf["CatPort"]
         }
+        self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
+
+        #TODO: IDEA: taking the basic configuration from the catalog???
         self.user = {
             "usrID": "",
             "name": "",
@@ -33,6 +36,14 @@ class Telegram_Bot:
             "ownedPlants": [],
             "lastUpdate": ""
         } 
+        self.greenhouse = {
+            "ghID": "",
+            "devID": "",
+            "usrID": "",
+            "maxNumPlants": "",
+            "plantsList": [],
+            "lastUpdate": ""
+        }
                 
             
     def on_chat_message(self, msg): 
@@ -58,11 +69,9 @@ class Telegram_Bot:
                     if self.userConnected == False:            
                         newUser = self.user.copy()
                         newUser["name"] = parameters[0]
-
-                        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
                         
                         try:
-                            req = requests.post(addr + "/addUser", json.dumps(newUser))
+                            req = requests.post(self.addr_cat + "/addUser", json.dumps(newUser))
 
                         except:
                             raise Exception("The catalog web service is unreachable!")
@@ -79,9 +88,8 @@ class Telegram_Bot:
                         self.user["usrID"] = parameters[1]
                         self.user["name"] = parameters[0]
                         
-                        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + f"/user?usrID={self.user['usrID']}"
                         try:
-                            req = requests.get(addr)
+                            req = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}")
                         except:
                             raise Exception("The catalog web service is unreachable!")
 
@@ -158,8 +166,24 @@ class Telegram_Bot:
                     self.start(chat_ID)
                 
                 # When received this message a new empty greenhouse is istantly created
-                elif message == "/addGreenhouse":
-                    self.bot.sendMessage(chat_ID, text=f"Greenhouse ... correctly added.")
+                elif command == "/addGreenhouse":
+                    if self.userConnected:
+                        self.greenhouse["usrID"] = self.user["usrID"]#FIXME: need to GET the usrID assigned from the catalog!!!
+                        self.greenhouse["devID"] = parameters[0]
+                        self.greenhouse["maxNumPlants"] = parameters[1]
+                        # TODO: check that maxNumPlants is <= number of plants sensors in device devID
+
+                        try:
+                            req = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
+                        except:
+                            raise Exception("The catalog web service is unreachable!")
+                        #TODO: check if devID already exist (must exist)
+
+
+
+                        self.bot.sendMessage(chat_ID, text=f"Greenhouse ... correctly added.")
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"Sign in before adding a greenhouse!")
 
                 # 
                 elif message == "/selectGreenhouse":
@@ -230,7 +254,7 @@ class Telegram_Bot:
             self.userConnected = False
             self.bot.sendMessage(chat_ID, text=f"User correctly signed out."
                                                 "\nPlease sign in with another user clicking on /start")
-
+        #TODO: help message with format when calling /addGreenhouse (/addGreenhouse_devID_maxNumPlants)
         elif action == 'none':
             pass
 
@@ -252,7 +276,7 @@ class Telegram_Bot:
         elif self.userConnected == True and self.grHselected == True:
             help_message = ("*You can perform the following actions:*\n" #TODO: comandi help fatti un po a caso, sono tutti da decidere
                         "- /status: Get info about the greenhouse\n"
-                        "- /addGrHousePlant: Add new plant to the greenhouse\n" #TODO: decidere se si possono aggiungere piante nuove o se cerchiamo un database già fatto
+                        "- /addGrHousePlant: Add new plant to the greenhouse\n"
                         "- /selectGreenhouse: Get ID info about your greenhouse\n"
                         "- /plant: Get info about your plants\n"
                         "- /irrigate: Manually irrigate the selected plants\n")
