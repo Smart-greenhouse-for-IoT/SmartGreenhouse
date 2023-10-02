@@ -31,6 +31,7 @@ class Telegram_Bot:
         #TODO: IDEA: taking the basic configuration from the catalog???
         self.userConnected = False
         self.grHselected = False
+        self.plantSelected = False
 
         self.user = {
             "usrID": "",
@@ -39,6 +40,7 @@ class Telegram_Bot:
             "ownedPlants": [],
             "lastUpdate": ""
         } 
+
         self.greenhouse = {
             "ghID": "",
             "devID": "",
@@ -46,6 +48,12 @@ class Telegram_Bot:
             "maxNumPlants": "",
             "plantsList": [],
             "lastUpdate": ""
+        }
+
+        self.plant = {
+            "plant": "",
+            "th_min": "",
+            "th_max": ""
         }
                 
             
@@ -126,7 +134,7 @@ class Telegram_Bot:
                         self.greenhouse["usrID"] = self.user["usrID"]
                         self.greenhouse["devID"] = parameters[0]
                         self.greenhouse["maxNumPlants"] = parameters[1]
-                        # TODO: check that maxNumPlants is <= number of plants sensors in device devID (decidere se farlo o meno)
+                        #TODO: check that maxNumPlants is <= number of plants sensors in device devID (decidere se farlo o meno)
                         #TODO: controlla di non mettere un devID che è gia stato assegnato
                         try:
                             req_dev = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
@@ -200,17 +208,29 @@ class Telegram_Bot:
             if self.userConnected == True:
                 if self.grHselected == True:
                     # 
-                    if message == "/values":
+                    if message == "/status":
                         self.bot.sendMessage(chat_ID, text="C'mon do something")
                     # 
-                    elif message == "/plant":
+                    elif message == "/plants":
                         self.bot.sendMessage(chat_ID, text="C'mon do something")
                     # 
-                    elif message == "/irrigate":
+                    elif message == "/selectplant":
                         self.bot.sendMessage(chat_ID, text="C'mon do something")
                     # 
                     elif message == "/addgrhouseplant":
                         self.bot.sendMessage(chat_ID, text="C'mon do something")
+
+                    # If plant commands are received before a plant is selected send the proper error message
+                    elif message == "/plantstatus" or message == "/irrigate" and self.plantSelected == False :
+                        self.bot.sendMessage(chat_ID, text=f"Plant not selected."
+                                                            "\nPlease first select a plant with /selectplant")
+
+                    if self.plantSelected == True:
+                        if message == "/irrigate":
+                            self.bot.sendMessage(chat_ID, text="C'mon do something")
+                        # 
+                        elif message == "/plantstatus":
+                            self.bot.sendMessage(chat_ID, text="C'mon do something")
                         
                 # Help message when the user is connected
                 if message == "/help": 
@@ -233,6 +253,7 @@ class Telegram_Bot:
                     for i in self.user['ghID']:
                         self.bot.sendMessage(chat_ID, text=f"Greenhouse : /{i}")
 
+                # If the message is one of the greenhouse in the user list then is selected
                 elif message[1:] in self.user['ghID']:
                     self.bot.sendMessage(chat_ID, text=f"Greenhouse {message[1:]} selected")
                     self.grHselected = True
@@ -247,7 +268,13 @@ class Telegram_Bot:
                                                         "\nWhere the last two data are the level of humidity treshold in %"
                                                         "\nThe humidity thresold are numbers that goes from 0 to 100")
                     
-                elif message == "/addgrhouseplant" or message == "/values" or message == "/plant" or message == "/irrigate" and self.grHselected == False:
+                # If greenhouse or plant commands are received before a greenhouse is selected send the proper error message
+                elif message == "/addgrhouseplant" or message == "/status" or message == "/plants" and self.grHselected == False:
+                    self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
+                                                        "\nPlease first select a greenhouse with /selectgreenhouse"
+                                                        "\nOr create a new one with /addgreenhouse")
+                    
+                elif message == "/selectplant" or message == "/plantstatus" or message == "/irrigate" and self.grHselected == False :
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
@@ -268,7 +295,10 @@ class Telegram_Bot:
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                     
-                elif message == "/addgrhouseplant" or message == "/values" or message == "/plant" or message == "/irrigate":
+                elif message == "/addgrhouseplant" or message == "/status" or message == "/plants" or message == "/selectplant":
+                    self.bot.sendMessage(chat_ID, text=f"User not connected."
+                                                        "\nPlease first sign in with a user clicking on /start")
+                elif message == "/plantstatus" or message == "/irrigate" or message == "/selectplant":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 else:
@@ -323,14 +353,24 @@ class Telegram_Bot:
 
         if self.userConnected == True and self.grHselected == False:
             help_message = ("*You can perform the following actions:*\n" 
-                        "- /status: Get info about your greenhouses\n" #???
+                        "- /status: Get info about your greenhouses\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n")
             
-        elif self.userConnected == True and self.grHselected == True:
-            help_message = ("*You can perform the following actions:*\n" #FIXME: comandi help da concludere
-                        "- /status: Get info about your greenhouses\n" #???
+        elif self.userConnected == True and self.grHselected == True and self.plantSelected == False:
+            help_message = ("*You can perform the following actions:*\n" 
+                        "- /status: Get info about your greenhouses\n" 
+                        "- /addplant: Add new plant to the user database\n"
+                        "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
+                        "- /addgreenhouse: Add a new empty greenhouse\n"
+                        "- /addgrhouseplant: Add new plant to the greenhouse\n"
+                        "- /plants: Get the list of the plants of the selected greenhouse\n"
+                        "- /selectplant: Get the name of the selected greenhouse plants to select one\n")
+            
+        elif self.userConnected == True and self.grHselected == True and self.plantSelected == True:
+            help_message = ("*You can perform the following actions:*\n"
+                        "- /status: Get info about your greenhouses\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
