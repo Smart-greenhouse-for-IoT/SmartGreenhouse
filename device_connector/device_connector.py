@@ -9,6 +9,7 @@ import sys
 import time
 import datetime
 import paho.mqtt.client as PahoMQTT
+import cherrypy
 
 class Device_Connector(object):
     """
@@ -17,9 +18,12 @@ class Device_Connector(object):
         - get info from the catalog
         - 
     """
+    exposed = True
 
     def __init__(self, conf_path, device_path):
 
+        self.conf_file = conf_path
+        self.device_file = device_path
         # Opening the configuration files
         with open(conf_path) as f:
             self.cat_info = json.load(f)
@@ -28,6 +32,7 @@ class Device_Connector(object):
         with open(device_path) as f:
             self.mydevice = json.load(f)
         
+        self.myIP, self.myPort = self.webServiceInfo()
         # Read all the sensors in self.mydevice list
         # and initialize it all to start obtaining their values
         self.measures = []
@@ -110,13 +115,16 @@ class Device_Connector(object):
         """
 
         # Address of the catalog for adding the devices
-        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/addDevice"
+        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
         try:
             #POST the devices to the catalog
-            req = requests.post(addr, data=json.dumps(self.mydevice))
-            if req.status_code == 200:
+            req_dev = requests.post(addr + "/addDevice", data=json.dumps(self.mydevice))
+            req_id = requests.get(addr + "/device/recentID")
+            if req_dev.ok and req_id.ok:
                 print(f"Device {self.mydevice['devID']} added successfully!")
+                self.mydevice["devID"] = req_id.json()["devID"]
+                self.saveJson()
             else:
                 print(f"Device {self.mydevice['devID']} could not be added!")
         except:
@@ -135,7 +143,7 @@ class Device_Connector(object):
         try:
             #PUT the devices to the catalog
             req = requests.put(addr, data=json.dumps(self.mydevice))
-            if req.status_code == 200:
+            if req.ok:
                 print(f"Device {self.mydevice['devID']} updated successfully!")
             else:
                 print(f"Device {self.mydevice['devID']} could not be updated!")
@@ -218,7 +226,15 @@ class Device_Connector(object):
             else:
                 raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
 
-
+    def saveJson(self):
+        """
+        saveJson
+        --------
+        Used to save the catalog as a JSON file.
+        """
+        with open(self.device_file, 'w') as fw:
+            json.dump(self.mydevice, fw, indent=4)
+            return 0
 
     def loop(self, refresh_time = 10):
         """
@@ -252,13 +268,23 @@ class Device_Connector(object):
         except KeyboardInterrupt: #to kill the program
             print("Loop manually interrupted")
             pass
+    
+    def webServiceInfo(self):
+        ind = self.mydevice["endpoints"].index("REST")
+        ip = self.mydevice["endpoints_details"][ind]["ip"]
+        port = self.mydevice["endpoints_details"][ind]["port"] 
+        return ip, port
 
 
 if __name__=='__main__':
 
     dc = Device_Connector(
         conf_path = "device_connector/conf.json",
-        device_path = "device_connector/dev2.json"
+        device_path = "device_connector/devices.json"
         )
+    #TODO: webservice DC
+    #cherrypy.tree.mount(dc, '/', self._http_conf)
+    #cherrypy.config.update({'server.socket_host': self.getIP()})
+    #cherrypy.config.update({'server.socket_port': self.getPort()})
 
     dc.loop()

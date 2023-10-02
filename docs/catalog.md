@@ -19,7 +19,7 @@
     "greenhouses":[
         {
             "ghID":,
-            "devID":,
+            "devID": [],
             "usrID":,
             "maxNumPlants":,
             "plantsList": [

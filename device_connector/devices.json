@@ -1,6 +1,6 @@
 {
-    "devID": "d_001",
-    "ghID": "g_001",
+    "devID": "d1",
+    "ghID": "",
     "name": "raspberry1",
     "endpoints": [
         "REST",
@@ -9,7 +9,9 @@
     "endpoints_details": [
         {
             "endpoint": "REST",
-            "address": "http://127.0.0.1:8080"
+            "address": "http://127.0.0.1:8081",
+            "ip": "127.0.0.1",
+            "port": "8081"
         },
         {
             "endpoint": "MQTT",
@@ -26,8 +28,14 @@
                 "sensID": "s_001",
                 "devID": "d_001",
                 "pin": 1,
-                "measurementType": ["Temperature","Humidity"],
-                "units": ["Cel","RH"],
+                "measurementType": [
+                    "Temperature",
+                    "Humidity"
+                ],
+                "units": [
+                    "Cel",
+                    "RH"
+                ],
                 "available_services": [
                     "MQTT"
                 ],
@@ -36,7 +44,8 @@
                         "service_type": "MQTT",
                         "topic": [
                             "smartGreenhouse/d_001/s_001/temperature",
-                            "smartGreenhouse/d_001/s_001/humidity"]
+                            "smartGreenhouse/d_001/s_001/humidity"
+                        ]
                     }
                 ],
                 "lastUpdate": ""
@@ -54,7 +63,9 @@
                 "services_details": [
                     {
                         "service_type": "MQTT",
-                        "topic": ["smartGreenhouse/d_001/s_002/soil_moisture"]
+                        "topic": [
+                            "smartGreenhouse/d_001/s_002/soil_moisture"
+                        ]
                     }
                 ],
                 "lastUpdate": ""
@@ -72,7 +83,9 @@
                 "services_details": [
                     {
                         "service_type": "MQTT",
-                        "topic": ["smartGreenhouse/d_001/s_003/soil_moisture"]
+                        "topic": [
+                            "smartGreenhouse/d_001/s_003/soil_moisture"
+                        ]
                     }
                 ],
                 "lastUpdate": ""
@@ -90,11 +103,14 @@
                 "services_details": [
                     {
                         "service_type": "MQTT",
-                        "topic": ["smartGreenhouse/d_001/a_001"]
+                        "topic": [
+                            "smartGreenhouse/d_001/a_001"
+                        ]
                     }
                 ],
                 "lastUpdate": ""
-            },{
+            },
+            {
                 "device_name": "???",
                 "actID": "a_002",
                 "devID": "d_001",
@@ -105,7 +121,9 @@
                 "services_details": [
                     {
                         "service_type": "MQTT",
-                        "topic": ["smartGreenhouse/d_001/a_002"]
+                        "topic": [
+                            "smartGreenhouse/d_001/a_002"
+                        ]
                     }
                 ],
                 "lastUpdate": ""

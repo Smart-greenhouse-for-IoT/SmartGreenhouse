@@ -18,85 +18,8 @@
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
         "link": ""
     },
-    "greenhouses": [
-        {
-            "ghID": "g1",
-            "devID": "d1",
-            "usrID": "u1",
-            "numPlants": 2,
-            "plantsList": [
-                {
-                    "plantID": "p1",
-                    "type": "rosmarino"
-                },
-                {
-                    "plantID": "p2",
-                    "type": "basilico"
-                }
-            ],
-            "lastUpdate": ""
-        },
-        {
-            "ghID": "g2",
-            "devID": "d2",
-            "usrID": "u2",
-            "numPlants": 1,
-            "plantsList": [
-                {
-                    "plantID": "p1",
-                    "type": "rosmarino"
-                }
-            ],
-            "lastUpdate": ""
-        }
-    ],
-    "users": [
-        {
-            "usrID": "u1",
-            "name": "Federico",
-            "ghID": [
-                "g1"
-            ],
-            "ownedPlants": [
-                {
-                    "name": "",
-                    "th_min": "",
-                    "th_max": ""
-                },
-                {
-                    "plant": "cactus",
-                    "th_min": 7,
-                    "th_max": 9
-                },
-                {
-                    "plant": "cactus",
-                    "th_min": 7,
-                    "th_max": 9
-                }
-            ]
-        },
-        {
-            "usrID": "u5",
-            "name": "Alex",
-            "ghID": [],
-            "ownedPlants": [],
-            "lastUpdate": "2023-09-29 11:54:51"
-        },
-        {
-            "usrID": "u3",
-            "name": "Pippo",
-            "ghID": null,
-            "onwedPlants": null,
-            "lastUpdate": "2023-09-29 12:27:14"
-        },
-        {
-            "usrID": "u4",
-            "name": "jesus",
-            "ghID": "",
-            "ownedPlants": [],
-            "lastUpdate": "2023-09-29 12:44:45"
-        }
-    ],
+    "greenhouses": [],
+    "users": [],
     "devices": [],
-    "lastUpdate": "2023-09-30 19:35:08"
+    "lastUpdate": "2023-10-02 12:05:48"
 }
