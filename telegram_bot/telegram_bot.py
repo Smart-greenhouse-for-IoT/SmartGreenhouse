@@ -6,6 +6,7 @@ import requests
 import time
 
 #FIXME: sometimes a lot of exception arrives and to resolve it the catalog must be restarted. true problem not found
+#TODO: in /addGreenhouse fare in modo di poter mettere più devices (quindi piu parametri)
 
 class Telegram_Bot:
     """
@@ -34,7 +35,7 @@ class Telegram_Bot:
         self.user = {
             "usrID": "",
             "name": "",
-            "ghID": "",
+            "ghID": [],
             "ownedPlants": [],
             "lastUpdate": ""
         } 
@@ -66,6 +67,7 @@ class Telegram_Bot:
             parameters = message
             
             if len(parameters) == 1: 
+                #FIXME: signup ha bisogno solo del nome: rimuovere messaggio di errore
                 if  command == "/signup":
                     if self.userConnected == False:            
                         newUser = self.user.copy()
@@ -73,12 +75,13 @@ class Telegram_Bot:
                         
                         try:
                             req = requests.post(self.addr_cat + "/addUser", json.dumps(newUser))
-
+                            req_id = requests.get(self.addr_cat + "/user/recentID")
                         except:
                             raise Exception("The catalog web service is unreachable!")
                             
-                        self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} {parameters[1]} correctly created.")
-                        #FIXME: since the ID is assigned dynamically the user after signup does not know his own ID
+                        self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} correctly created.")
+                        self.bot.sendMessage(chat_ID, text=f"Your ID is {req_id.json()['usrID']}")
+                    
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
 
@@ -121,18 +124,34 @@ class Telegram_Bot:
                         
                 elif command == "/addgreenhouse":
                     if self.userConnected:
-                        self.greenhouse["usrID"] = self.user["usrID"]#FIXME: need to GET the usrID assigned from the catalog!!!
+                        self.greenhouse["usrID"] = self.user["usrID"]
                         self.greenhouse["devID"] = parameters[0]
                         self.greenhouse["maxNumPlants"] = parameters[1]
-                        # TODO: check that maxNumPlants is <= number of plants sensors in device devID
+                        # TODO: check that maxNumPlants is <= number of plants sensors in device devID (decidere se farlo o meno)
 
                         try:
-                            req = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
+                            req_dev = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
+                            if req_dev.ok:
+                                req_gh = requests.post(self.addr_cat + "/addGreenhouse", json.dumps(self.greenhouse))
+                                req_id = requests.get(self.addr_cat + "/greenhouse/recentID")
+                                self.greenhouse["ghID"] = req_id.json()["ghID"]
+                                # Update user and device adding the new greenhouse
+                                self.user["ghID"].append(self.greenhouse["ghID"])
+                                req_usr = requests.put(self.addr_cat + f"/updateUser", json.dumps(self.user))
+                                device = req_dev.json()
+                                device["ghID"] = self.greenhouse["ghID"]
+                                req_dev = requests.put(self.addr_cat + f"/updateDevice", json.dumps(device))
+                                
+                                if req_gh.ok and req_usr.ok:
+                                    self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} correctly added.")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} has not been added!")
+
+                            else:
+                                self.bot.sendMessage(chat_ID, text=f"The device {self.greenhouse['devID']} does not exist!")
                         except:
                             raise Exception("The catalog web service is unreachable!")
-                        #TODO: check if devID already exist (must exist)
-
-                        self.bot.sendMessage(chat_ID, text=f"Greenhouse ... correctly added.")
+                        
                     else:
                         self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nTo add a greenhouse first you need to sign in with a user clicking on /start")

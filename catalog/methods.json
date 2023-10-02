@@ -5,6 +5,7 @@
                 "device",
                 "device?devID=",
                 "device?name=",
+                "device/recentID",
                 "broker",
                 "catalogInfo",
                 "projectInfo",
@@ -21,7 +22,8 @@
                 "updateDevices",
                 "addDevice",
                 "addUser",
-                "addGreenhouse"
+                "addGreenhouse",
+                "addPlant?usrID="
             ]
         },
         {
