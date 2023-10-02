@@ -67,7 +67,6 @@ class Telegram_Bot:
             parameters = message
             
             if len(parameters) == 1: 
-                #FIXME: signup ha bisogno solo del nome: rimuovere messaggio di errore
                 if  command == "/signup":
                     if self.userConnected == False:            
                         newUser = self.user.copy()
@@ -85,7 +84,7 @@ class Telegram_Bot:
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
 
-            if len(parameters) == 2:
+            elif len(parameters) == 2:
                 if command == "/signin":
                     if self.userConnected == False:            
                         self.user["usrID"] = parameters[1]
@@ -103,10 +102,10 @@ class Telegram_Bot:
                                 self.userConnected = True
                                 if usr["ghID"] == []:
                                     self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse."
-                                                                    "\n /addGreenhouse")
+                                                                    "\n /addgreenhouse")
                                 else:
                                     self.user["ghID"] = usr["ghID"]
-                                    self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectGreenhouse")
+                                    self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectgreenhouse")
                             else:
                                 self.bot.sendMessage(chat_ID, text=f"The name {self.user['name']} does not match\
                                                                                         with the existing user!")
@@ -224,7 +223,7 @@ class Telegram_Bot:
                 # Message for adding a new greenhouse
                 elif message == "/addgreenhouse":
                     self.bot.sendMessage(chat_ID, text=f"To add a new greenhouse type the command:"
-                                                        "\n/addGreenhouse_devID_maxNumPlants"
+                                                        "\n/addgreenhouse_devID_maxNumPlants"
                                                         "\nWith devID as the identifier of the device connector of this specific greenhouse.")
 
                 # 
@@ -244,14 +243,14 @@ class Telegram_Bot:
                 elif message == "/addplant":
                     self.bot.sendMessage(chat_ID, text="Add a new plant to the user database."
                                                         "\nPlease write it in this way:"
-                                                        "\n/addPlant_Name_lowHumidityTresh_highHumidityTresh"
+                                                        "\n/addplant_Name_lowHumidityTresh_highHumidityTresh"
                                                         "\nWhere the last two data are the level of humidity treshold in %"
                                                         "\nThe humidity thresold are numbers that goes from 0 to 100")
                     
                 elif message == "/addgrhouseplant" or message == "/values" or message == "/plant" or message == "/irrigate" and self.grHselected == False:
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
-                                                        "\nPlease first select a greenhouse with /selectGreenhouse"
-                                                        "\nOr create a new one with /addGreenhouse")
+                                                        "\nPlease first select a greenhouse with /selectgreenhouse"
+                                                        "\nOr create a new one with /addgreenhouse")
                         
                 elif message.startswith('/'):
                     self.bot.sendMessage(chat_ID, text="Command not supported")
@@ -336,8 +335,10 @@ class Telegram_Bot:
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
                         "- /addgrhouseplant: Add new plant to the greenhouse\n"
-                        "- /plants: Get info about your plants\n"
-                        "- /irrigate: Manually irrigate the selected plants\n")
+                        "- /plants: Get the list of the plants of the selected greenhouse\n"
+                        "- /selectplant: Get the name of the selected greenhouse plants to select one\n"
+                        "- /irrigate: Manually irrigate the selected plants\n"
+                        "- /plantstatus: Get info about the selected plant\n")
         else:
             help_message = ("*Before doing anything please log in into your account*\n" 
                         "- /start: Sign in or sign up commands\n")

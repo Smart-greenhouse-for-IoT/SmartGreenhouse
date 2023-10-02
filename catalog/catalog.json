@@ -19,7 +19,15 @@
         "link": ""
     },
     "greenhouses": [],
-    "users": [],
+    "users": [
+        {
+            "usrID": "u1",
+            "name": "Ale",
+            "ghID": [],
+            "ownedPlants": [],
+            "lastUpdate": "2023-10-02 14:02:03"
+        }
+    ],
     "devices": [],
-    "lastUpdate": "2023-10-02 12:05:48"
+    "lastUpdate": "2023-10-02 14:02:03"
 }
