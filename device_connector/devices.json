@@ -1,6 +1,5 @@
 {
-    "devID": "d1",
-    "ghID": "",
+    "devID": "d4",
     "name": "raspberry1",
     "endpoints": [
         "REST",

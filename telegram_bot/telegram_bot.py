@@ -128,7 +128,7 @@ class Telegram_Bot:
                         self.greenhouse["devID"] = parameters[0]
                         self.greenhouse["maxNumPlants"] = parameters[1]
                         # TODO: check that maxNumPlants is <= number of plants sensors in device devID (decidere se farlo o meno)
-
+                        #TODO: controlla di non mettere un devID che è gia stato assegnato
                         try:
                             req_dev = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
                             if req_dev.ok:

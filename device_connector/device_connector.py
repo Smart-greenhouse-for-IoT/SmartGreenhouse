@@ -287,4 +287,4 @@ if __name__=='__main__':
     #cherrypy.config.update({'server.socket_host': self.getIP()})
     #cherrypy.config.update({'server.socket_port': self.getPort()})
 
-    dc.loop()
+    dc.loop(refresh_time=30)

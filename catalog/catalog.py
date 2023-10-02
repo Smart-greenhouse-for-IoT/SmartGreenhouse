@@ -4,6 +4,7 @@ from datetime import datetime
 import time
 from tools import searchDict, generateID
 
+#TODO: ghID viene aggiunta in fondo, cercare un modo per cambiare posizione
 class catalog():
     """
     Catalog
@@ -424,6 +425,7 @@ class REST_catalog(catalog):
         bodyAsDict = json.loads(bodyAsStr)
         if len(uri) >= 1:
             if uri[0] == "updateDevice":
+                #TODO: quando il DC manda update sovrascrive i campi di ghID
                 if self.updateDevice(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nDevice {bodyAsDict["devID"]} updated successfully')
@@ -434,7 +436,7 @@ class REST_catalog(catalog):
             if uri[0] == "updateUser":
                 if self.updateUser(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nUser {bodyAsDict["usrID"]} updated successfully')
+                    print(f'\nUser {bodyAsDict["usrID"]} updated successfully')
                 else:
                     print('User {bodyAsDict["devID"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The user could not be updated!")
@@ -480,6 +482,6 @@ if __name__ == "__main__":
     cherrypy.tree.mount(webService,'/',conf)
     cherrypy.engine.start()
     try:
-        webService.cleaning(timeout=15)
+        webService.cleaning(timeout=160)
     except KeyboardInterrupt:
         cherrypy.engine.block()
