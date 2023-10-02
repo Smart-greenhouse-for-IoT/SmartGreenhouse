@@ -68,6 +68,8 @@ class Telegram_Bot:
         #if chat_ID not in self.chatIDs:   # this line maybe is needed for security????
         #    self.chatIDs.append(chat_ID)
         message = msg['text']
+        # Used to not print wrong commands
+        done = False
 
         if (message.find('_')>0): #This mean that i have the information that the command is carrying
             message = message.split('_')
@@ -91,6 +93,22 @@ class Telegram_Bot:
                     
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
+                
+                elif command == "/addgrhouseplant": 
+                    if self.userConnected == True:
+                        if self.grHselected == True:
+                            # in param[0] there is the plant name
+                            # TODO: FOX qua bisogna controllare che la pianta esista nel database, se esiste aggiungila alla serra selezionata
+                            pass
+                        else:
+                            self.bot.sendMessage(chat_ID, text=f"Greenhouse not selected."
+                                                        "\nPlease first select a greenhouse with /selectgreenhouse"
+                                                        "\nOr create a new one with /addgreenhouse")
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"User not connected."
+                                                "\nTo add a greenhouse plant, first you need to sign in with a user clicking on /start")
+                else:
+                    self.bot.sendMessage(chat_ID, text=f"Number of parameters for command {command} not correct!")
 
             elif len(parameters) == 2:
                 if command == "/signin":
@@ -123,8 +141,8 @@ class Telegram_Bot:
                             self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} not found!")
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
-                        buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'signout_none_none'), 
-                                    InlineKeyboardButton(text=f'No', callback_data=f'none_none_none')]]
+                        buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'signout'), 
+                                    InlineKeyboardButton(text=f'No', callback_data=f'none')]]
                         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
                         self.bot.sendMessage(chat_ID, text=f"Do you want to log out and enter with another user?",
                                                         parse_mode='Markdown', reply_markup=keyboard)
@@ -161,10 +179,12 @@ class Telegram_Bot:
                         
                     else:
                         self.bot.sendMessage(chat_ID, text=f"User not connected."
-                                                        "\nTo add a greenhouse first you need to sign in with a user clicking on /start")
-
+                                                        "\nTo add a greenhouse, first you need to sign in with a user clicking on /start")
+                else:
+                    self.bot.sendMessage(chat_ID, text=f"Number of parameters for command {command} not correct!")
 
             elif len(parameters) == 3:
+                # Check if the user is correctly connected
                 if self.userConnected == True:
                     if command == "/addplant":
                         if parameters[1].isnumeric() and parameters[2].isnumeric():
@@ -196,7 +216,8 @@ class Telegram_Bot:
                         else:
                             self.bot.sendMessage(chat_ID, text="Humidity threshold format not correct."
                                                                 "\nPlease reinsert the command.")
-
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"Number of parameters for command {command} not correct!")
                 else:
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
@@ -204,32 +225,67 @@ class Telegram_Bot:
                 self.bot.sendMessage(chat_ID, text=f"Number of parameters for command {command} not correct!")
 
         else:
-            
             if self.userConnected == True:
                 if self.grHselected == True:
-                    # 
+                    # Check the status of the selected greenhouse, including: humidity, temperature and number of plants
                     if message == "/status":
-                        self.bot.sendMessage(chat_ID, text="C'mon do something")
-                    # 
+                        done = True
+                        #TODO: FOX qui bisogna prendere le informazioni di temperatura e umidità più recenti dal catalog.
+                        self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
+                                                    f"\nNumber of plants: {len(self.greenhouse['plantsList'])}"
+                                                    "\nIf you want the list of the plants of this greenhouse click /plants")
+                        
+                    # Check and print all the plant list of the selected greenhouse
                     elif message == "/plants":
-                        self.bot.sendMessage(chat_ID, text="C'mon do something")
-                    # 
+                        done = True
+                        if len(self.greenhouse['plantsList']) > 0:
+                            self.bot.sendMessage(chat_ID, text=f"The list of plants of greenhouse {self.greenhouse['ghID']} is:")
+                            for i in self.greenhouse['plantsList']:
+                                self.bot.sendMessage(chat_ID, text=f"/{i}")
+                        else:
+                            self.bot.sendMessage(chat_ID, text=f"There are no plants in greenhouse {self.greenhouse['ghID']}"
+                                                                "\nTo add a plant click on /addgrhouseplant")
+
+                    # Inform the user how to obtain all the name of the plants of the selected greenhouse
                     elif message == "/selectplant":
-                        self.bot.sendMessage(chat_ID, text="C'mon do something")
-                    # 
+                        done = True
+                        self.bot.sendMessage(chat_ID, text="If you want to select a specific plant obtain the greenhouse list with /plants")
+
+                    # If we have a greenhouse selected and we receive a command message of a plant present in this greenhouse, then this plant is selected
+                    elif message[1:] in self.greenhouse['plantsList']:
+                        done = True
+                        self.bot.sendMessage(chat_ID, text=f"{message[1:]} plant selected")
+                        self.plantSelected = True
+                        self.plantSelected["plant"] = message[1:]
+                        #TODO: FOX ottieni le info della pianta selezionata
+
+                    # Inform the user to the complete command to add a plant to the greenhouse
                     elif message == "/addgrhouseplant":
-                        self.bot.sendMessage(chat_ID, text="C'mon do something")
+                        done = True
+                        self.bot.sendMessage(chat_ID, text="To add a plant to the greenhouse write:"
+                                                        "\n/addgrhouseplant_NameOfThePlant")
+                        text = ("Do you want the list of the user plants?")
+                        buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'plants'), 
+                                    InlineKeyboardButton(text=f'No', callback_data=f'none')]]
+                        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+                        self.bot.sendMessage(chat_ID, text=text, parse_mode='Markdown', reply_markup=keyboard)
 
                     # If plant commands are received before a plant is selected send the proper error message
-                    elif message == "/plantstatus" or message == "/irrigate" and self.plantSelected == False :
+                    elif (message == "/plantstatus" or message == "/irrigate") and not self.plantSelected:
+                        done = True
                         self.bot.sendMessage(chat_ID, text=f"Plant not selected."
                                                             "\nPlease first select a plant with /selectplant")
-
+                        
+                    # If a plant is selected then other commands are unlocked
                     if self.plantSelected == True:
+                        # Manually activate the irrigation on the selected plant
                         if message == "/irrigate":
+                            done = True
                             self.bot.sendMessage(chat_ID, text="C'mon do something")
-                        # 
+                        
+                        # Obtain the plant information like its humidity treshold (low and high) and the last moisture level measured
                         elif message == "/plantstatus":
+                            done = True
                             self.bot.sendMessage(chat_ID, text="C'mon do something")
                         
                 # Help message when the user is connected
@@ -246,8 +302,9 @@ class Telegram_Bot:
                                                         "\n/addgreenhouse_devID_maxNumPlants"
                                                         "\nWith devID as the identifier of the device connector of this specific greenhouse.")
 
-                # 
+                # If present print of all the greenhouse of the user selected
                 elif message == "/selectgreenhouse":
+                    self.plantSelected = False
                     self.bot.sendMessage(chat_ID, text=f"{self.user['name']} you have {len(self.user['ghID'])} greenhouses."
                                                         "\nWhich one do you want to select?")
                     for i in self.user['ghID']:
@@ -276,20 +333,20 @@ class Telegram_Bot:
                                                         "\nThe humidity thresold are numbers that goes from 0 to 100")
                     
                 # If greenhouse or plant commands are received before a greenhouse is selected send the proper error message
-                elif message == "/addgrhouseplant" or message == "/status" or message == "/plants" and self.grHselected == False:
+                elif (message == "/addgrhouseplant" or message == "/status" or message == "/plants") and not self.grHselected:
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
                     
-                elif message == "/selectplant" or message == "/plantstatus" or message == "/irrigate" and self.grHselected == False :
+                elif (message == "/selectplant" or message == "/plantstatus" or message == "/irrigate") and not self.grHselected:
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
                         
-                elif message.startswith('/'):
+                elif message.startswith('/') and not done:
                     self.bot.sendMessage(chat_ID, text="Command not supported")
 
-                else:
+                elif not done:
                     self.bot.sendMessage(chat_ID, text="Word/words not recognized. Please start with command /start")
             else:
                 if message == "/help": 
@@ -308,6 +365,8 @@ class Telegram_Bot:
                 elif message == "/plantstatus" or message == "/irrigate" or message == "/selectplant":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
+                elif message.startswith('/'):
+                    self.bot.sendMessage(chat_ID, text="Command not supported")
                 else:
                     self.bot.sendMessage(chat_ID, text="Word/words not recognized. Please start with command /start")
             
@@ -319,36 +378,33 @@ class Telegram_Bot:
             - it will elaborate the information when a button is pressed
         """
         
-        query_ID, chat_ID, query_data = telepot.glance(msg, flavor='callback_query') #query_data is the callback data write in the buttons
-        action, place, doing = query_data.split('_')
+        query_ID, chat_ID, action = telepot.glance(msg, flavor='callback_query') #query_data is the callback data write in the buttons
 
-        if action == 'Add': # Action of adding something to the catalog
-            if place == 'Plant':
-                pass
-
-            elif place == 'User': # Adding a new user to the catalog
-                if doing == "True":
-                    text_Add = ("To sign up write it in this way:\n"
-                                "/signup_Name \n")
-                    self.bot.sendMessage(chat_ID, text=text_Add)
-                elif doing == "False":
-                    self.bot.sendMessage(chat_ID, text=f"User not added, please repeat the command.")
-            
-            else:
-                pass
+        if action == 'signin': 
+            self.bot.sendMessage(chat_ID, text="To sign up write it in this way:\n"
+                                                "/signup_Name \n")
+        
+        # When the signin button is pressed 
         elif action == 'signin':
+            self.bot.sendMessage(chat_ID, text="To sign in into your account write it in this way:\n"
+                                                "/signin_Name_ID \n")
 
-            text_Add = ("To sign in into your account write it in this way:\n"
-                            "/signin_Name_ID \n")
-            self.bot.sendMessage(chat_ID, text=text_Add)
-
+        # If the user will signout then all the previous selection must be setted to false
         elif action == 'signout':
             self.userConnected = False
+            self.grHselected = False
+            self.plantSelected = False
             self.bot.sendMessage(chat_ID, text=f"User correctly signed out."
                                                 "\nPlease sign in with another user clicking on /start")
+        
+        # If the user does not remember which plant have in its database they can be all printed
+        elif action == 'plants':
+            #TODO: FOX qui c'è bisogno di stampare tutte le piante di questo user
+            self.bot.sendMessage(chat_ID, text=f"Plant list:")
 
+        # When 'No' buttons are clicked
         elif action == 'none':
-            pass
+            self.bot.sendMessage(chat_ID, text=f"No action done")
 
 
     def help(self, chat_ID):
@@ -367,7 +423,7 @@ class Telegram_Bot:
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == False:
             help_message = ("*You can perform the following actions:*\n" 
-                        "- /status: Get info about your greenhouses\n" 
+                        "- /status: Get info about your greenhouse\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
@@ -377,7 +433,7 @@ class Telegram_Bot:
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == True:
             help_message = ("*You can perform the following actions:*\n"
-                        "- /status: Get info about your greenhouses\n" 
+                        "- /status: Get info about your greenhouse\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
@@ -410,8 +466,8 @@ class Telegram_Bot:
             message = ("Welcome to the SmartGreenHouse bot 🌱"
                             "\nHere you will able to manage your plants and greenhouses."
                             "\nPlease start with the registration or log in.")
-            buttons = [[InlineKeyboardButton(text=f'Sign up', callback_data=f'Add_User_True'), 
-                        InlineKeyboardButton(text=f'Sign in', callback_data=f'signin_none_none')]]
+            buttons = [[InlineKeyboardButton(text=f'Sign up', callback_data=f'signup'), 
+                        InlineKeyboardButton(text=f'Sign in', callback_data=f'signin')]]
             keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
             self.bot.sendMessage(chat_ID, text=message,
                         parse_mode='Markdown', reply_markup=keyboard)

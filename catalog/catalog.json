@@ -41,7 +41,7 @@
     ],
     "devices": [
         {
-            "devID": "d1",
+            "devID": "d2",
             "name": "raspberry1",
             "endpoints": [
                 "REST",
@@ -171,9 +171,8 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-02 18:25:11",
-            "ghID": "g1"
+            "lastUpdate": "2023-10-02 21:34:06"
         }
     ],
-    "lastUpdate": "2023-10-02 18:25:11"
+    "lastUpdate": "2023-10-02 21:34:06"
 }
