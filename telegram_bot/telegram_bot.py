@@ -258,7 +258,14 @@ class Telegram_Bot:
                     self.bot.sendMessage(chat_ID, text=f"Greenhouse {message[1:]} selected")
                     self.grHselected = True
                     self.greenhouse["ghID"] = message[1:]
-                    #TODO: FOX prendi tutte le informazioni di questa greenhouse selezionata
+                    try:
+                        req = requests.get(self.addr_cat + f"/greenhouse?ghID={self.greenhouse['ghID']}")
+                    except:
+                        raise Exception("The catalog web service is unreachable!")
+                    if req.ok:
+                        self.greenhouse = req.json()
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"An error occured when selecting greenhouse {self.greenhouse['ghID']}!")
                     
                 # Used to specify the correct command to add a new plant to the user database
                 elif message == "/addplant":
