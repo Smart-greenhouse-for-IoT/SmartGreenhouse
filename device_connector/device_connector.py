@@ -2,14 +2,16 @@
 
 import requests
 import json
-from sub.MyMQTT import *
-from device_sensors.dht11 import *
-from device_sensors.chirp import *
 import sys
 import time
 import datetime
 import paho.mqtt.client as PahoMQTT
 import cherrypy
+
+from sub.MyMQTT import *
+from device_sensors.dht11 import *
+from device_sensors.chirp import *
+from device_sensors.actuator import *
 
 class Device_Connector(object):
     """
@@ -60,14 +62,23 @@ class Device_Connector(object):
                 
         
         # At the start the program does not know wich actuators have
-        for actuators in self.mydevice['resources']['actuators']:
-            pass
+        # Also for the actuators, each actuator will be appended as an object
+        count = 0
+        self.actuator_index = {}
+        self.actuator_list = []
+        for act in self.mydevice['resources']['actuators']:
+            if act['device_name'] == "actuator":
+                self.actuator_index[str(act["actID"])] = count
+                count += 1
+
+                actuator_conf = act.copy()
+                self.actuator_list.append(actuator(actuator_conf))
         
         # Register to catalog
         self.registerToCat()
 
-        ###############################
-        ### MQTT client
+        ########################################
+        # MQTT client
         # Obtaining the broker information
         self.broker_dict = self.get_broker()
         
@@ -88,10 +99,29 @@ class Device_Connector(object):
         Where we receive the topic which we are subscribed (plant control microservices)
         """
 
-        self.actuation = json.load(payload)
-        if self.actuation["action"] == True:
-            pass
-            #TODO: start irrigation
+        message = json.load(payload)
+        # Iteration over all the actuator to find the one of the topic
+        for actuator in self.mydevice["resources"]["actuators"]:
+            # Check if the actuator have a topic where public the measure
+            if "MQTT" in actuator["available_services"]:
+                services = actuator["services_details"][0]
+                if services["service_type"] == "MQTT":
+                    # Obtain the topic list of this actuator
+                    topic_list = services["topic"]
+
+                    # If this is the correct actuator then
+                    if topic in topic_list:
+                        #TODO: maybe with the communication the actuator is already on, so check if it is already on
+                        # Start the actuation
+                        if message['command'] == 'start':
+                            self.actuator_list[self.actuator_index[actuator["actID"]]].start()
+                        # Stop the actuation
+                        elif message['command'] == 'stop':
+                            self.actuator_list[self.actuator_index[actuator["actID"]]].start()
+                else:
+                    raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
+            else:
+                raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
 
     def subscribe(self):
         """
@@ -207,7 +237,6 @@ class Device_Connector(object):
 
         # Iteration over all the sensor device to publish on their topic 
         for sensor in self.mydevice["resources"]["sensors"]:
-
             # Check if the sensor have a topic where public the measure
             if "MQTT" in sensor["available_services"]:
                 measure_list = self.measures[self.sensor_index[sensor["sensID"]]]
