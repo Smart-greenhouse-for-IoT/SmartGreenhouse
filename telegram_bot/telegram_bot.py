@@ -97,9 +97,23 @@ class Telegram_Bot:
                 elif command == "/addgrhouseplant": 
                     if self.userConnected == True:
                         if self.grHselected == True:
-                            # in param[0] there is the plant name
-                            # TODO: FOX qua bisogna controllare che la pianta esista nel database, se esiste aggiungila alla serra selezionata
-                            pass
+                            plant_name = parameters[0]
+                            try:
+                                req_plant = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}&plant={plant_name}")
+                            except:
+                                raise Exception("The catalog web service is unreachable!")
+                            if req_plant.ok:
+                                plant = req_plant.json()
+                                self.greenhouse["plantsList"].append(plant)
+                                try:
+                                    req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
+                                    self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added"
+                                                          f"to greenhouse {self.greenhouse['ghID']}")
+                                except:
+                                    raise Exception("The catalog web service is unreachable!")
+                            else:
+                                self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
+
                         else:
                             self.bot.sendMessage(chat_ID, text=f"Greenhouse not selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
@@ -193,7 +207,7 @@ class Telegram_Bot:
                             if parameters[1] >= 0 and parameters[1] <= 100 and parameters[2] >= 0 and parameters[2] <= 100:
                                 if parameters[1] < parameters[2]:
                                     newPlant = {
-                                        "plant": parameters[0],
+                                        "plant": parameters[0].lower(),
                                         "th_min": parameters[1],
                                         "th_max": parameters[2]
                                     }
