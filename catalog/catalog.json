@@ -25,16 +25,20 @@
             "usrID": "u1",
             "maxNumPlants": "2",
             "plantsList": [
-                [
-                    {
-                        "plant": "cardo",
-                        "th_min": 10,
-                        "th_max": 90
-                    },
-                    "2"
-                ]
+                {
+                    "plant": "cardo",
+                    "th_min": 10,
+                    "th_max": 90,
+                    "sensID": "s1",
+                    "actID": "a1"
+                },
+                {
+                    "plant": "pomodoro",
+                    "th_min": 10,
+                    "th_max": 90
+                }
             ],
-            "lastUpdate": "2023-10-04 14:08:15"
+            "lastUpdate": "2023-10-04 17:12:38"
         }
     ],
     "users": [
@@ -61,7 +65,7 @@
     ],
     "devices": [
         {
-            "devID": "d3",
+            "devID": "d2",
             "name": "raspberry1",
             "endpoints": [
                 "REST",
@@ -78,7 +82,7 @@
                     "endpoint": "MQTT",
                     "bn": "RaspberryPi3_2",
                     "topic": [
-                        "smartGreenhouse/d_001"
+                        "smartGreenhouse/d1"
                     ]
                 }
             ],
@@ -86,8 +90,7 @@
                 "sensors": [
                     {
                         "device_name": "DHT11",
-                        "sensID": "s_001",
-                        "devID": "d_001",
+                        "sensID": "s1",
                         "pin": 1,
                         "measurementType": [
                             "Temperature",
@@ -104,17 +107,16 @@
                             {
                                 "service_type": "MQTT",
                                 "topic": [
-                                    "smartGreenhouse/d_001/s_001/temperature",
-                                    "smartGreenhouse/d_001/s_001/humidity"
+                                    "smartGreenhouse/d1/s1/temperature",
+                                    "smartGreenhouse/d1/s1/humidity"
                                 ]
                             }
                         ],
-                        "lastUpdate": ""
+                        "lastUpdate": "2023-10-02 18:15:45"
                     },
                     {
                         "device_name": "chirp",
-                        "sensID": "s_002",
-                        "devID": "d_001",
+                        "sensID": "s2",
                         "pin": 2,
                         "measurementType": "Moisture",
                         "units": "%",
@@ -125,16 +127,15 @@
                             {
                                 "service_type": "MQTT",
                                 "topic": [
-                                    "smartGreenhouse/d_001/s_002/soil_moisture"
+                                    "smartGreenhouse/d1/s2/soil_moisture"
                                 ]
                             }
                         ],
-                        "lastUpdate": ""
+                        "lastUpdate": "2023-10-02 18:15:45"
                     },
                     {
                         "device_name": "chirp",
-                        "sensID": "s_003",
-                        "devID": "d_001",
+                        "sensID": "s3",
                         "pin": 3,
                         "measurementType": "Moisture",
                         "units": "%",
@@ -145,19 +146,75 @@
                             {
                                 "service_type": "MQTT",
                                 "topic": [
-                                    "smartGreenhouse/d_001/s_003/soil_moisture"
+                                    "smartGreenhouse/d1/s3/soil_moisture"
                                 ]
                             }
                         ],
-                        "lastUpdate": ""
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "chirp",
+                        "sensID": "s4",
+                        "pin": 4,
+                        "measurementType": "Moisture",
+                        "units": "%",
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/s4/soil_moisture"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "chirp",
+                        "sensID": "s5",
+                        "pin": 5,
+                        "measurementType": "Moisture",
+                        "units": "%",
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/s5/soil_moisture"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "chirp",
+                        "sensID": "s6",
+                        "pin": 6,
+                        "measurementType": "Moisture",
+                        "units": "%",
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/s6/soil_moisture"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
                     }
                 ],
                 "actuators": [
                     {
-                        "device_name": "???",
-                        "actID": "a_001",
-                        "devID": "d_001",
-                        "pin": 18,
+                        "device_name": "actuator",
+                        "actID": "a1",
+                        "pin": 7,
                         "available_services": [
                             "MQTT"
                         ],
@@ -165,17 +222,16 @@
                             {
                                 "service_type": "MQTT",
                                 "topic": [
-                                    "smartGreenhouse/d_001/a_001"
+                                    "smartGreenhouse/d1/a1"
                                 ]
                             }
                         ],
-                        "lastUpdate": ""
+                        "lastUpdate": "2023-10-02 18:15:45"
                     },
                     {
-                        "device_name": "???",
-                        "actID": "a_002",
-                        "devID": "d_001",
-                        "pin": 19,
+                        "device_name": "actuator",
+                        "actID": "a2",
+                        "pin": 8,
                         "available_services": [
                             "MQTT"
                         ],
@@ -183,16 +239,84 @@
                             {
                                 "service_type": "MQTT",
                                 "topic": [
-                                    "smartGreenhouse/d_001/a_002"
+                                    "smartGreenhouse/d1/a2"
                                 ]
                             }
                         ],
-                        "lastUpdate": ""
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "actuator",
+                        "actID": "a3",
+                        "pin": 9,
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/a3"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "actuator",
+                        "actID": "a4",
+                        "pin": 10,
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/a4"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "actuator",
+                        "actID": "a5",
+                        "pin": 11,
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/a5"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
+                    },
+                    {
+                        "device_name": "actuator",
+                        "actID": "a6",
+                        "pin": 12,
+                        "available_services": [
+                            "MQTT"
+                        ],
+                        "services_details": [
+                            {
+                                "service_type": "MQTT",
+                                "topic": [
+                                    "smartGreenhouse/d1/a6"
+                                ]
+                            }
+                        ],
+                        "lastUpdate": "2023-10-02 18:15:45"
                     }
                 ]
             },
-            "lastUpdate": "2023-10-04 14:38:34"
+            "lastUpdate": "2023-10-04 17:22:45"
         }
     ],
-    "lastUpdate": "2023-10-04 14:38:34"
+    "lastUpdate": "2023-10-04 17:22:45"
 }

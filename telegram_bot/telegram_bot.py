@@ -5,6 +5,8 @@ import json
 import requests
 import time
 
+from tools import searchDict
+
 #FIXME: sometimes a lot of exception arrives and to resolve it the catalog must be restarted. true problem not found
 #TODO: in /addGreenhouse fare in modo di poter mettere più devices (quindi piu parametri)
 
@@ -98,21 +100,27 @@ class Telegram_Bot:
                     if self.userConnected == True:
                         if self.grHselected == True:
                             plant_name = parameters[0]
-                            try:
-                                req_plant = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}&plant={plant_name}")
-                            except:
-                                raise Exception("The catalog web service is unreachable!")
-                            if req_plant.ok:
-                                plant = req_plant.json()
-                                self.greenhouse["plantsList"].append(plant)
+                            # Check if the maximum number of plant has not been exceeded
+                            if len(self.greenhouse["plantsList"]) < int(self.greenhouse["maxNumPlants"]):
                                 try:
-                                    req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
-                                    self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added"
-                                                          f"to greenhouse {self.greenhouse['ghID']}")
+                                    req_plant = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}&plant={plant_name}")
                                 except:
                                     raise Exception("The catalog web service is unreachable!")
+                                
+                                if req_plant.ok:
+                                    plant = req_plant.json()
+                                    self.greenhouse["plantsList"].append(plant)
+                                    try:
+                                        req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
+                                        self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added"
+                                                            f"to greenhouse {self.greenhouse['ghID']}")
+                                    except:
+                                        raise Exception("The catalog web service is unreachable!")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
                             else:
-                                self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
+                                self.bot.sendMessage(chat_ID, text=f"{self.greenhouse['devID']} in greenhouse {self.greenhouse['ghID']}"
+                                                                    " has no more sensors and actuators available!")
 
                         else:
                             self.bot.sendMessage(chat_ID, text=f"Greenhouse not selected."
@@ -121,6 +129,42 @@ class Telegram_Bot:
                     else:
                         self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                 "\nTo add a greenhouse plant, first you need to sign in with a user clicking on /start")
+                        
+                elif command == "/addgreenhouse":
+                    if self.userConnected:
+                        self.greenhouse["usrID"] = self.user["usrID"]
+                        self.greenhouse["devID"] = parameters[0]
+                        #TODO: FOX qui bisogna prendere le info del device utilizzato, perché self.greenhouse["maxNumPlants"] = len(self.device["resources"]["sensors"]) -1
+                        # self.greenhouse["maxNumPlants"] = 
+                        #TODO: controlla di non mettere un devID che è gia stato assegnato
+                        try:
+                            req_dev = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
+                            if req_dev.ok:
+                                req_gh = requests.post(self.addr_cat + "/addGreenhouse", json.dumps(self.greenhouse))
+                                req_id = requests.get(self.addr_cat + "/greenhouse/recentID")
+                                self.greenhouse["ghID"] = req_id.json()["ghID"]
+                                # Update user and device adding the new greenhouse
+                                self.user["ghID"].append(self.greenhouse["ghID"])
+                                req_usr = requests.put(self.addr_cat + f"/updateUser", json.dumps(self.user))
+                                device = req_dev.json()
+                                device["ghID"] = self.greenhouse["ghID"]
+                                req_dev = requests.put(self.addr_cat + f"/updateDevice", json.dumps(device))
+                                
+                                if req_gh.ok and req_usr.ok:
+                                    self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} correctly added."
+                                                                        f"\n With DC {self.greenhouse['devID']} a max of {self.greenhouse['maxNumPlants']}"
+                                                                        " different plants can be placed into the greenhouse.")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} has not been added!")
+
+                            else:
+                                self.bot.sendMessage(chat_ID, text=f"The device {self.greenhouse['devID']} does not exist!")
+                        except:
+                            raise Exception("The catalog web service is unreachable!")
+                        
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"User not connected."
+                                                        "\nTo add a greenhouse, first you need to sign in with a user clicking on /start")
                 else:
                     self.bot.sendMessage(chat_ID, text=f"Number of parameters for command {command} not correct!")
 
@@ -161,39 +205,6 @@ class Telegram_Bot:
                         self.bot.sendMessage(chat_ID, text=f"Do you want to log out and enter with another user?",
                                                         parse_mode='Markdown', reply_markup=keyboard)
                         
-                elif command == "/addgreenhouse":
-                    if self.userConnected:
-                        self.greenhouse["usrID"] = self.user["usrID"]
-                        self.greenhouse["devID"] = parameters[0]
-                        self.greenhouse["maxNumPlants"] = parameters[1]
-                        #TODO: check that maxNumPlants is <= number of plants sensors in device devID (decidere se farlo o meno)
-                        #TODO: controlla di non mettere un devID che è gia stato assegnato
-                        try:
-                            req_dev = requests.get(self.addr_cat + f"/device?devID={self.greenhouse['devID']}")
-                            if req_dev.ok:
-                                req_gh = requests.post(self.addr_cat + "/addGreenhouse", json.dumps(self.greenhouse))
-                                req_id = requests.get(self.addr_cat + "/greenhouse/recentID")
-                                self.greenhouse["ghID"] = req_id.json()["ghID"]
-                                # Update user and device adding the new greenhouse
-                                self.user["ghID"].append(self.greenhouse["ghID"])
-                                req_usr = requests.put(self.addr_cat + f"/updateUser", json.dumps(self.user))
-                                device = req_dev.json()
-                                device["ghID"] = self.greenhouse["ghID"]
-                                req_dev = requests.put(self.addr_cat + f"/updateDevice", json.dumps(device))
-                                
-                                if req_gh.ok and req_usr.ok:
-                                    self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} correctly added.")
-                                else:
-                                    self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} has not been added!")
-
-                            else:
-                                self.bot.sendMessage(chat_ID, text=f"The device {self.greenhouse['devID']} does not exist!")
-                        except:
-                            raise Exception("The catalog web service is unreachable!")
-                        
-                    else:
-                        self.bot.sendMessage(chat_ID, text=f"User not connected."
-                                                        "\nTo add a greenhouse, first you need to sign in with a user clicking on /start")
                 else:
                     self.bot.sendMessage(chat_ID, text=f"Number of parameters for command {command} not correct!")
 
@@ -244,7 +255,7 @@ class Telegram_Bot:
                     # Check the status of the selected greenhouse, including: humidity, temperature and number of plants
                     if message == "/status":
                         done = True
-                        #TODO: FOX qui bisogna prendere le informazioni di temperatura e umidità più recenti dal catalog.
+                        #TODO: qui bisogna prendere le informazioni di temperatura e umidità della greenhouse
                         self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
                                                     f"\nNumber of plants: {len(self.greenhouse['plantsList'])}"
                                                     "\nIf you want the list of the plants of this greenhouse click /plants")
@@ -255,7 +266,7 @@ class Telegram_Bot:
                         if len(self.greenhouse['plantsList']) > 0:
                             self.bot.sendMessage(chat_ID, text=f"The list of plants of greenhouse {self.greenhouse['ghID']} is:")
                             for i in self.greenhouse['plantsList']:
-                                self.bot.sendMessage(chat_ID, text=f"/{i}")
+                                self.bot.sendMessage(chat_ID, text=f"/{i['plant']}")
                         else:
                             self.bot.sendMessage(chat_ID, text=f"There are no plants in greenhouse {self.greenhouse['ghID']}"
                                                                 "\nTo add a plant click on /addgrhouseplant")
@@ -266,11 +277,11 @@ class Telegram_Bot:
                         self.bot.sendMessage(chat_ID, text="If you want to select a specific plant obtain the greenhouse list with /plants")
 
                     # If we have a greenhouse selected and we receive a command message of a plant present in this greenhouse, then this plant is selected
-                    elif message[1:] in self.greenhouse['plantsList']:
+                    elif searchDict(self.greenhouse, 'plantsList', 'plant', message[1:]):
                         done = True
                         self.bot.sendMessage(chat_ID, text=f"{message[1:]} plant selected")
                         self.plantSelected = True
-                        self.plantSelected["plant"] = message[1:]
+                        self.plant["plant"] = message[1:]
                         #TODO: FOX ottieni le info della pianta selezionata
 
                     # Inform the user to the complete command to add a plant to the greenhouse
