@@ -13,9 +13,11 @@
                 "greenhouse",
                 "greenhouse?ghID=",
                 "greenhouse?usrID=",
+                "greenhouse?devID=",
                 "user",
                 "user?usrID=",
-                "user?usrID=&plant="
+                "user?usrID=&plant=",
+                "plant?devID=&sensID="
             ]
         },
         {

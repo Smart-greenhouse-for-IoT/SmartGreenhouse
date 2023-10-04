@@ -5,15 +5,16 @@ import time
 from tools import searchDict, generateID
 
 #TODO: ghID viene aggiunta in fondo, cercare un modo per cambiare posizione
+#TODO: valutare "services" in catalog
+#TODO: check on the ID formats
+#TODO: quando un device viene rimosso, rimuoverlo anche dalle serre e dagli utenti
 class catalog():
     """
     Catalog
     -------
 
     """
-    #TODO: check on the ID formats
-    #TODO: get per i topic
-    #TODO: una greenhouse -> più device
+    
     def __init__(self):
         self.catalogFile = "catalog/catalog.json" 
         self.plantDBFile = "catalog/plantsDatabase.json"
@@ -24,7 +25,6 @@ class catalog():
             self.plantDB = json.load(pf)
 
         # Save the numeric IDs of the catalog
-        self.devIDs = [int(dev["devID"][1:]) for dev in self.catDic["devices"]]
         self.usrIDs = [int(usr["usrID"][1:]) for usr in self.catDic["users"]]
         self.ghIDs = [int(gh["ghID"][1:]) for gh in self.catDic["greenhouses"]]
 
@@ -38,15 +38,15 @@ class catalog():
         ---------
         Function used to add a new device in the catalog.
         """
-        new_id = generateID(self.devIDs)
-        self.devIDs.append(new_id)
-        new_id = "d" + str(new_id)
-        newDev["devID"] = new_id
-        self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        newDev["lastUpdate"] = self.lastUpdate
-        self.catDic["devices"].append(newDev)
-        self.catDic["lastUpdate"] = self.lastUpdate
-        return 0
+        if searchDict(self.catDic, "devices","devID", newDev["devID"]) == {}:
+            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            newDev["lastUpdate"] = self.lastUpdate
+            self.catDic["devices"].append(newDev)
+            self.catDic["lastUpdate"] = self.lastUpdate
+            return 0
+        else:
+            return -1
+
     
     def updateDevice(self, update_dev):
         """
@@ -328,6 +328,14 @@ class REST_catalog(catalog):
                         else:
                             raise cherrypy.HTTPError(404, f"No greenhouses associated\
                                                             to user {usrID}")
+                    elif "devID" in params:
+                        devID = params["devID"]
+                        search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                        if search_gh:
+                            return json.dumps(search_gh)
+                        else:
+                            raise cherrypy.HTTPError(404, f"No greenhouses associated\
+                                                            to device {devID}")
                     elif params == {}:
                         return json.dumps(self.dictInfo("greenhouses"))
                     else:
@@ -363,9 +371,26 @@ class REST_catalog(catalog):
                     else:
                         cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
 
-            elif uri[0] == "getThresholds":
-                humidityTh = self.thresholdHumidity(params.get("plant")) # retrieve humidity threshold given plant name
-                return json.dumps(humidityTh)   # return a list containing min and max thresholds
+            elif uri[0] == "plant":
+                if "devID" in params and "sensID" in params:
+                    devID = params["devID"]
+                    search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                    
+                    if search_gh:
+                        sensID = params["sensID"]
+                        search_plant = searchDict(search_gh, "plantsList", "sensID", sensID)
+
+                        if search_plant:
+                            return json.dumps(search_plant)
+                        else:
+                            raise cherrypy.HTTPError(404, f"No plant associated with sensor {sensID}")
+                    else:
+                            raise cherrypy.HTTPError(404, f"No plant associated with device {sensID}")
+                
+                else:
+                    cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
+
+                
 
         else:
             return json.dumps(self.methods)

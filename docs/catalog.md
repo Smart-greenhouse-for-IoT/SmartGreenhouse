@@ -24,17 +24,12 @@
             "maxNumPlants":,
             "plantsList": [
                 {
-                    "type":,
+                    "plant":"",
+                    "th_min":,
+                    "th_max":,
+                    "devID":, 
                     "sensID":,
-                    "actID":,
-                    "available_services": [
-                    "MQTT"
-                    ],
-                    "services_details": [
-                    {
-                        "service_type": "MQTT",
-                        "topic": []
-                    }
+                    "actID":
                 ],
                 }
             ],
@@ -125,5 +120,6 @@
             },
             "lastUpdate": ""
         }
-    ]
+    ],
+    "services":[#TODO]
 }
