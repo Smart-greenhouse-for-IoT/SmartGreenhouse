@@ -343,7 +343,17 @@ class REST_catalog(catalog):
                         usrID = params["usrID"]
                         search_usr= searchDict(self.catDic, "users", "usrID", usrID)
                         if search_usr:
-                            return json.dumps(search_usr)
+                            if "plant" in params:
+                                #return the plant dict
+                                plant_name = params["plant"].lower()
+                                search_plant = searchDict(search_usr, "ownedPlants", "plant", plant_name)
+                                if search_plant:
+                                    return json.dumps(search_plant)
+                                else:
+                                    raise cherrypy.HTTPError(404, f"Plant {plant_name} not found!")
+                            else:
+                                # return the requested user
+                                return json.dumps(search_usr)
                         else:
                             raise cherrypy.HTTPError(404, f"User {usrID} not found!")
 
@@ -425,7 +435,6 @@ class REST_catalog(catalog):
         bodyAsDict = json.loads(bodyAsStr)
         if len(uri) >= 1:
             if uri[0] == "updateDevice":
-                #TODO: quando il DC manda update sovrascrive i campi di ghID
                 if self.updateDevice(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nDevice {bodyAsDict["devID"]} updated successfully')

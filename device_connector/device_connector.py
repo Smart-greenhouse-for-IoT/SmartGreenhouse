@@ -211,8 +211,8 @@ class Device_Connector(object):
         # For every active sensor connected to the device connector
         for sens_id in self.sensor_index.keys():
             print(f"Measuring with sensor {sens_id}")
-            sens = {"sensor": sens_id,
-                    "device": self.mydevice['devID']}
+            sens = {"sensID": sens_id,
+                    "devID": self.mydevice['devID']}
             
             # Obtain the measure from the sensor
             curr_meas = self.sensors_list[self.sensor_index[sens_id]].measure()
@@ -246,7 +246,6 @@ class Device_Connector(object):
                     if services["service_type"] == "MQTT":
                         # Obtain the topic list of this sensor
                         topic_list = services["topic"]
-                        app = topic_list[ind]
 
                         # Publish the measure to the respective topic
                         self.client_mqtt.myPublish(topic = topic_list[ind], msg = measure)

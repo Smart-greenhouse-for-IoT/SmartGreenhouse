@@ -18,19 +18,50 @@
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
         "link": ""
     },
-    "greenhouses": [],
+    "greenhouses": [
+        {
+            "ghID": "g1",
+            "devID": "d1",
+            "usrID": "u1",
+            "maxNumPlants": "2",
+            "plantsList": [
+                [
+                    {
+                        "plant": "cardo",
+                        "th_min": 10,
+                        "th_max": 90
+                    },
+                    "2"
+                ]
+            ],
+            "lastUpdate": "2023-10-04 14:08:15"
+        }
+    ],
     "users": [
         {
             "usrID": "u1",
             "name": "Ale",
-            "ghID": [],
-            "ownedPlants": [],
-            "lastUpdate": "2023-10-02 14:02:03"
+            "ghID": [
+                "g1"
+            ],
+            "ownedPlants": [
+                {
+                    "plant": "cardo",
+                    "th_min": 10,
+                    "th_max": 90
+                },
+                {
+                    "plant": "pomodoro",
+                    "th_min": 10,
+                    "th_max": 90
+                }
+            ],
+            "lastUpdate": "2023-10-02 18:15:45"
         }
     ],
     "devices": [
         {
-            "devID": "d1",
+            "devID": "d3",
             "name": "raspberry1",
             "endpoints": [
                 "REST",
@@ -123,7 +154,7 @@
                 ],
                 "actuators": [
                     {
-                        "device_name": "actuator",
+                        "device_name": "???",
                         "actID": "a_001",
                         "devID": "d_001",
                         "pin": 18,
@@ -141,7 +172,7 @@
                         "lastUpdate": ""
                     },
                     {
-                        "device_name": "actuator",
+                        "device_name": "???",
                         "actID": "a_002",
                         "devID": "d_001",
                         "pin": 19,
@@ -160,8 +191,8 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-03 21:54:29"
+            "lastUpdate": "2023-10-04 14:38:34"
         }
     ],
-    "lastUpdate": "2023-10-03 21:54:29"
+    "lastUpdate": "2023-10-04 14:38:34"
 }

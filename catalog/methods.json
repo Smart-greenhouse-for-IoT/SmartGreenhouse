@@ -14,7 +14,8 @@
                 "greenhouse?ghID=",
                 "greenhouse?usrID=",
                 "user",
-                "user?usrID="
+                "user?usrID=",
+                "user?usrID=&plant="
             ]
         },
         {
