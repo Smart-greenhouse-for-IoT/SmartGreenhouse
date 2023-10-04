@@ -24,8 +24,17 @@
             "devID": "d1",
             "usrID": "u1",
             "maxNumPlants": "2",
-            "plantsList": [],
-            "lastUpdate": "2023-10-02 18:15:45"
+            "plantsList": [
+                [
+                    {
+                        "plant": "cardo",
+                        "th_min": 10,
+                        "th_max": 90
+                    },
+                    "2"
+                ]
+            ],
+            "lastUpdate": "2023-10-04 14:08:15"
         }
     ],
     "users": [
@@ -35,13 +44,24 @@
             "ghID": [
                 "g1"
             ],
-            "ownedPlants": [],
+            "ownedPlants": [
+                {
+                    "plant": "cardo",
+                    "th_min": 10,
+                    "th_max": 90
+                },
+                {
+                    "plant": "pomodoro",
+                    "th_min": 10,
+                    "th_max": 90
+                }
+            ],
             "lastUpdate": "2023-10-02 18:15:45"
         }
     ],
     "devices": [
         {
-            "devID": "d2",
+            "devID": "d3",
             "name": "raspberry1",
             "endpoints": [
                 "REST",
@@ -171,8 +191,8 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-02 21:34:06"
+            "lastUpdate": "2023-10-04 14:38:34"
         }
     ],
-    "lastUpdate": "2023-10-02 21:34:06"
+    "lastUpdate": "2023-10-04 14:38:34"
 }
