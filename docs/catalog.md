@@ -62,6 +62,8 @@
             "ghID":,
             "devID": [],
             "usrID":,
+            "bestTemp":,
+            "bestHum":,
             "maxNumPlants":,
             "plantsList": [
                 {

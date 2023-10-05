@@ -42,9 +42,17 @@
                     "devID": "d1",
                     "sensID": "s3",
                     "actID": "a3"
+                },
+                {
+                    "plant": "cicoria",
+                    "th_min": 8,
+                    "th_max": 90,
+                    "devID": "d1",
+                    "sensID": "s4",
+                    "actID": "a4"
                 }
             ],
-            "lastUpdate": "2023-10-05 12:04:36"
+            "lastUpdate": "2023-10-05 17:05:00"
         }
     ],
     "users": [
@@ -336,9 +344,9 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-05 12:12:21"
+            "lastUpdate": "2023-10-05 17:44:34"
         }
     ],
     "services": [],
-    "lastUpdate": "2023-10-05 12:12:21"
+    "lastUpdate": "2023-10-05 17:44:34"
 }
