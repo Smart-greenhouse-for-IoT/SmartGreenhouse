@@ -6,6 +6,7 @@
                 "device?devID=",
                 "device?name=",
                 "device/recentID",
+                "device/sensors?devID=",
                 "broker",
                 "catalogInfo",
                 "projectInfo",
@@ -13,9 +14,12 @@
                 "greenhouse",
                 "greenhouse?ghID=",
                 "greenhouse?usrID=",
+                "greenhouse?devID=",
+                "greenhouse/sensors?devID=&ghID=&",
                 "user",
                 "user?usrID=",
-                "user?usrID=&plant="
+                "user?usrID=&plant=",
+                "plant?devID=&sensID="
             ]
         },
         {

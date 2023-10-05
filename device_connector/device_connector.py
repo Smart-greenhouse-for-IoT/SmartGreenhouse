@@ -149,6 +149,7 @@ class Device_Connector(object):
 
         try:
             #POST the devices to the catalog
+            #TODO: FOX rimuovere /recentID non più necessario con ID statico
             req_dev = requests.post(addr + "/addDevice", data=json.dumps(self.mydevice))
             req_id = requests.get(addr + "/device/recentID")
             if req_dev.ok and req_id.ok:

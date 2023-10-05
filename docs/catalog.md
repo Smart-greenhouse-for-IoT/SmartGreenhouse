@@ -1,4 +1,45 @@
 # Catalog
+
+### Metodi
+"GET":[
+                "device",   #return all devices
+                "device?devID=",    #return device with devID specified
+                "device?name=", #return device with specified name
+                "device/recentID",  #return the ID of the latest added device
+                "device/sensors?devID=",    #return sensors associated to device devID
+                "device/actuators?devID="   #return actuators associated to device devID
+                "broker",   #return broker info
+                "catalogInfo",  #return catalog info
+                "projectInfo",  #return project info
+                "telegramInfo", #return telegram info
+                "greenhouse",   #return all greenhouses
+                "greenhouse?ghID=", #return greenhouse with specified ghID
+                "greenhouse?usrID=",    #return greenhouses with specifeid usrID #TODO:deve ritornare più greenhouse se associate a user
+                "greenhouse?devID=",    #return greenhouse asscoiated to device devID
+                "user", #return all users
+                "user?usrID=", #return user with specified usrID
+                "user?usrID=&plant=",   #return the plant if present in owned plants
+                "plant?devID=&sensID="  #return plant associated to sensor sensID and device devID
+            ]
+        },
+        {
+            "POST":[
+                "updateDevices",
+                "addDevice",
+                "addUser",
+                "addGreenhouse",
+                "addPlant?usrID=",
+                "addService",
+            ]
+        },
+        {
+            "PUT":[
+                "updateDevice",
+                "updateUser",
+                "updateGreenhouse",
+                "updateService"
+            ]
+
 ### Structure
 {
     "projectName":,
@@ -24,17 +65,12 @@
             "maxNumPlants":,
             "plantsList": [
                 {
-                    "type":,
+                    "plant":"",
+                    "th_min":,
+                    "th_max":,
+                    "devID":, 
                     "sensID":,
-                    "actID":,
-                    "available_services": [
-                    "MQTT"
-                    ],
-                    "services_details": [
-                    {
-                        "service_type": "MQTT",
-                        "topic": []
-                    }
+                    "actID":
                 ],
                 }
             ],
@@ -125,5 +161,6 @@
             },
             "lastUpdate": ""
         }
-    ]
+    ],
+    "services":[#TODO]
 }
