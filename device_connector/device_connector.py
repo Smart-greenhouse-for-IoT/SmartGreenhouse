@@ -141,8 +141,6 @@ class Device_Connector(object):
         registerToCat
         -------------
         This function will register the device connector to the catalog.
-        Each time the registration is done all the device of this device connector \n
-        are sent to the catalog.
         """
 
         # Address of the catalog for adding the devices
@@ -152,7 +150,6 @@ class Device_Connector(object):
             req_dev = requests.post(addr + "/addDevice", data=json.dumps(self.mydevice))
             if req_dev.ok:
                 print(f"Device {self.mydevice['devID']} added successfully!")
-                self.saveJson()
             else:
                 print(f"Device {self.mydevice['devID']} could not be added!")
         except:
@@ -252,15 +249,6 @@ class Device_Connector(object):
             else:
                 raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
 
-    def saveJson(self):
-        """
-        saveJson
-        --------
-        Used to save the catalog as a JSON file.
-        """
-        with open(self.device_file, 'w') as fw:
-            json.dump(self.mydevice, fw, indent=4)
-            return 0
 
     def loop(self, refresh_time = 10):
         """

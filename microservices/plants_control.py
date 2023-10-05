@@ -8,15 +8,21 @@ from catalogInterface import *
 # Open and initialize with config.json
 class plantsControl():
 
-    def __init__(self, conf_path):
+    def __init__(self, conf_path, confMS_path):
 
         with open(conf_path) as f:
             self.conf_dict = json.load(f)
+        
+        # Opening the devices file
+        with open(confMS_path) as f:
+            self.myservice = json.load(f)
 
-        self.catalog_interf = catalogInterface(conf_path)
+        self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
+
+        self.registerToCat()
 
         self._topic = self.conf_dict.get("topic")
-        self.broker_dict = self.catalog_interf.get_broker()
+        self.broker_dict = self.get_broker()
         
         self._pubSub = MyMQTT( clientID = self.broker_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
@@ -53,8 +59,57 @@ class plantsControl():
         self._pubSub.myPublish("/".join(topic_), measure_dict)
         
     
+    def registerToCat(self):
+        """
+        registerToCat
+        -------------
+        This function will register the plant control service to the catalog.
+        """
 
+        # Address of the catalog for adding the devices
+        try:
+            req_dev = requests.post(self.addr_cat + "/addService", data=json.dumps(self.myservice))
+            if req_dev.ok:
+                print(f"Plant control service {self.myservice['servID']} added successfully!")
+            else:
+                print(f"Plant control service {self.myservice['servID']} could not be added!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
 
+    def updateToCat(self):
+        """
+        updateToCat
+        -----------
+        Update all the decice of this device connector to the catalog, to let the catalog \n
+        know that this device connector and its devices are still 'alive'.
+        """
+        
+        # Address of the catalog for updating the devices
+        try:
+            #PUT the devices to the catalog
+            req = requests.put(self.addr_cat + "/updateService", data=json.dumps(self.myservice))
+            if req.ok:
+                print(f"Plant control service {self.myservice['servID']} updated successfully!")
+            else:
+                print(f"Plant control service {self.myservice['servID']} could not be updated!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
+    
+    def get_broker(self): 
+        """
+        get_broker
+        ----------
+        GET all the broker information
+        """
+
+        # Address of the catalog for obtaining all the informtions of the MQTT broker
+        try:
+            b_dict = requests.get(self.addr_cat + "/broker").json()  
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
+
+        # Return a json dict with BrokerIP and BrokerPort
+        return b_dict       
 
     
     def loop(self, refresh_time = 10):
@@ -68,7 +123,7 @@ class plantsControl():
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
 
-                    self.catalog_interf.updateToCat()
+                    self.updateToCat()
 
                     last_time = time.time() 
 
@@ -81,7 +136,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "microservices/conf.json")
+        conf_path = "microservices/conf.json",
+        confMS_path = "microservices/confMS.json")
 
     plant_control.loop()
     
