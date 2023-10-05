@@ -13,6 +13,7 @@ from device_sensors.dht11 import *
 from device_sensors.chirp import *
 from device_sensors.actuator import *
 
+#TODO:->ALE: address del catalog come self 
 class Device_Connector(object):
     """
     Device connector class:
@@ -111,7 +112,7 @@ class Device_Connector(object):
 
                     # If this is the correct actuator then
                     if topic in topic_list:
-                        #TODO: maybe with the communication the actuator is already on, so check if it is already on
+                        #TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
                         # Start the actuation
                         if message['command'] == 'start':
                             self.actuator_list[self.actuator_index[actuator["actID"]]].start()
@@ -148,13 +149,9 @@ class Device_Connector(object):
         addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
         try:
-            #POST the devices to the catalog
-            #TODO: FOX rimuovere /recentID non più necessario con ID statico
             req_dev = requests.post(addr + "/addDevice", data=json.dumps(self.mydevice))
-            req_id = requests.get(addr + "/device/recentID")
-            if req_dev.ok and req_id.ok:
+            if req_dev.ok:
                 print(f"Device {self.mydevice['devID']} added successfully!")
-                self.mydevice["devID"] = req_id.json()["devID"]
                 self.saveJson()
             else:
                 print(f"Device {self.mydevice['devID']} could not be added!")
@@ -276,7 +273,6 @@ class Device_Connector(object):
         At each loop, after a fixed time, the device connector will obtain all the \n
         measures from its sensors, will send the information to the catalog and ... ???? #NOTE: to be finished
         """
-        #TODO: every given time update the catalog registration to know DC is alive
         last_time = 0
 
         try:

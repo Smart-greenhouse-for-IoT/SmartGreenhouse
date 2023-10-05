@@ -7,9 +7,8 @@ import time
 
 from tools import searchDict
 
-#FIXME: sometimes a lot of exception arrives and to resolve it the catalog must be restarted. true problem not found
-#TODO: in /addGreenhouse fare in modo di poter mettere più devices (quindi piu parametri)
-
+#TODO:->ALE: funzione per aggiungere un nuovo device ad una serra selezionata
+#TODO:->ALE: aggiungere temperatura e umidità quando si aggiunge la serra
 class Telegram_Bot:
     """
     Telegram_Bot
@@ -30,7 +29,6 @@ class Telegram_Bot:
         }
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
-        #TODO: IDEA: taking the basic configuration from the catalog???
         self.userConnected = False
         self.grHselected = False
         self.plantSelected = False
@@ -102,8 +100,7 @@ class Telegram_Bot:
                         self.greenhouse["usrID"] = self.user["usrID"]
                         self.greenhouse["devID"].append(parameters[0])
                         devID_gh = self.greenhouse['devID'][-1]
-                        #TODO: FOX qui bisogna prendere le info del device utilizzato, perché self.greenhouse["maxNumPlants"] = len(self.device["resources"]["sensors"]) -1
-                        # self.greenhouse["maxNumPlants"] = 
+                    
                         try:
                             req_dev = requests.get(self.addr_cat + f"/device?devID={devID_gh}")
                             r_assigned_dev = requests.get(self.addr_cat + 
@@ -121,9 +118,11 @@ class Telegram_Bot:
                                     req_dev = requests.put(self.addr_cat + f"/updateDevice", json.dumps(device))
 
                                     if req_gh.ok and req_usr.ok:
+                                        sensors = device["resources"]["sensors"]
+                                        all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
                                         self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} correctly added."
                                                                             f"\n With DC {devID_gh} a max of" 
-                                                                            f"{self.greenhouse['maxNumPlants']}"
+                                                                            f"{len(all_sens)}"
                                                                             " different plants can be placed into the greenhouse.")
                                     else:
                                         self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} has not been added!")
