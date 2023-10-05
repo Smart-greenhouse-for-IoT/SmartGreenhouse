@@ -1,6 +1,7 @@
 import requests
 import json
 from sub.MyMQTT import *
+import time
 
 '''
 retrieved_data = {
@@ -14,7 +15,6 @@ retrieved_data = {
 }
 '''
 
-# api_url = 'https://api.thingspeak.com/update.json'
 
 class ThingspeakAdaptor():
 
@@ -33,13 +33,58 @@ class ThingspeakAdaptor():
             'timestamp': None, # message
             'plant_type': None # catalog
         }
-        self.url_TS = self.conf_dict.get('url_TS')
-        self._topic = self.conf_dict.get("topic")
-        self.broker_dict = self.catalog_interf.get_broker()
+
+        self.url_TS = self.conf_dict['thingspeak_url']
+        self.broker_dict = self.get_broker()
+
+        self.device = self.getCatDevice()
         
-        self._pubSub = MyMQTT( clientID = self.broker_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
-        self._pubSub.start()
-        self._pubSub.mySubscribe(self._topic)
+        self.client_mqtt = MyMQTT( clientID = self.broker_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
+        self.client_mqtt.start()
+
+    #########################################
+    ############### MQTT part ###############
+    #########################################
+
+    def subscribe(self, topic):
+        """
+        subscribe
+        ---------
+        Subscriber to all the sensor topics of all DC
+        """
+
+        self.client_mqtt.mySubscribe(topic = topic)
+
+    def get_broker(self): 
+        """
+        get_broker
+        ----------
+        GET all the broker information
+        """
+
+        # Address of the catalog for obtaining all the informtions of the MQTT broker
+        addr = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"] + "/broker" 
+        try:
+            b_dict = requests.get(addr).json()  
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
+
+        # Return a json dict with BrokerIP and BrokerPort
+        return b_dict   
+    
+    def getCatDevice(self):
+        """
+        getCatDevice
+        ------------
+        
+        """
+        # Address of the catalog for updating the devices
+        addr = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"] + "/device"
+        try:
+            #PUT the devices to the catalog
+            return requests.get(addr).json()
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
      
     def dictCreation(self, topic, msg):
         fields = self.fields_dict.copy()
@@ -75,3 +120,10 @@ class ThingspeakAdaptor():
     def retrievePlant_type(self, devID, sensID):
         plant_type = requests.get(f'{self.ip}:{self.port}/{devID}/{sensID}')
         return plant_type
+
+
+if __name__ == "__main__":
+
+    ThingspeakAdaptor("Thingspeak\conf.json")
+    while 1:
+        time.sleep(10)

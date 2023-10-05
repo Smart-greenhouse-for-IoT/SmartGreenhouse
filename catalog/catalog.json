@@ -61,7 +61,7 @@
     ],
     "devices": [
         {
-            "devID": "d3",
+            "devID": "d4",
             "name": "raspberry1",
             "endpoints": [
                 "REST",
@@ -154,7 +154,7 @@
                 ],
                 "actuators": [
                     {
-                        "device_name": "???",
+                        "device_name": "actuator",
                         "actID": "a_001",
                         "devID": "d_001",
                         "pin": 18,
@@ -172,7 +172,7 @@
                         "lastUpdate": ""
                     },
                     {
-                        "device_name": "???",
+                        "device_name": "actuator",
                         "actID": "a_002",
                         "devID": "d_001",
                         "pin": 19,
@@ -191,8 +191,8 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-04 14:38:34"
+            "lastUpdate": "2023-10-05 10:11:36"
         }
     ],
-    "lastUpdate": "2023-10-04 14:38:34"
+    "lastUpdate": "2023-10-05 10:11:36"
 }

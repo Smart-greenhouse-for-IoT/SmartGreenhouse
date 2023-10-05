@@ -1,4 +1,12 @@
 {
     "ip": "127.0.0.1",
-    "port": "8080"
+    "port": "8080",
+    "thingspeak_url": "https://api.thingspeak.com/update.json",
+    "thingspeak_channel": [
+        {
+            "devID":"d1",   
+            "write_apy": "KLYWHYIDU800VR11",
+            "read_apy": "TF0F973IVFW43M9U"
+    }
+]
 }
