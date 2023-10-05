@@ -1,7 +1,0 @@
-{
-    "notebook.output.textLineLimit": 50,
-    "editor.tokenColorCustomizations": {
-        "comments": "#50C878"
-    },
-    
-}
