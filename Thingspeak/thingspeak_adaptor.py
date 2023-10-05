@@ -42,6 +42,7 @@ class ThingspeakAdaptor():
         self.client_mqtt = MyMQTT( clientID = self.broker_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self.client_mqtt.start()
 
+
     #########################################
     ############### MQTT part ###############
     #########################################
