@@ -5,9 +5,7 @@ import time
 from tools import searchDict, generateID
 
 #TODO: ghID viene aggiunta in fondo, cercare un modo per cambiare posizione
-#TODO: valutare "services" in catalog
 #TODO: check on the ID formats
-#TODO: quando un device viene rimosso, rimuoverlo anche dalle serre e dagli utenti
 class catalog():
     """
     Catalog
