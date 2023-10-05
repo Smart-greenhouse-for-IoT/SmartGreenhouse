@@ -269,10 +269,34 @@ class REST_catalog(catalog):
             
             # DEVICE CATALOG
             if uri[0] == "device":
-                if len(uri) > 1 and uri[1] == "recentID":
-                    # Retrieve the ID of the device added most recently
-                    devID = self.catDic["devices"][-1]["devID"]
-                    return json.dumps({'devID': devID})
+                if len(uri) > 1: 
+                    if uri[1] == "recentID":
+                        # Retrieve the ID of the device added most recently
+                        devID = self.catDic["devices"][-1]["devID"]
+                        return json.dumps({'devID': devID})
+                    
+                    # Retrieve sensors of a specified device
+                    elif uri[1] == "sensors" and "devID" in params:
+                        devID = params["devID"]
+                        search_dev = searchDict(self.catDic, "devices", "devID", devID)
+                        if search_dev:
+                            sensors = search_dev["resources"]["sensors"]
+                            return json.dumps(sensors)
+                        else:
+                            raise cherrypy.HTTPError(404, f"Device {devID} not found!")
+                    
+                    elif uri[1] == "actuators" and "devID" in params:
+                        devID = params["devID"]
+                        search_dev = searchDict(self.catDic, "devices", "devID", devID)
+                        if search_dev:
+                            actuators = search_dev["resources"]["actuators"]
+                            return json.dumps(actuators)
+                        else:
+                            raise cherrypy.HTTPError(404, f"Device {devID} not found!")
+                        
+                    else:
+                        cherrypy.HTTPError(400, f"URI and parameters are not correct!")
+
                 else:
                     if "devID" in params:
                         devID = params["devID"]
