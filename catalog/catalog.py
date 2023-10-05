@@ -172,48 +172,36 @@ class catalog():
                 return 0
         return -1
 
-    def getNumberLots(self, ghID = []):
+    def addService(self, newServ):
         """
-        getNumberLots
-        -------------
-        #FIXME: fox scrivi qualcosa tu
+        addService
+        ---------
+        Function used to add a new service in the catalog.
         """
-        greenhouses = self.catDic["greenhouses"]
-        numLots = 0
-        for gh in greenhouses:
-            if ghID.count(gh.get("ghID")) != 0:   
-                numLots = gh.get("numPlants")
-        return numLots
+        if searchDict(self.catDic, "services","servID", newServ["servID"]) == {}:
+            self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            newServ["lastUpdate"] = self.lastUpdate
+            self.catDic["services"].append(newServ)
+            self.catDic["lastUpdate"] = self.lastUpdate
+            return 0
+        else:
+            return -1
     
-    # Retrieve humidity threshold from telegram bot given plant name
-    def thresholdHumidity(self, plantRequest = ""):
+    def updateService(self, update_serv):
         """
-        thresholdHumidity
-        -----------------
-        ### Method to give humidity threshold to plant control
-        The threshold are given in the form:\n
-            {
-                "th_min": 0.1,\n
-                "th_max": 0.2\n
-            }\n
-        If the plant requested is not found the return -1
+        updateService
+        ------------
+        Update a device already present in catalog.
         """
-        try:
-            # Find dictionary by plant type in plantDB dictionary
-            humidityTh = next(item for item in self.plantDB["humidityThresh"] if item["plant"] == plantRequest)
-            # Pop plant key to return only desired thresholds
-            humidityTh.pop("plant")  
-            return humidityTh
-        
-        # If plant not present raise error
-        except KeyError:    
-            error_code = -1
-            return error_code
-    
-    def lastUpdate(self, key):
-        for dict in self.catDic["key"]:
-            last_upd = time.mktime(datetime.strptime(device["lastUpdate"],
-                                            "%Y-%m-%d %H:%M:%S").timetuple())
+        for i, service in enumerate(self.catDic["services"]):
+            if service["servID"] == update_serv["servID"]:
+                for key in update_serv.keys():
+                    self.catDic["services"][i][key] = update_serv[key]
+                self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.catDic["services"][i]["lastUpdate"] = self.lastUpdate
+                self.catDic["lastUpdate"] = self.lastUpdate
+                return 0
+        return -1
     
     ######################## GENERAL METHODS ########################
     def saveJson(self):
@@ -441,7 +429,6 @@ class REST_catalog(catalog):
                 if self.addDevice(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nDevice {bodyAsDict["devID"]} added successfully!')
-                    #TODO: assegnare il nuovo ID al device connector 
                 else:
                     raise cherrypy.HTTPError(400, f'Device {bodyAsDict["devID"]} could not be added!')
 
@@ -471,6 +458,13 @@ class REST_catalog(catalog):
                 else:
                     raise cherrypy.HTTPError(400, f'Invalid parameter! Format is /addPlant?usrID=')
             
+            elif uri[0] == "addService":
+                if self.addService(bodyAsDict) == 0:
+                    self.saveJson()
+                    print(f'\Service {bodyAsDict["servID"]} added successfully!')
+                else:
+                    raise cherrypy.HTTPError(400, f'Service {bodyAsDict["servID"]} could not be added!')
+            
 
     
     def PUT(self, *uri, **params):
@@ -491,7 +485,7 @@ class REST_catalog(catalog):
                     print(f'Device {bodyAsDict["devID"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The device could not be updated!")
             
-            if uri[0] == "updateUser":
+            elif uri[0] == "updateUser":
                 if self.updateUser(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nUser {bodyAsDict["usrID"]} updated successfully')
@@ -499,13 +493,21 @@ class REST_catalog(catalog):
                     print('User {bodyAsDict["devID"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The user could not be updated!")
             
-            if uri[0] == "updateGreenhouse":
+            elif uri[0] == "updateGreenhouse":
                 if self.updateGreenhouse(bodyAsDict) == 0:
                     self.saveJson()
                     print('\nGreenhouse {bodyAsDict["ghID"]} updated successfully')
                 else:
                     print('Greenhouse {bodyAsDict["ghID"]}could not be updated')
                     raise cherrypy.HTTPError(400, "The greenhouse could not be updated!")
+            
+            elif uri[0] == "updateService":
+                if self.updateService(bodyAsDict) == 0:
+                    self.saveJson()
+                    print(f'\nService {bodyAsDict["servID"]} updated successfully')
+                else:
+                    print(f'Service {bodyAsDict["servID"]} could not be updated')
+                    raise cherrypy.HTTPError(400, "The service could not be updated!")
     
     def cleaning(self, timeout):
         """

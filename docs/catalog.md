@@ -28,14 +28,16 @@
                 "addDevice",
                 "addUser",
                 "addGreenhouse",
-                "addPlant?usrID="
+                "addPlant?usrID=",
+                "addService",
             ]
         },
         {
             "PUT":[
                 "updateDevice",
                 "updateUser",
-                "updateGreenhouse"
+                "updateGreenhouse",
+                "updateService"
             ]
 
 ### Structure
