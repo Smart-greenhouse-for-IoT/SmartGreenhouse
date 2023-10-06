@@ -507,21 +507,39 @@ class REST_catalog(catalog):
                     print(f'Service {bodyAsDict["servID"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The service could not be updated!")
     
-    def cleaning(self, timeout):
+    def cleaningDev(self, timeout):
         """
-        cleaning
+        cleaningDev
         --------
         Method to remove devices that are no more active.
         The inactivity is determined by a timeout. 
         """
-        while True:
-            for ind, device in enumerate(self.catDic["devices"]):
-                last_upd = time.mktime(datetime.strptime(device["lastUpdate"],
+        
+        for ind, device in enumerate(self.catDic["devices"]):
+            last_upd = time.mktime(datetime.strptime(device["lastUpdate"],
+                                        "%Y-%m-%d %H:%M:%S").timetuple())
+            current_t = datetime.timestamp(datetime.now())
+            if current_t - last_upd >= timeout:
+                self.catDic["devices"].pop(ind)
+                print(f"Device {device['devID']} has been removed due to inactivity!")
+                self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.catDic["lastUpdate"] = self.lastUpdate
+                self.saveJson()
+    
+    def cleaningServ(self, timeout):
+        """
+        cleaningServ
+        --------
+        Method to remove services that are no more active.
+        The inactivity is determined by a timeout. 
+        """
+        for ind, service in enumerate(self.catDic["services"]):
+                last_upd = time.mktime(datetime.strptime(service["lastUpdate"],
                                             "%Y-%m-%d %H:%M:%S").timetuple())
                 current_t = datetime.timestamp(datetime.now())
                 if current_t - last_upd >= timeout:
-                    self.catDic["devices"].pop(ind)
-                    print(f"Device {device['devID']} has been removed due to inactivity!")
+                    self.catDic["services"].pop(ind)
+                    print(f"Service {service['servID']} has been removed due to inactivity!")
                     self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     self.catDic["lastUpdate"] = self.lastUpdate
                     self.saveJson()
@@ -540,6 +558,8 @@ if __name__ == "__main__":
     cherrypy.tree.mount(webService,'/',conf)
     cherrypy.engine.start()
     try:
-        webService.cleaning(timeout=160)
+        while True:
+            webService.cleaningDev(timeout=160)
+            webService.cleaningServ(timeout=160)
     except KeyboardInterrupt:
         cherrypy.engine.block()
