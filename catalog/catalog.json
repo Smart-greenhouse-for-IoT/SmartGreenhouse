@@ -62,34 +62,8 @@
             "ghID": [
                 "g1"
             ],
-            "ownedPlants": [
-                {
-                    "plant": "cicoria",
-                    "th_min": 8,
-                    "th_max": 90
-                },
-                {
-                    "plant": "cardamomo",
-                    "th_min": 10,
-                    "th_max": 85
-                },
-                {
-                    "plant": "zafferano",
-                    "th_min": 8,
-                    "th_max": 90
-                },
-                {
-                    "plant": "basilico",
-                    "th_min": 8,
-                    "th_max": 90
-                },
-                {
-                    "plant": "coriandolo",
-                    "th_min": 8,
-                    "th_max": 90
-                }
-            ],
-            "lastUpdate": "2023-10-05 11:04:10"
+            "ownedPlants": [],
+            "lastUpdate": "2023-10-06 11:21:30"
         }
     ],
     "devices": [
@@ -344,9 +318,10 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-05 17:44:34"
+            "lastUpdate": "2023-10-06 11:22:00",
+            "ghID": "g1"
         }
     ],
     "services": [],
-    "lastUpdate": "2023-10-05 17:44:34"
+    "lastUpdate": "2023-10-06 11:22:00"
 }

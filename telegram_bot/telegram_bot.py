@@ -47,8 +47,11 @@ class Telegram_Bot:
             "ghID": "",
             "devID": [],
             "usrID": "",
-            "bestTemp":"",
-            "bestHum":"",
+            "gh_params":{
+                "temp": "",
+                "CO2": "",
+                "hum": ""
+            },
             "maxNumPlants": "",
             "plantsList": [],
             "lastUpdate": ""
@@ -289,8 +292,6 @@ class Telegram_Bot:
                 elif command == "/addgreenhouse":
                     if self.userConnected:
                         devID_gh = parameters[0]
-                        #TODO: FOX qui bisogna prendere le info del device utilizzato, perché self.greenhouse["maxNumPlants"] = len(self.device["resources"]["sensors"]) -1
-                        # self.greenhouse["maxNumPlants"] = 
                         if parameters[1].isnumeric() and parameters[2].isnumeric():
                             parameters[1] = int(parameters[1])
                             parameters[2] = int(parameters[2])
@@ -303,6 +304,10 @@ class Telegram_Bot:
                                         if not r_assigned_dev.ok:
                                             self.greenhouse["usrID"] = self.user["usrID"]
                                             self.greenhouse["devID"].append(parameters[0])
+                                            self.greenhouse["gh_params"]["temp"] = parameters[1]
+                                            self.greenhouse["gh_params"]["hum"] = parameters[2]
+                                            #FIXME: find a better way to assign the CO2 value
+                                            self.greenhouse["gh_params"]["CO2"] = 420
                                             req_gh = requests.post(self.addr_cat + "/addGreenhouse", json.dumps(self.greenhouse))
                                             req_id = requests.get(self.addr_cat + "/greenhouse/recentID")
                                             self.greenhouse["ghID"] = req_id.json()["ghID"]
@@ -315,9 +320,9 @@ class Telegram_Bot:
 
                                             if req_gh.ok and req_usr.ok:
                                                 self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} correctly added."
-                                                                                    f"\n With DC {devID_gh} a max of" 
-                                                                                    f"{self.greenhouse['maxNumPlants']}"
-                                                                                    " different plants can be placed into the greenhouse.")
+                                                                                    f"\nWith DC {devID_gh} a max of " 
+                                                                                    f"{len(device['resources']['sensors'])-1}"
+                                                                                    " different plants can be added into the greenhouse.")
                                             else:
                                                 self.bot.sendMessage(chat_ID, text=f"Greenhouse {self.greenhouse['ghID']} has not been added!")
                                         
@@ -626,6 +631,7 @@ class Telegram_Bot:
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
                         "- /addgrhouseplant: Add new plant to the greenhouse\n"
+                        "- /addgrhousedevice: Add a new device to the selected greenhouse\n"
                         "- /plants: Get the list of the plants of the selected greenhouse\n"
                         "- /selectplant: Get the name of the selected greenhouse plants to select one\n")
             
@@ -636,6 +642,7 @@ class Telegram_Bot:
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
                         "- /addgrhouseplant: Add new plant to the greenhouse\n"
+                        "- /addgrhousedevice: Add a new device to the selected greenhouse\n"
                         "- /plants: Get the list of the plants of the selected greenhouse\n"
                         "- /selectplant: Get the name of the selected greenhouse plants to select one\n"
                         "- /irrigate: Manually irrigate the selected plants\n"

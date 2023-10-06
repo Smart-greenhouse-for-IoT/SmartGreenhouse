@@ -62,8 +62,11 @@
             "ghID":,
             "devID": [],
             "usrID":,
-            "bestTemp":,
-            "bestHum":,
+            "gh_params":{
+                "temp": "",
+                "CO2": "",
+                "hum": ""
+            },
             "maxNumPlants":,
             "plantsList": [
                 {
