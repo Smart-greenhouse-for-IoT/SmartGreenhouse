@@ -7,9 +7,8 @@ import time
 
 from tools import searchDict
 
-#FIXME: sometimes a lot of exception arrives and to resolve it the catalog must be restarted. true problem not found
-#TODO: in /addGreenhouse fare in modo di poter mettere più devices (quindi piu parametri)
-
+#TODO:->ALE: funzione per aggiungere un nuovo device ad una serra selezionata
+#TODO:->ALE: aggiungere temperatura e umidità quando si aggiunge la serra
 class Telegram_Bot:
     """
     Telegram_Bot
@@ -30,7 +29,6 @@ class Telegram_Bot:
         }
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
-        #TODO: IDEA: taking the basic configuration from the catalog???
         self.userConnected = False
         self.grHselected = False
         self.plantSelected = False
