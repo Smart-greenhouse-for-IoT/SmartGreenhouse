@@ -13,7 +13,6 @@ from device_sensors.dht11 import *
 from device_sensors.chirp import *
 from device_sensors.actuator import *
 
-#TODO:->ALE: address del catalog come self 
 class Device_Connector(object):
     """
     Device connector class:
@@ -34,6 +33,9 @@ class Device_Connector(object):
         # Opening the devices file
         with open(device_path) as f:
             self.mydevice = json.load(f)
+
+        # Address of the catalog for adding the devices
+        self.CatAddr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
         
         self.myIP, self.myPort = self.webServiceInfo()
         # Read all the sensors in self.mydevice list
@@ -145,11 +147,8 @@ class Device_Connector(object):
         are sent to the catalog.
         """
 
-        # Address of the catalog for adding the devices
-        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
-
         try:
-            req_dev = requests.post(addr + "/addDevice", data=json.dumps(self.mydevice))
+            req_dev = requests.post(self.CatAddr + "/addDevice", data=json.dumps(self.mydevice))
             if req_dev.ok:
                 print(f"Device {self.mydevice['devID']} added successfully!")
                 self.saveJson()
@@ -166,11 +165,9 @@ class Device_Connector(object):
         know that this device connector and its devices are still 'alive'.
         """
         
-        # Address of the catalog for updating the devices
-        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/updateDevice"
         try:
             #PUT the devices to the catalog
-            req = requests.put(addr, data=json.dumps(self.mydevice))
+            req = requests.put(self.CatAddr + "/updateDevice", data=json.dumps(self.mydevice))
             if req.ok:
                 print(f"Device {self.mydevice['devID']} updated successfully!")
             else:
@@ -185,10 +182,8 @@ class Device_Connector(object):
         GET all the broker information
         """
 
-        # Address of the catalog for obtaining all the informtions of the MQTT broker
-        addr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"] + "/broker" 
         try:
-            b_dict = requests.get(addr).json()  
+            b_dict = requests.get(self.CatAddr + "/broker").json()  
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
@@ -307,9 +302,5 @@ if __name__=='__main__':
         conf_path = "device_connector/conf.json",
         device_path = "device_connector/devices.json"
         )
-    #TODO: webservice DC
-    #cherrypy.tree.mount(dc, '/', self._http_conf)
-    #cherrypy.config.update({'server.socket_host': self.getIP()})
-    #cherrypy.config.update({'server.socket_port': self.getPort()})
 
     dc.loop(refresh_time=30)
