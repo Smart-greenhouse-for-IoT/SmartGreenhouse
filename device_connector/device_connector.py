@@ -12,6 +12,7 @@ from sub.MyMQTT import *
 from device_sensors.dht11 import *
 from device_sensors.chirp import *
 from device_sensors.actuator import *
+from device_sensors.CO2sens import *
 
 class Device_Connector(object):
     """
@@ -47,6 +48,7 @@ class Device_Connector(object):
 
         # At the start the program check the sensor that are connected to the device connector
         for sensor in self.mydevice['resources']['sensors']:
+            #FIXME: now read all the sensor, but we need to start the actuation only for the active sensor
             
             if sensor['device_name'] == "chirp":
                 self.sensor_index[str(sensor["sensID"])] = count
@@ -62,6 +64,13 @@ class Device_Connector(object):
 
                 dht_conf = sensor.copy()
                 self.sensors_list.append(DHT11(dht_conf))
+
+            elif sensor['device_name'] == "CO2sens":
+                self.sensor_index[str(sensor["sensID"])] = count
+                count += 1
+
+                co2_conf = sensor.copy()
+                self.sensors_list.append(CO2sensor(co2_conf))
                 
         
         # At the start the program does not know wich actuators have

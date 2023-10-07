@@ -32,27 +32,35 @@
                     "th_min": 8,
                     "th_max": 90,
                     "devID": "d1",
-                    "sensID": "s2",
-                    "actID": "a2"
+                    "sensID": "s3",
+                    "actID": "a3"
                 },
                 {
                     "plant": "zafferano",
                     "th_min": 8,
                     "th_max": 90,
                     "devID": "d1",
-                    "sensID": "s3",
-                    "actID": "a3"
+                    "sensID": "s4",
+                    "actID": "a4"
                 },
                 {
                     "plant": "cicoria",
                     "th_min": 8,
                     "th_max": 90,
                     "devID": "d1",
-                    "sensID": "s4",
-                    "actID": "a4"
+                    "sensID": "s5",
+                    "actID": "a5"
+                },
+                {
+                    "plant": "mango",
+                    "th_min": 20,
+                    "th_max": 87,
+                    "devID": "d1",
+                    "sensID": "s6",
+                    "actID": "a6"
                 }
             ],
-            "lastUpdate": "2023-10-05 17:05:00"
+            "lastUpdate": "2023-10-07 10:29:54"
         }
     ],
     "users": [
@@ -62,7 +70,13 @@
             "ghID": [
                 "g1"
             ],
-            "ownedPlants": [],
+            "ownedPlants": [
+                {
+                    "plant": "mango",
+                    "th_min": 20,
+                    "th_max": 87
+                }
+            ],
             "lastUpdate": "2023-10-06 11:21:30"
         }
     ],
@@ -118,11 +132,11 @@
                         "lastUpdate": "2023-10-02 18:15:45"
                     },
                     {
-                        "device_name": "chirp",
+                        "device_name": "CO2sens",
                         "sensID": "s2",
                         "pin": 2,
-                        "measurementType": "Moisture",
-                        "units": "%",
+                        "measurementType": "CO2",
+                        "units": "ppm",
                         "available_services": [
                             "MQTT"
                         ],
@@ -130,7 +144,7 @@
                             {
                                 "service_type": "MQTT",
                                 "topic": [
-                                    "smartGreenhouse/d1/s2/soil_moisture"
+                                    "smartGreenhouse/d1/s2/CO2_level"
                                 ]
                             }
                         ],
@@ -318,10 +332,9 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-06 11:22:00",
-            "ghID": "g1"
+            "lastUpdate": "2023-10-07 10:36:14"
         }
     ],
     "services": [],
-    "lastUpdate": "2023-10-06 11:22:00"
+    "lastUpdate": "2023-10-07 10:36:14"
 }

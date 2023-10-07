@@ -49,11 +49,11 @@
                 "lastUpdate": "2023-10-02 18:15:45"
             },
             {
-                "device_name": "chirp",
+                "device_name": "CO2sens",
                 "sensID": "s2",
                 "pin": 2,
-                "measurementType": "Moisture",
-                "units": "%",
+                "measurementType": "CO2",
+                "units": "ppm",
                 "available_services": [
                     "MQTT"
                 ],
@@ -61,7 +61,7 @@
                     {
                         "service_type": "MQTT",
                         "topic": [
-                            "smartGreenhouse/d1/s2/soil_moisture"
+                            "smartGreenhouse/d1/s2/CO2_level"
                         ]
                     }
                 ],
