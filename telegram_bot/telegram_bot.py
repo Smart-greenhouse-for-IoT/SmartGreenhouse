@@ -209,8 +209,12 @@ class Telegram_Bot:
                                 free_sens = [sens for sens in all_sens if sens not in used_sens]
                                 free_act = [act for act in all_act if act not in used_act]
 
-                                sensID = free_sens.pop(0)
-                                actID = free_act.pop(free_act.index("a" + sensID[1:]))
+                                # Check if there are sensor available
+                                try:
+                                    sensID = free_sens.pop(0)
+                                    actID = free_act.pop(free_act.index("a" + sensID[1:]))
+                                except:
+                                    self.bot.sendMessage(chat_ID, text=f"Device {device} does not have more free sensor!")
                             else:
                                 self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
                             
@@ -232,8 +236,9 @@ class Telegram_Bot:
                                     # Update the greenhouse in catalog
                                     try:
                                         req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
-                                        self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added"
-                                                            f"to greenhouse {self.greenhouse['ghID']}")
+                                        self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added "
+                                                            f"to greenhouse {self.greenhouse['ghID']}"
+                                                            f"\nPlease insert in the pot the sensor {plant['sensID']} and actuator {plant['actID']}")
                                     except:
                                         raise Exception("The catalog web service is unreachable!")
                                 else: 
