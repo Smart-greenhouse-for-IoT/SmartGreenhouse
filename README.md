@@ -2,6 +2,7 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.8%20|%203.10-informational?style=flat&logo=python&logoColor=white)
 ![GitHub](https://img.shields.io/github/contributors/Smart-greenhouse-for-IoT/SmartGreenhouse?style=flat&logo=github)
+![GitHub](https://img.shields.io/github/license/Smart-greenhouse-for-IoT/SmartGreenhouse?style=flat)
 
 Project for the course Programming for IoT Applications at Politecnico di Torino, academic year 2022-2023.
 
