@@ -136,7 +136,7 @@ class GHControl():
         measure_dict_resp["devID"] = topic_[2]
         measure_dict_resp["timestamp"] = time.now()
 
-        self._pubSub.myPublish(topic, measure_dict)
+        self._pubSub.myPublish("/".join(topic_), measure_dict)
 
 
     def loop(self, refresh_time = 10):
