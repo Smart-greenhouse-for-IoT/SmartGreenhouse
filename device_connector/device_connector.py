@@ -142,9 +142,7 @@ class Device_Connector(object):
         Subscriber to all the irrigator topics of this device connector
         """
 
-        self.client_mqtt.start()
         # We want to be sure to do that commands in order
-        time.sleep(3) 
         self.client_mqtt.mySubscribe()
     
     def registerToCat(self):
