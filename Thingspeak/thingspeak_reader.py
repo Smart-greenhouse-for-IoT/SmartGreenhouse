@@ -7,7 +7,7 @@ import pandas as pd
 from io import StringIO
 
 
-class ThingspeakReader():
+class ThingspeakReader(): 
 
     def __init__(self, conf_path):
 
