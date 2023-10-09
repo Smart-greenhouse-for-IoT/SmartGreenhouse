@@ -399,6 +399,37 @@ class REST_catalog(catalog):
                 
                 else:
                     cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
+            
+            elif uri[0] == "service":
+                if len(uri) > 1: 
+                    if uri[1] == "recentID":
+                        # Retrieve the ID of the service added most recently
+                        servID = self.catDic["services"][-1]["servID"]
+                        return json.dumps({'servID': servID})
+                        
+                    else:
+                        cherrypy.HTTPError(400, f"URI and parameters are not correct!")
+
+                else:
+                    if "servID" in params:
+                        servID = params["servID"]
+                        search_serv = searchDict(self.catDic, "services", "servID", servID)
+                        if search_serv:
+                            return json.dumps(search_serv)
+                        else:
+                            raise cherrypy.HTTPError(404, f"Service {servID} not found!")
+                    elif "name" in params:
+                        name = params["name"]
+                        search_serv = searchDict(self.catDic, "services", "name", name)
+                        if search_serv:
+                            return json.dumps(search_serv)
+                        else:
+                            raise cherrypy.HTTPError(404, f"Service {name} not found!")
+                    elif params == {}:
+                        return json.dumps(self.dictInfo("services"))
+
+                    else:
+                        cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
 
                 
 

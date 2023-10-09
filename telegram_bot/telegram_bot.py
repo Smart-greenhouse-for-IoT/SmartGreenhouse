@@ -29,7 +29,7 @@ class Telegram_Bot:
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
         #FIXME: what happen if the result is negative? We needt to add a maxtry param like davide did?
-        # self.TS_info()    
+        self.DA_info()    
 
         self.userConnected = False
         self.grHselected = False
@@ -372,11 +372,11 @@ class Telegram_Bot:
                     if message == "/status":
                         done = True
                         #TODO: ALE qui bisogna prendere le informazioni di temperatura e umidità della greenhouse
-                        """try:
-                            req_ghINFO = requests.get(self.addr_TS + f"/greenhouse?ghID={self.greenhouse['ghID']}")
+                        try:
+                            req_ghINFO = requests.get(self.addr_DA + f"/getLastValue?ghID={self.greenhouse['ghID']}")
                             ghINFO = req_ghINFO.json() #CHECK: its a csv file? maybe .json is not correct
                         except:
-                            raise Exception("The thingspeak web service is unreachable!")"""
+                            raise Exception("The data analysis web service is unreachable!")
                         
                         self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
                                                     f"\nNumber of plants: {len(self.greenhouse['plantsList'])}"
@@ -405,11 +405,11 @@ class Telegram_Bot:
                         self.plantSelected = True
                         self.plant["plant"] = message[1:]
                         #TODO: ALE ottieni le info della pianta selezionata
-                        """try:
-                            req_plantINFO = requests.get(self.addr_TS + f"/greenhouse?ghID={self.greenhouse['ghID']}")
+                        try:
+                            req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
                             plantINFO = req_plantINFO.json() #CHECK: its a csv file? maybe .json is not correct
                         except:
-                            raise Exception("The thingspeak web service is unreachable!")"""
+                            raise Exception("The data analysis web service is unreachable!")
 
                     # Inform the user to the complete command to add a plant to the greenhouse
                     elif message == "/addgrhouseplant":
@@ -693,9 +693,9 @@ class Telegram_Bot:
             self.bot.sendMessage(chat_ID, text=message,
                         parse_mode='Markdown', reply_markup=keyboard)
 
-    def TS_info(self):
+    def DA_info(self):
         """
-        TS_info
+        DA_info
         -------
         Try to contact the catalog to obtain the information of thingspeak.
         ### Parameters obtained
@@ -703,13 +703,13 @@ class Telegram_Bot:
         - TsPort: Port of thingspeak rest interface
         """
         try:
-            req_TS = requests.get(self.addr_cat + "/thingspeak")
-            TS = req_TS.json()
-            TS_info = {
-                "ip": TS["TsIp"],
-                "port": TS["TsPort"]
+            req_Da = requests.get(self.addr_cat + "/service?name=data_analysis")
+            Da =req_Da.json()
+            DA_info = {
+                "ip": Da["endpoints_details"][0]["ip"],
+                "port": str(Da["endpoints_details"][0]["port"])
             }
-            self.addr_TS = "http://" + TS_info["ip"] + ":" + TS_info["port"]
+            self.addr_DA = "http://" + DA_info["ip"] + ":" + DA_info["port"]
         except:
             raise Exception("The catalog web service is unreachable!")
 
