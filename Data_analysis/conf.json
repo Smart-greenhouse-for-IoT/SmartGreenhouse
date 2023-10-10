@@ -1,5 +1,5 @@
 {
-    "ip": "127.0.0.1", 
+    "ip": "127.0.0.1",
     "port": "8080",
     "url_TS": "https://api.thingspeak.com/update.json",
     "write_key": "6K2SF8DLAG4J7D3L",
@@ -7,3 +7,4 @@
     "topic":  "smartGreenhouse/#",
     "channel_id": "2055720"
 }
+

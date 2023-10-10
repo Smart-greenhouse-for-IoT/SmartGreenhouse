@@ -100,9 +100,38 @@ class DataAnalysisMicroservice():
     
     exposed = True
 
-    def __init__(self):
-        self.TR = ThingspeakReader("Thingspeak\conf.json")
+    def __init__(self, conf_path, conf_DA_path):
+
+        with open(conf_path) as f:
+            self.conf = json.load(f)
+
+        with open(conf_DA_path) as f:
+            self.confDA = json.load(f)
+
+        self.TR = ThingspeakReader("Data_analysis\conf.json")
         self.queryClass = Queries()
+
+        # Address of the catalog for adding the devices
+        self.CatAddr = "http://" + self.conf["ip"] + ":" + self.conf["port"]
+
+        # Register to catalog
+        self.registerToCat()
+
+    def registerToCat(self):
+        """
+        registerToCat
+        -------------
+        This function will register the microservice to the catalog.
+        """
+
+        try:
+            req_dev = requests.post(self.CatAddr + "/addService", data=json.dumps(self.confDA))
+            if req_dev.ok:
+                print(f"Service {self.confDA['servID']} added successfully!")
+            else:
+                print(f"Service {self.confDA['servID']} could not be added!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf['ip']}")
 
     def GET(self, *uri, **params):
         
@@ -159,23 +188,61 @@ class DataAnalysisMicroservice():
         else:
             raise cherrypy.HTTPError(404, f"Error! Method not found!")     
                 
-                
+    def loop(self, refresh_time = 10):
+        """
+        Loop
+        ----
+        loop to mantain updated the services in the catalog
+        """
+        last_time = 0
+
+        try:
+            while True:
+                print("looping\n")
+                local_time = time.time()
+                # Every refresh_time the measure are done and published to the topic
+                if local_time - last_time > refresh_time: 
+                    self.updateToCat()
+                    # self.post_sensor_Cat()
+                    last_time = time.time() 
+
+                time.sleep(5)
+        except KeyboardInterrupt:
+            cherrypy.engine.block()
+            print("Loop manually interrupted")
+
+    def updateToCat(self):
+        """
+        updateToCat
+        -----------
+        Update the microservice, to let the catalog know that this microservic is still operative.
+        """
+
+        try:
+            req_dev = requests.put(self.CatAddr + "/updateService", data=json.dumps(self.confDA))
+            if req_dev.ok:
+                print(f"Service {self.confDA['servID']} updated successfully!")
+            else:
+                print(f"Service {self.confDA['servID']} could not be updated!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.conf['ip']}")
+
+    
 
 if __name__ == "__main__": 
 	
-    # Standard configuration to serve the url "localhost:8080"
-    conf={
-    	'/':{
-    		'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-    		'tools.sessions.on': True
-    	}
+    webService = DataAnalysisMicroservice("Data_analysis\conf.json", "Data_analysis\conf_DA.json")
+    cherryConf = {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.sessions.on': True
+        }
     }
-    webService = DataAnalysisMicroservice()
-    cherrypy.tree.mount(webService,'/',conf)
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
+    cherrypy.tree.mount(webService, '/', cherryConf)
     cherrypy.engine.start()
 
-
-
+    webService.loop(refresh_time=50)
 '''
 if __name__ == "__main__":
     
