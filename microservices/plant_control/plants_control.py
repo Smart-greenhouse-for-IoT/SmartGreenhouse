@@ -3,7 +3,7 @@ import json
 from sub.MyMQTT import * 
 import time
 from datetime import datetime
-from catalogInterface import *
+
 
 # Open and initialize with config.json
 class plantsControl():
@@ -149,8 +149,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "microservices/conf.json",
-        confMS_path = "microservices/confMS.json")
+        conf_path = "microservices/plant_control/conf.json",
+        confMS_path = "microservices/plant_control/confMS.json")
 
     plant_control.loop()
     
