@@ -75,6 +75,11 @@
                     "plant": "mango",
                     "th_min": 20,
                     "th_max": 87
+                },
+                {
+                    "plant": "baobab",
+                    "th_min": 24,
+                    "th_max": 65
                 }
             ],
             "lastUpdate": "2023-10-06 11:21:30"
@@ -332,9 +337,26 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-09 18:57:27"
+            "lastUpdate": "2023-10-10 22:30:27"
         }
     ],
-    "services": [],
-    "lastUpdate": "2023-10-09 18:57:27"
+    "services": [
+        {
+            "servID": "16",
+            "name": "data_analysis",
+            "endpoints": [
+                "REST"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "REST",
+                    "address": "http://127.0.0.1:8090",
+                    "ip": "127.0.0.1",
+                    "port": 8090
+                }
+            ],
+            "lastUpdate": "2023-10-10 22:30:26"
+        }
+    ],
+    "lastUpdate": "2023-10-10 22:30:27"
 }
