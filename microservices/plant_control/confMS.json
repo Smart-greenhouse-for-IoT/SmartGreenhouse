@@ -1,5 +1,5 @@
 {
-    "servID": "01",
+    "servID": "PC01",
     "name": "plant_control",
     "endpoints": [
         "REST",

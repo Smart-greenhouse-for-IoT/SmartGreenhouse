@@ -3,6 +3,7 @@ import json
 from sub.MyMQTT import * 
 import time
 from datetime import datetime
+import threading
 
 
 # Open and initialize with config.json
@@ -18,6 +19,8 @@ class plantsControl():
             self.myservice = json.load(f)
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
+        self.track_actuation_dict = {}
+        self._actuation_time = 10
 
         self.registerToCat()
 
@@ -35,27 +38,55 @@ class plantsControl():
         '''
 
         measure_dict = json.loads(body)
-        measure_dict_resp = {}
 
-        plant_description = self.getThresholdsPlant(measure_dict.get("device"), measure_dict.get("sensor"))
+        plant_description = self.getThresholdsPlant(measure_dict.get("device"), measure_dict.get("sensor"))        
+        topic_act = self.transformTopic(topic, plant_description.get("act_ID"))
+        body["plant_type"] = plant_description.get("plant_type")
 
         if measure_dict.get("v") < plant_description.get("th_min"):
-            measure_dict_resp["command"] = "start"
+
+            if topic_act not in self.track_actuation_dict:
+                self.startActuation()
             
-        else:
-            measure_dict_resp["command"] = "stop"
+
+    def startActuation(self, topic, body):
+
+        measure_dict_resp = body
+
+        measure_dict_resp["devID"] = topic[1]
+        measure_dict_resp["actID"] = topic[2]
+        measure_dict_resp["timestamp"] = time.time()
+        measure_dict_resp["command"] = "start"
+        
+
+        self._pubSub.myPublish(topic, measure_dict_resp)
+
+        print(f"Actuation started, topic:{topic}")
+
+        self.track_actuation_dict[topic] = measure_dict_resp
+        threading.Timer(self._actuation_time, self.stopActuation(topic))
+
+    def stopActuation(self, topic_):
+
+        message = self.track_actuation_dict.get(topic_)
+
+        message["timestamp"] = time.time()
+        message["command"] = "stop"
+        self._pubSub.myPublish(topic_, message)
+
+        self.track_actuation_dict.pop(topic_)
+
+        print(f"Actuation stopped, topic:{topic_}")
+
+
+
+    def transformTopic(self, topic, actuator):
         
         topic_ = topic.split("/")
+        topic_[2] = actuator
+        topic_ = ("/").join(topic_)
+        return topic_
 
-        measure_dict_resp["devID"] = topic_[1]
-        
-        topic_[2] = plant_description.get("actID")
-        measure_dict_resp["devID"] = topic_[2]
-        measure_dict_resp["timestamp"] = time.now()
-
-        
-        self._pubSub.myPublish("/".join(topic_), measure_dict)
-        
     
     def registerToCat(self):
         """
@@ -125,17 +156,17 @@ class plantsControl():
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
 
-    def loop(self, refresh_time = 10):
+    def loop(self, refresh_time = 100):
 
         last_time = 0
         try:
             while True:
-                print("looping\n")
+                
                 local_time = time.time()
 
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
-
+                    print("looping\n")
                     self.updateToCat()
 
                     last_time = time.time() 
