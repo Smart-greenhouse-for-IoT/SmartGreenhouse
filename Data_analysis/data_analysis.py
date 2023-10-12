@@ -117,21 +117,32 @@ class DataAnalysisMicroservice():
         # Register to catalog
         self.registerToCat()
 
-    def registerToCat(self):
+    def registerToCat(self, tries = 10):
         """
         registerToCat
         -------------
         This function will register the microservice to the catalog.
         """
 
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
         try:
             req_dev = requests.post(self.CatAddr + "/addService", data=json.dumps(self.confDA))
             if req_dev.ok:
                 print(f"Service {self.confDA['servID']} added successfully!")
+                update = True
             else:
                 print(f"Service {self.confDA['servID']} could not be added!")
         except:
-            raise Exception(f"Fail to establish a connection with {self.conf['ip']}")
+            print(f"Fail to establish a connection with {self.conf['ip']}")
+            time.sleep(1)
+
+        if update == False:
+            raise Exception(f"Fail to establish a connection with {self.conf['ip']}")  
+        
+
 
     def GET(self, *uri, **params):
         
@@ -211,20 +222,29 @@ class DataAnalysisMicroservice():
             cherrypy.engine.block()
             print("Loop manually interrupted")
 
-    def updateToCat(self):
+    def updateToCat(self, tries = 10):
         """
         updateToCat
         -----------
         Update the microservice, to let the catalog know that this microservic is still operative.
         """
 
-        try:
-            req_dev = requests.put(self.CatAddr + "/updateService", data=json.dumps(self.confDA))
-            if req_dev.ok:
-                print(f"Service {self.confDA['servID']} updated successfully!")
-            else:
-                print(f"Service {self.confDA['servID']} could not be updated!")
-        except:
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                req_dev = requests.put(self.CatAddr + "/updateService", data=json.dumps(self.confDA))
+                if req_dev.ok:
+                    print(f"Service {self.confDA['servID']} updated successfully!")
+                    update = True
+                else:
+                    print(f"Service {self.confDA['servID']} could not be updated!")
+            except:
+                print(f"Fail to establish a connection with {self.conf['ip']}")
+                time.sleep(1)
+
+        if update == False:
             raise Exception(f"Fail to establish a connection with {self.conf['ip']}")
 
     
@@ -243,6 +263,7 @@ if __name__ == "__main__":
     cherrypy.engine.start()
 
     webService.loop(refresh_time=50)
+
 '''
 if __name__ == "__main__":
     

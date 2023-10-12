@@ -490,7 +490,7 @@ class REST_catalog(catalog):
             elif uri[0] == "addService":
                 if self.addService(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\Service {bodyAsDict["servID"]} added successfully!')
+                    print(f'\nService {bodyAsDict["servID"]} added successfully!')
                 else:
                     raise cherrypy.HTTPError(400, f'Service {bodyAsDict["servID"]} could not be added!')
             
@@ -590,7 +590,7 @@ if __name__ == "__main__":
     cherrypy.engine.start()
     try:
         while True:
-            webService.cleaningDev(timeout=160)
-            webService.cleaningServ(timeout=160)
+            webService.cleaningDev(timeout=100)
+            webService.cleaningServ(timeout=100)
     except KeyboardInterrupt:
         cherrypy.engine.block()
