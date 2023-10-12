@@ -1,0 +1,15 @@
+{
+    "servID": "16",
+    "name": "data_analysis",
+    "endpoints": [
+        "REST"
+    ],
+    "endpoints_details": [
+        {
+            "endpoint": "REST",
+            "address": "http://127.0.0.1:8090",
+            "ip": "127.0.0.1",
+            "port": 8090
+        }
+      ], "lastUpdate": ""
+} 

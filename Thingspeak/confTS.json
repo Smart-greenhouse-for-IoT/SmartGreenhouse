@@ -1,0 +1,20 @@
+{
+    "servID": "123",
+    "name": "thingspeak",
+    "endpoints": [
+        "MQTT"
+    ],
+    "endpoints_details": [
+        {
+            "endpoint": "MQTT",
+            "topic": "smartGreenhouse/#"
+        }
+      ], 
+    "TS_info": {
+            "url_TS": "https://api.thingspeak.com/update.json",
+            "write_key": "6K2SF8DLAG4J7D3L",
+            "read_key": "PITP9J8PVKXKS720",
+            "channel_id": "2055720"
+    },
+    "lastUpdate": ""
+} 

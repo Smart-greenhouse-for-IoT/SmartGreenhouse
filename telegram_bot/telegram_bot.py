@@ -29,7 +29,7 @@ class Telegram_Bot:
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
         #FIXME: what happen if the result is negative? We needt to add a maxtry param like davide did?
-        # self.TS_info()    
+        self.DA_info()    
 
         self.userConnected = False
         self.grHselected = False
@@ -100,11 +100,10 @@ class Telegram_Bot:
                         try:
                             req = requests.post(self.addr_cat + "/addUser", json.dumps(newUser))
                             req_id = requests.get(self.addr_cat + "/user/recentID")
+                            self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} correctly created.")
+                            self.bot.sendMessage(chat_ID, text=f"Your ID is {req_id.json()['usrID']}")
                         except:
-                            raise Exception("The catalog web service is unreachable!")
-                            
-                        self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} correctly created.")
-                        self.bot.sendMessage(chat_ID, text=f"Your ID is {req_id.json()['usrID']}")
+                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
                     
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
@@ -112,6 +111,7 @@ class Telegram_Bot:
                 elif command == "/addgrhousedevice":
                     if self.userConnected == True: 
                         if self.grHselected == True:
+
                             try:
                                 req_dev = requests.get(self.addr_cat + f"/device?devID={parameters[0]}")
                                 r_assigned_dev = requests.get(self.addr_cat + 
@@ -130,7 +130,7 @@ class Telegram_Bot:
                                 else:
                                     self.bot.sendMessage(chat_ID, text=f"The device {parameters[0]} does not exist!")
                             except:
-                                raise Exception("The catalog web service is unreachable!")
+                                self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
                         else:
                             self.bot.sendMessage(chat_ID, text=f"Greenhouse not selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
@@ -149,27 +149,26 @@ class Telegram_Bot:
                         
                         try:
                             req = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}")
-                        except:
-                            raise Exception("The catalog web service is unreachable!")
 
-                        if req.ok:              
-                            usr = req.json()
-                            if usr['name'] == self.user['name']:
-                                self.bot.sendMessage(chat_ID, text=f"Logged in with user: {parameters[0]} {parameters[1]}")
-                                self.userConnected = True
-                                if usr["ghID"] == []:
-                                    self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse."
-                                                                    "\n /addgreenhouse")
+                            if req.ok:              
+                                usr = req.json()
+                                if usr['name'] == self.user['name']:
+                                    self.bot.sendMessage(chat_ID, text=f"Logged in with user: {parameters[0]} {parameters[1]}")
+                                    self.userConnected = True
+                                    if usr["ghID"] == []:
+                                        self.bot.sendMessage(chat_ID, text=f"No greenhouses found, add your first greenhouse."
+                                                                        "\n /addgreenhouse")
+                                    else:
+                                        self.user["ghID"] = usr["ghID"]
+                                        self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectgreenhouse")
                                 else:
-                                    self.user["ghID"] = usr["ghID"]
-                                    self.bot.sendMessage(chat_ID, text=f"Select one greenhouse /selectgreenhouse")
+                                    self.bot.sendMessage(chat_ID, text=f"The name {self.user['name']} does not match\
+                                                                                            with the existing user!")      
                             else:
-                                self.bot.sendMessage(chat_ID, text=f"The name {self.user['name']} does not match\
-                                                                                        with the existing user!")
+                                self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} not found!")
+                        except:
+                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
 
-                                
-                        else:
-                            self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} not found!")
                     else:
                         self.bot.sendMessage(chat_ID, text=f"You are already logged with user {self.user['name']} {self.user['usrID']}.")
                         buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'signout'), 
@@ -195,57 +194,57 @@ class Telegram_Bot:
                                 req_plant = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}&plant={plant_name}")
                                 req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={device}")
                                 req_act = requests.get(self.addr_cat + f"/device/actuators?devID={device}")
-                            except:
-                                raise Exception("The catalog web service is unreachable!")
-                            
-                            # Assign a sensor and actuator to the plant to be added
-                            if req_sens.ok and req_act.ok:
-                                sensors = req_sens.json()
-                                actuators = req_act.json()
 
-                                all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
-                                all_act = [act["actID"] for act in actuators]
+                                # Assign a sensor and actuator to the plant to be added
+                                if req_sens.ok and req_act.ok:
+                                    sensors = req_sens.json()
+                                    actuators = req_act.json()
 
-                                free_sens = [sens for sens in all_sens if sens not in used_sens]
-                                free_act = [act for act in all_act if act not in used_act]
+                                    all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
+                                    all_act = [act["actID"] for act in actuators]
 
-                                # Check if there are sensor available
-                                try:
-                                    sensID = free_sens.pop(0)
-                                    actID = free_act.pop(free_act.index("a" + sensID[1:]))
-                                except:
-                                    self.bot.sendMessage(chat_ID, text=f"Device {device} does not have more free sensor!")
-                            else:
-                                self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
-                            
+                                    free_sens = [sens for sens in all_sens if sens not in used_sens]
+                                    free_act = [act for act in all_act if act not in used_act]
 
-                            # Check if the plant exist in user owned plants
-                            if req_plant.ok: 
-                                
-                                # Check if there is a free sensors to be assigned
-                                if sensID and actID:
-                                    plant = req_plant.json()
-
-                                    # Add device, sensor, actuators info to the plant
-                                    plant["devID"] = device
-                                    plant["sensID"] = sensID
-                                    plant["actID"] = actID
-
-                                    self.greenhouse["plantsList"].append(plant)
-                                    
-                                    # Update the greenhouse in catalog
+                                    # Check if there are sensor available
                                     try:
-                                        req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
-                                        self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added "
-                                                            f"to greenhouse {self.greenhouse['ghID']}"
-                                                            f"\nPlease insert in the pot the sensor {plant['sensID']} and actuator {plant['actID']}")
+                                        sensID = free_sens.pop(0)
+                                        actID = free_act.pop(free_act.index("a" + sensID[1:]))
                                     except:
-                                        raise Exception("The catalog web service is unreachable!")
-                                else: 
-                                    self.bot.sendMessage(chat_ID, text=f"There are no more free sensor in device {device}!")
+                                        self.bot.sendMessage(chat_ID, text=f"Device {device} does not have more free sensor!")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
+                                
 
-                            else:
-                                self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
+                                # Check if the plant exist in user owned plants
+                                if req_plant.ok: 
+                                    
+                                    # Check if there is a free sensors to be assigned
+                                    if sensID and actID:
+                                        plant = req_plant.json()
+
+                                        # Add device, sensor, actuators info to the plant
+                                        plant["devID"] = device
+                                        plant["sensID"] = sensID
+                                        plant["actID"] = actID
+
+                                        self.greenhouse["plantsList"].append(plant)
+                                        
+                                        # Update the greenhouse in catalog
+                                        try:
+                                            req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
+                                            self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added "
+                                                                f"to greenhouse {self.greenhouse['ghID']}"
+                                                                f"\nPlease insert in the pot the sensor {plant['sensID']} and actuator {plant['actID']}")
+                                        except:
+                                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
+                                    else: 
+                                        self.bot.sendMessage(chat_ID, text=f"There are no more free sensor in device {device}!")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
+
+                            except:
+                                self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
                         
                         else:
                             self.bot.sendMessage(chat_ID, text=f"Greenhouse not selected."
@@ -275,12 +274,12 @@ class Telegram_Bot:
                                     try:
                                         req = requests.post(self.addr_cat + f"/addPlant?usrID={self.user['usrID']}",
                                                             data=json.dumps(newPlant))
+                                        if req.ok:
+                                            self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} correctly added to the user database.")
+                                        else:
+                                            self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} has not been added to the user database!.")
                                     except:
-                                        raise Exception("The catalog web service is unreachable!")
-                                    if req.ok:
-                                        self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} correctly added to the user database.")
-                                    else:
-                                        self.bot.sendMessage(chat_ID, text=f"{newPlant['plant']} has not been added to the user database!.")
+                                        self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
 
                                 else:
                                     self.bot.sendMessage(chat_ID, text="Low humidity threshold cannot be higher than the high treshold."
@@ -338,7 +337,7 @@ class Telegram_Bot:
                                     else:
                                         self.bot.sendMessage(chat_ID, text=f"The device {devID_gh} does not exist!")
                                 except:
-                                    raise Exception("The catalog web service is unreachable!")
+                                    self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
                             else:
                                 self.bot.sendMessage(chat_ID, text="Humidity and temperature values out of maximum range."
                                                                 "\nPlease reinsert the command.")
@@ -372,15 +371,14 @@ class Telegram_Bot:
                     if message == "/status":
                         done = True
                         #TODO: ALE qui bisogna prendere le informazioni di temperatura e umidità della greenhouse
-                        """try:
-                            req_ghINFO = requests.get(self.addr_TS + f"/greenhouse?ghID={self.greenhouse['ghID']}")
+                        try:
+                            req_ghINFO = requests.get(self.addr_DA + f"/getLastValue?ghID={self.greenhouse['ghID']}")
                             ghINFO = req_ghINFO.json() #CHECK: its a csv file? maybe .json is not correct
-                        except:
-                            raise Exception("The thingspeak web service is unreachable!")"""
-                        
-                        self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
+                            self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
                                                     f"\nNumber of plants: {len(self.greenhouse['plantsList'])}"
                                                     "\nIf you want the list of the plants of this greenhouse click /plants")
+                        except:
+                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the data analysis web service is unreachable! Try again later.")
                         
                     # Check and print all the plant list of the selected greenhouse
                     elif message == "/plants":
@@ -405,11 +403,11 @@ class Telegram_Bot:
                         self.plantSelected = True
                         self.plant["plant"] = message[1:]
                         #TODO: ALE ottieni le info della pianta selezionata
-                        """try:
-                            req_plantINFO = requests.get(self.addr_TS + f"/greenhouse?ghID={self.greenhouse['ghID']}")
+                        try:
+                            req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
                             plantINFO = req_plantINFO.json() #CHECK: its a csv file? maybe .json is not correct
                         except:
-                            raise Exception("The thingspeak web service is unreachable!")"""
+                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the data analysis web service is unreachable! Try again later.")
 
                     # Inform the user to the complete command to add a plant to the greenhouse
                     elif message == "/addgrhouseplant":
@@ -423,21 +421,19 @@ class Telegram_Bot:
                                          if plant["devID"] == dev]
                             try:
                                 req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev}")
+                                
+                                # Assign a sensor and actuator to the plant to be added
+                                if req_sens.ok:
+                                    sensors = req_sens.json()
+
+                                    all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
+
+                                    free_sens = [sens for sens in all_sens if sens not in used_sens]
+                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev} have {len(free_sens)} sensor available")
+                                else:
+                                    self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
                             except:
-                                raise Exception("The catalog web service is unreachable!")
-                            
-                            # Assign a sensor and actuator to the plant to be added
-                            if req_sens.ok:
-                                sensors = req_sens.json()
-
-                                all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
-
-                                free_sens = [sens for sens in all_sens if sens not in used_sens]
-                                self.bot.sendMessage(chat_ID, text=f"Device connector {dev} have {len(free_sens)} sensor available")
-                            else:
-                                self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
-
-                            
+                                self.bot.sendMessage(chat_ID, text=f"Sorry, the catalog web service is unreachable! Try again later.")
                         
                         text = ("Do you want the list of the user plants?")
                         buttons = [[InlineKeyboardButton(text=f'Yes', callback_data=f'plants'), 
@@ -504,12 +500,12 @@ class Telegram_Bot:
                     self.greenhouse["ghID"] = message[1:]
                     try:
                         req = requests.get(self.addr_cat + f"/greenhouse?ghID={self.greenhouse['ghID']}")
+                        if req.ok:
+                            self.greenhouse = req.json()
+                        else:
+                            self.bot.sendMessage(chat_ID, text=f"An error occured when selecting greenhouse {self.greenhouse['ghID']}!")
                     except:
-                        raise Exception("The catalog web service is unreachable!")
-                    if req.ok:
-                        self.greenhouse = req.json()
-                    else:
-                        self.bot.sendMessage(chat_ID, text=f"An error occured when selecting greenhouse {self.greenhouse['ghID']}!")
+                        self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
                     
                 # Used to specify the correct command to add a new plant to the user database
                 elif message == "/addplant":
@@ -616,7 +612,7 @@ class Telegram_Bot:
                 else:
                     self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} does not have plants in its database!")
             except:
-                raise Exception("The catalog web service is unreachable!")
+                self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
 
         # When 'No' buttons are clicked
         elif action == 'none':
@@ -693,24 +689,36 @@ class Telegram_Bot:
             self.bot.sendMessage(chat_ID, text=message,
                         parse_mode='Markdown', reply_markup=keyboard)
 
-    def TS_info(self):
+    def DA_info(self, tries = 10):
         """
-        TS_info
+        DA_info
         -------
         Try to contact the catalog to obtain the information of thingspeak.
         ### Parameters obtained
         - TsIp: IP of thingspeak rest interface
         - TsPort: Port of thingspeak rest interface
         """
-        try:
-            req_TS = requests.get(self.addr_cat + "/thingspeak")
-            TS = req_TS.json()
-            TS_info = {
-                "ip": TS["TsIp"],
-                "port": TS["TsPort"]
-            }
-            self.addr_TS = "http://" + TS_info["ip"] + ":" + TS_info["port"]
-        except:
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                req_Da = requests.get(self.addr_cat + "/service?name=data_analysis")
+                if req_Da.ok:
+                    Da =req_Da.json()
+                    DA_info = {
+                        "ip": Da["endpoints_details"][0]["ip"],
+                        "port": str(Da["endpoints_details"][0]["port"])
+                    }
+                    self.addr_DA = "http://" + DA_info["ip"] + ":" + DA_info["port"]
+                    update = True
+                else:
+                    print("Data analysis microservice not present in the catalog!")
+            except:
+                print("The catalog web service is unreachable!")
+                time.sleep(1)
+
+        if update == False:
             raise Exception("The catalog web service is unreachable!")
 
 

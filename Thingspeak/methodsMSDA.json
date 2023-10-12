@@ -1,0 +1,11 @@
+{
+    "methods":[
+        {
+            "GET":[
+                "getLastValue?ghID=&n=",
+                "getLastMoistureLevel?ghID=&sensID=",
+                "getAllLastValues?ghID="
+            ]
+        }
+    ]
+}
