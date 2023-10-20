@@ -1,0 +1,16 @@
+{
+    "servID": "02",
+    "name": "GH_control",
+    "endpoints": [
+        "REST",
+        "MQTT"
+    ],
+    "endpoints_details": [
+        {
+            "endpoint": "",
+            "address": "",
+            "ip": "",
+            "port": ""
+        }
+      ], "lastUpdate": ""
+} 
