@@ -4,7 +4,12 @@
             "GET":[
                 "getLastValue?ghID=&n=",
                 "getLastMoistureLevel?ghID=&sensID=",
-                "getAllLastValues?ghID="
+                "getAllLastValues?ghID=",
+                "getGHIDlist",
+                "getDataChart?ghID=&n=&t=",
+                "EnergyConsumptionACT?ghid=&devid=&actid=",
+                "EnergyConsumptionDEV?ghid=&devid=",
+                "EnergyConsumptionGH?ghid="
             ]
         }
     ]
