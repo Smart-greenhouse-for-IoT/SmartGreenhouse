@@ -220,8 +220,8 @@ class GHControl():
 if __name__ == "__main__":
 
     gh_control = GHControl(
-        conf_path = "microservices/conf.json",
-        confMS_path = "microservices/confMS.json")
+        conf_path = "gh_control/conf.json",
+        confMS_path = "gh_control/confMS.json")
 
     gh_control.loop()
     

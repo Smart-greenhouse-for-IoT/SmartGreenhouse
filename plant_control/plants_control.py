@@ -23,13 +23,16 @@ class plantsControl():
         self._actuation_time = 15
 
         self.registerToCat()
-
-        self._topic = self.conf_dict.get("topic")
+        for end_det in self.myservice["endpoints_details"]:
+            if end_det.get("endpoint") == "MQTT":
+                self._topic = end_det["topics"]
+            
         self.broker_dict = self.get_broker()
         
         self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
-        self._pubSub.mySubscribe(self._topic)
+        for topic in self._topic:
+            self._pubSub.mySubscribe(topic)
         
 
     def notify(self, topic, body):
@@ -182,8 +185,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "microservices/plant_control/conf.json",
-        confMS_path = "microservices/plant_control/confMS.json")
+        conf_path = "plant_control/conf.json",
+        confMS_path = "plant_control/confMS.json")
 
     plant_control.loop()
     
