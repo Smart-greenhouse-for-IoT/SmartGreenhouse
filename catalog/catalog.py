@@ -590,7 +590,7 @@ if __name__ == "__main__":
     cherrypy.engine.start()
     try:
         while True:
-            webService.cleaningDev(timeout=100)
-            webService.cleaningServ(timeout=100)
+            webService.cleaningDev(timeout=50)
+            webService.cleaningServ(timeout=50)
     except KeyboardInterrupt:
         cherrypy.engine.block()

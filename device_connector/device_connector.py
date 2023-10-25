@@ -95,7 +95,7 @@ class Device_Connector(object):
         self.broker_dict = self.get_broker()
         
         self.client_mqtt = MyMQTT(
-            clientID = self.broker_dict["clientID"],
+            clientID = self.cat_info["clientID"],
             broker = self.broker_dict["IP"],
             port = self.broker_dict["port"],
             notifier=self
@@ -103,6 +103,15 @@ class Device_Connector(object):
         
         # Start MQTT client
         self.client_mqtt.start()
+        
+        # Subscription to MQTT topics
+        for end_det in self.mydevice["endpoints_details"]:
+            if end_det.get("endpoint") == "MQTT":
+                self._topic = end_det["topics"]
+        
+        for topic in self._topic:
+            self.client_mqtt.mySubscribe(topic)
+
 
     def notify(self,topic,payload): 
         """
@@ -111,39 +120,33 @@ class Device_Connector(object):
         Where we receive the topic which we are subscribed (plant control microservices)
         """
 
-        message = json.load(payload)
-        # Iteration over all the actuator to find the one of the topic
-        for actuator in self.mydevice["resources"]["actuators"]:
-            # Check if the actuator have a topic where public the measure
-            if "MQTT" in actuator["available_services"]:
-                services = actuator["services_details"][0]
-                if services["service_type"] == "MQTT":
-                    # Obtain the topic list of this actuator
-                    topic_list = services["topic"]
+        message = json.loads(payload)
+        if topic.split("/")[2].startswith("a"):
+            #print(f"Command received:\n{message}\n from topic {topic}")
+            # Iteration over all the actuator to find the one of the topic
+            for actuator in self.mydevice["resources"]["actuators"]:
+                # Check if the actuator have a topic where public the measure
+                if "MQTT" in actuator["available_services"]:
+                    services = actuator["services_details"][0]
+                    if services["service_type"] == "MQTT":
+                        # Obtain the topic list of this actuator
+                        topic_list = services["topic"]
 
-                    # If this is the correct actuator then
-                    if topic in topic_list:
-                        #TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
-                        # Start the actuation
-                        if message['command'] == True:
-                            self.actuator_list[self.actuator_index[actuator["actID"]]].start()
-                        # Stop the actuation
-                        elif message['command'] == False:
-                            self.actuator_list[self.actuator_index[actuator["actID"]]].start()
+                        # If this is the correct actuator then
+                        if topic in topic_list:
+                            #TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
+                            # Start the actuation
+                            if message['command'] == True:
+                                self.actuator_list[self.actuator_index[actuator["actID"]]].start_actuation()
+                                print(f"{message['sensID']} start")
+                            # Stop the actuation
+                            elif message['command'] == False:
+                                self.actuator_list[self.actuator_index[actuator["actID"]]].start_actuation()
+                                print(f"{message['sensID']} stop")
+                    else:
+                        raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
                 else:
                     raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
-            else:
-                raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
-
-    def subscribe(self):
-        """
-        subscribe
-        ---------
-        Subscriber to all the irrigator topics of this device connector
-        """
-
-        # We want to be sure to do that commands in order
-        self.client_mqtt.mySubscribe()
     
     def registerToCat(self, tries = 10):
         """
@@ -166,9 +169,9 @@ class Device_Connector(object):
                     self.saveJson()
                 else:
                     print(f"Device {self.mydevice['devID']} could not be added!")
+                    time.sleep(1)
             except:
                 print(f"Fail to establish a connection with {self.cat_info['ip']}")
-                time.sleep(1)
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
@@ -193,9 +196,9 @@ class Device_Connector(object):
                     print(f"Device {self.mydevice['devID']} updated successfully!")
                 else:
                     print(f"Device {self.mydevice['devID']} could not be updated!")
+                    time.sleep(1)
             except:
                 print(f"Fail to establish a connection with {self.cat_info['ip']}")
-                time.sleep(1)
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
@@ -238,7 +241,7 @@ class Device_Connector(object):
 
         # For every active sensor connected to the device connector
         for sens_id in self.sensor_index.keys():
-            print(f"Measuring with sensor {sens_id}")
+            #print(f"Measuring with sensor {sens_id}")
             sens = {"sensID": sens_id,
                     "devID": self.mydevice['devID']}
             
@@ -249,7 +252,7 @@ class Device_Connector(object):
             for i in range(len(curr_meas)):
                 # At each measure is attached the origin, sensor_id and device_id
                 curr_meas[i].update(sens)
-            print(f"Measure: {curr_meas}")
+            #print(f"Measure: {curr_meas}")
 
             # Add the current measure to the list containing the last measures 
             # self.measures[self.sensor_index[sens_id]] = curr_meas
