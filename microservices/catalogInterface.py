@@ -1,5 +1,5 @@
-import json
 import requests
+import json
 
 
 class catalogInterface():
@@ -25,6 +25,29 @@ class catalogInterface():
 
         # Return a json dict with BrokerIP and BrokerPort
         return broker_dict
+    
+    def registerToCatMS(self):
+        """
+        registerToCat
+        -------------
+        This function will register the device connector to the catalog.
+        Each time the registration is done all the device of this device connector \n
+        are sent to the catalog.
+        """
+
+        # Address of the catalog for adding the devices
+        addr = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
+
+        try:
+            #POST the MS to the catalog
+            req_dev = requests.post(addr + "/addMS", data="esisto+id")  #TODO
+            
+            if req_dev.ok:
+                print(f"MS added successfully!")
+            else:
+                print(f"MS could not be added!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
     
     def get_devices(self):
         """

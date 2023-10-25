@@ -87,7 +87,7 @@ class Device_Connector(object):
                 self.actuator_list.append(actuator(actuator_conf))
         
         # Register to catalog
-        self.registerToCat()
+        self.registerToCat(tries=15)
 
         ########################################
         # MQTT client
@@ -125,10 +125,10 @@ class Device_Connector(object):
                     if topic in topic_list:
                         #TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
                         # Start the actuation
-                        if message['command'] == 'start':
+                        if message['command'] == True:
                             self.actuator_list[self.actuator_index[actuator["actID"]]].start()
                         # Stop the actuation
-                        elif message['command'] == 'stop':
+                        elif message['command'] == False:
                             self.actuator_list[self.actuator_index[actuator["actID"]]].start()
                 else:
                     raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
@@ -145,7 +145,7 @@ class Device_Connector(object):
         # We want to be sure to do that commands in order
         self.client_mqtt.mySubscribe()
     
-    def registerToCat(self):
+    def registerToCat(self, tries = 10):
         """
         registerToCat
         -------------
@@ -154,17 +154,26 @@ class Device_Connector(object):
         are sent to the catalog.
         """
 
-        try:
-            req_dev = requests.post(self.CatAddr + "/addDevice", data=json.dumps(self.mydevice))
-            if req_dev.ok:
-                print(f"Device {self.mydevice['devID']} added successfully!")
-                self.saveJson()
-            else:
-                print(f"Device {self.mydevice['devID']} could not be added!")
-        except:
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                req_dev = requests.post(self.CatAddr + "/addDevice", data=json.dumps(self.mydevice))
+                if req_dev.ok:
+                    print(f"Device {self.mydevice['devID']} added successfully!")
+                    update = True
+                    self.saveJson()
+                else:
+                    print(f"Device {self.mydevice['devID']} could not be added!")
+            except:
+                print(f"Fail to establish a connection with {self.cat_info['ip']}")
+                time.sleep(1)
+
+        if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
     
-    def updateToCat(self):
+    def updateToCat(self, tries = 10):
         """
         updateToCat
         -----------
@@ -172,26 +181,45 @@ class Device_Connector(object):
         know that this device connector and its devices are still 'alive'.
         """
         
-        try:
-            #PUT the devices to the catalog
-            req = requests.put(self.CatAddr + "/updateDevice", data=json.dumps(self.mydevice))
-            if req.ok:
-                print(f"Device {self.mydevice['devID']} updated successfully!")
-            else:
-                print(f"Device {self.mydevice['devID']} could not be updated!")
-        except:
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                #PUT the devices to the catalog
+                req = requests.put(self.CatAddr + "/updateDevice", data=json.dumps(self.mydevice))
+                if req.ok:
+                    update = True
+                    print(f"Device {self.mydevice['devID']} updated successfully!")
+                else:
+                    print(f"Device {self.mydevice['devID']} could not be updated!")
+            except:
+                print(f"Fail to establish a connection with {self.cat_info['ip']}")
+                time.sleep(1)
+
+        if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
-    def get_broker(self): 
+
+    def get_broker(self, tries = 10): 
         """
         get_broker
         ----------
         GET all the broker information
         """
 
-        try:
-            b_dict = requests.get(self.CatAddr + "/broker").json()  
-        except:
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                b_dict = requests.get(self.CatAddr + "/broker").json()  
+                update = True
+            except:
+                print(f"Fail to establish a connection with {self.cat_info['ip']}")
+                time.sleep(1)
+
+        if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
 
         # Return a json dict with BrokerIP and BrokerPort
@@ -286,15 +314,14 @@ class Device_Connector(object):
                 if local_time - last_time > refresh_time: 
                     self.updateMeasures()
                     self.publishLastMeas()
-                    self.updateToCat()
+                    self.updateToCat(tries=15)
                     # self.post_sensor_Cat()
                     last_time = time.time() 
 
                 time.sleep(5)
-
-        except KeyboardInterrupt: #to kill the program
+        # To kill the program
+        except KeyboardInterrupt: 
             print("Loop manually interrupted")
-            pass
     
     def webServiceInfo(self):
         ind = self.mydevice["endpoints"].index("REST")
