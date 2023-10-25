@@ -239,22 +239,30 @@ class DataAnalysisMicroservice():
         # Register to catalog
         self.registerToCat()
 
-    def registerToCat(self):
+    def registerToCat(self, tries = 10):
         """
         registerToCat
         -------------
-        This function will register the microservice to the catalog.
+        This function will register the TS adaptor to the catalog.
         """
 
-        try:
-            req_dev = requests.post(self.CatAddr + "/addService", data=json.dumps(self.confDA))
-            if req_dev.ok:
-                print(f"Service {self.confDA['servID']} added successfully!")
-            else:
-                print(f"Service {self.confDA['servID']} could not be added!")
-        except:
-            raise Exception(f"Fail to establish a connection with {self.conf['ip']}")
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                req_serv = requests.post(self.addr_cat + "/addService", data=json.dumps(self.myTS))
+                if req_serv.ok:
+                    print(f"Service {self.myTS['servID']} added successfully!")
+                    update = True
+                else:
+                    print(f"Service {self.myTS['servID']} could not be added!")
+            except:
+                print(f"Fail to establish a connection with {self.conf_dict['ip']}")
+                time.sleep(1)
 
+        if update == False:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
     
     def getGHIDlist(self):
         '''
@@ -437,48 +445,62 @@ class DataAnalysisMicroservice():
                 else:
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
         else:
-            raise cherrypy.HTTPError(404, f"Error! Method not found!")     
+            raise cherrypy.HTTPError(404, f"Error! Method not found!")
 
-
-
-    def loop(self, refresh_time = 10):
+    def loop(self, refresh_time = 30):
         """
         Loop
         ----
-        loop to mantain updated the services in the catalog
+        ### Input Parameters:
+        - refresh_time: time to wait before doing another measure of the sensors.
+
+        This function will run continuously until it is stopped.\n
         """
         last_time = 0
 
         try:
             while True:
+                time.sleep(5)
                 print("looping\n")
                 local_time = time.time()
+
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
-                    self.updateToCat()
+                    self.updateToCat(tries=15)
                     # self.post_sensor_Cat()
                     last_time = time.time() 
 
-                time.sleep(5)
+        # To kill the program
         except KeyboardInterrupt:
-            cherrypy.engine.block()
+            cherrypy.engine.block() 
             print("Loop manually interrupted")
 
-    def updateToCat(self):
+    def updateToCat(self, tries = 10):
         """
         updateToCat
         -----------
-        Update the microservice, to let the catalog know that this microservic is still operative.
+        Update the TS adaptor  to the catalog, to let the catalog \n
+        know that this service is still 'alive'.
         """
+        
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                #PUT the TS to the catalog services
+                req = requests.put(self.addr_cat + "/updateService", data=json.dumps(self.myTS))
+                if req.ok:
+                    update = True
+                    print(f"Service {self.myTS['servID']} updated successfully!")
+                else:
+                    print(f"Service {self.myTS['servID']} could not be updated!")
+            except:
+                print(f"Fail to establish a connection with {self.conf_dict['ip']}")
+                time.sleep(1)
 
-        try:
-            req_dev = requests.put(self.CatAddr + "/updateService", data=json.dumps(self.confDA))
-            if req_dev.ok:
-                print(f"Service {self.confDA['servID']} updated successfully!")
-            else:
-                print(f"Service {self.confDA['servID']} could not be updated!")
-        except:
-            raise Exception(f"Fail to establish a connection with {self.conf['ip']}")
+        if update == False:
+            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
 
     
 
