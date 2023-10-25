@@ -4,6 +4,7 @@ from sub.MyMQTT import *
 import time
 from datetime import datetime
 from catalogInterface import *
+import threading
 
 
 
@@ -106,7 +107,8 @@ class GHControl():
 
 
     def notify(self, topic, body):
-        '''This function is the on message callback
+        '''
+        This function is the on message callback
         '''
         
         measure_dict = json.loads(body)
@@ -139,6 +141,62 @@ class GHControl():
         self._pubSub.myPublish("/".join(topic_), measure_dict)
 
 
+
+    def notify(self, topic, body):
+        '''
+        This function is the on message callback
+        '''
+
+        measure_dict = json.loads(body)
+
+        plant_description = self.getThresholdsPlant(measure_dict.get("devID"), measure_dict.get("sensID"))        
+        topic_act = self.transformTopic(topic, plant_description.get("actID"))
+        measure_dict["plant"] = plant_description.get("plant")
+        if measure_dict.get("v") < plant_description.get("th_min"):
+
+            if topic_act not in self.track_actuation_dict:
+                self.startActuation(topic_act, measure_dict)
+            
+
+    def startActuation(self, topic, body):
+
+        measure_dict_resp = body
+
+        measure_dict_resp["devID"] = topic.split("/")[1]
+        measure_dict_resp["actID"] = topic.split("/")[2]
+        measure_dict_resp["timestamp"] = time.time()
+        measure_dict_resp["command"] = "start"
+        
+
+        self._pubSub.myPublish(topic, measure_dict_resp)
+
+        print(f"Actuation started, topic:{topic}")
+
+        self.track_actuation_dict[topic] = measure_dict_resp
+        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
+        self.track_actuation_dict[topic]["timer"].start()
+
+    def stopActuation(self, topic_):
+
+        message = self.track_actuation_dict.get(topic_)
+        
+        message.pop("timer")
+        message["timestamp"] = time.time()
+        message["command"] = "stop"
+        self._pubSub.myPublish(topic_, message)
+
+        self.track_actuation_dict.pop(topic_)
+
+        print(f"Actuation stopped, topic:{topic_}")
+
+
+
+    def transformTopic(self, topic, actuator):
+        
+        topic_ = topic.split("/")
+        topic_[2] = actuator
+        topic_ = ("/").join(topic_)
+        return topic_
     def loop(self, refresh_time = 10):
 
         last_time = 0
