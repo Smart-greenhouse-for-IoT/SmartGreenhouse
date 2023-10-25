@@ -11,5 +11,8 @@
             "ip": "127.0.0.1",
             "port": 8090
         }
-      ], "lastUpdate": ""
+      ], 
+      "lastUpdate": "",
+      "path_dataset1": "D:\\GitHub\\SmartGreenHouse\\SmartGreenhouse\\Data_analysis\\sub\\datasets\\20210703_greenhouse_data.csv",
+      "path_dataset2": "D:\\GitHub\\SmartGreenHouse\\SmartGreenhouse\\Data_analysis\\sub\\datasets\\RosesGreenhDB.csv"
 } 

@@ -29,7 +29,7 @@
             "plantsList": [
                 {
                     "plant": "zafferano",
-                    "th_min": 8,
+                    "th_min": 100,
                     "th_max": 90,
                     "devID": "d1",
                     "sensID": "s3",
@@ -37,7 +37,7 @@
                 },
                 {
                     "plant": "zafferano",
-                    "th_min": 8,
+                    "th_min": 100,
                     "th_max": 90,
                     "devID": "d1",
                     "sensID": "s4",
@@ -45,7 +45,7 @@
                 },
                 {
                     "plant": "cicoria",
-                    "th_min": 8,
+                    "th_min": 100,
                     "th_max": 90,
                     "devID": "d1",
                     "sensID": "s5",
@@ -53,7 +53,7 @@
                 },
                 {
                     "plant": "mango",
-                    "th_min": 20,
+                    "th_min": 100,
                     "th_max": 87,
                     "devID": "d1",
                     "sensID": "s6",
@@ -337,46 +337,27 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-12 11:13:00"
+            "lastUpdate": "2023-10-14 16:29:32"
         }
     ],
     "services": [
         {
-            "servID": "16",
-            "name": "data_analysis",
+            "servID": "PC01",
+            "name": "plant_control",
             "endpoints": [
-                "REST"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "REST",
-                    "address": "http://127.0.0.1:8090",
-                    "ip": "127.0.0.1",
-                    "port": 8090
-                }
-            ],
-            "lastUpdate": "2023-10-12 11:13:01"
-        },
-        {
-            "servID": "123",
-            "name": "thingspeak",
-            "endpoints": [
+                "REST",
                 "MQTT"
             ],
             "endpoints_details": [
                 {
-                    "endpoint": "MQTT",
-                    "topic": "smartGreenhouse/#"
+                    "endpoint": "",
+                    "address": "",
+                    "ip": "",
+                    "port": ""
                 }
             ],
-            "TS_info": {
-                "url_TS": "https://api.thingspeak.com/update.json",
-                "write_key": "6K2SF8DLAG4J7D3L",
-                "read_key": "PITP9J8PVKXKS720",
-                "channel_id": "2055720"
-            },
-            "lastUpdate": "2023-10-12 11:13:10"
+            "lastUpdate": "2023-10-14 16:28:23"
         }
     ],
-    "lastUpdate": "2023-10-12 11:13:10"
+    "lastUpdate": "2023-10-14 16:29:32"
 }
