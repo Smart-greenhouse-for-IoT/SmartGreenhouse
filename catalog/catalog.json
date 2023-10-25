@@ -29,7 +29,7 @@
             "plantsList": [
                 {
                     "plant": "zafferano",
-                    "th_min": 8,
+                    "th_min": 100,
                     "th_max": 90,
                     "devID": "d1",
                     "sensID": "s3",
@@ -37,7 +37,7 @@
                 },
                 {
                     "plant": "zafferano",
-                    "th_min": 8,
+                    "th_min": 100,
                     "th_max": 90,
                     "devID": "d1",
                     "sensID": "s4",
@@ -45,7 +45,7 @@
                 },
                 {
                     "plant": "cicoria",
-                    "th_min": 8,
+                    "th_min": 100,
                     "th_max": 90,
                     "devID": "d1",
                     "sensID": "s5",
@@ -53,7 +53,7 @@
                 },
                 {
                     "plant": "mango",
-                    "th_min": 20,
+                    "th_min": 100,
                     "th_max": 87,
                     "devID": "d1",
                     "sensID": "s6",
@@ -75,6 +75,11 @@
                     "plant": "mango",
                     "th_min": 20,
                     "th_max": 87
+                },
+                {
+                    "plant": "baobab",
+                    "th_min": 24,
+                    "th_max": 65
                 }
             ],
             "lastUpdate": "2023-10-06 11:21:30"
@@ -332,9 +337,27 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-07 10:36:14"
+            "lastUpdate": "2023-10-14 16:29:32"
         }
     ],
-    "services": [],
-    "lastUpdate": "2023-10-07 10:36:14"
+    "services": [
+        {
+            "servID": "PC01",
+            "name": "plant_control",
+            "endpoints": [
+                "REST",
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "",
+                    "address": "",
+                    "ip": "",
+                    "port": ""
+                }
+            ],
+            "lastUpdate": "2023-10-14 16:28:23"
+        }
+    ],
+    "lastUpdate": "2023-10-14 16:29:32"
 }

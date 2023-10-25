@@ -1,4 +1,5 @@
 import json
+
 import paho.mqtt.client as PahoMQTT
 
 
@@ -28,7 +29,6 @@ class MyMQTT:
         self._paho_mqtt.publish(topic, json.dumps(msg), 2)
 
     def mySubscribe(self, topic):
-
         # subscribe for a topic
         self._paho_mqtt.subscribe(topic, 2)
         # just to remember that it works also as a subscriber

@@ -1,6 +1,6 @@
 {
-    "servID": "",
-    "name": "",
+    "servID": "02",
+    "name": "GH_control",
     "endpoints": [
         "REST",
         "MQTT"
