@@ -125,10 +125,10 @@ class Device_Connector(object):
                     if topic in topic_list:
                         #TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
                         # Start the actuation
-                        if message['command'] == 'start':
+                        if message['command'] == True:
                             self.actuator_list[self.actuator_index[actuator["actID"]]].start()
                         # Stop the actuation
-                        elif message['command'] == 'stop':
+                        elif message['command'] == False:
                             self.actuator_list[self.actuator_index[actuator["actID"]]].start()
                 else:
                     raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
