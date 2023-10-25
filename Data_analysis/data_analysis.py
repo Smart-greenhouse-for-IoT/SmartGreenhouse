@@ -2,7 +2,7 @@ import numpy as np
 from thingspeak_reader import * 
 import cherrypy
 import json
-
+import pandas as pd
 import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -14,7 +14,32 @@ from sklearn.model_selection import cross_val_score
 
 
 class DataAnalysis():
+
     def __init__(self, conf_DA_path):
+
+        '''
+        df1: 17164 rows × 5 columns
+
+            id: measurement id 
+            T(°) : greenhouse temperature
+            HR (%) : Relative greenhouse humidity
+            CO2(Analog): greenhouse CO2
+            timestamp: yyyy-dd-mm hh:mm
+
+        -
+        df2: 300 rows × 5 columns
+
+            HS (Analog): soil humidity
+            T(°) : greenhouse temperature
+            HR (%) : Relative greenhouse humidity
+            CO2(Analog): greenhouse CO2
+            class: 
+                1: soil without water - bagno tanto
+                2: environment correct - non bagno
+                3: too much hot - bagno medio
+                4: very cold - bagno poco
+        '''
+
         with open(conf_DA_path) as f:
             self.confDA = json.load(f)
 
@@ -23,6 +48,7 @@ class DataAnalysis():
 
 
     def dfAnalysis(self):
+        
         self.df2.isna().any().any() # there are not NaN values
         self.df2 = self.df2.drop(columns=["L (Lux)"])
         self.df2 = self.df2.rename(columns={'clase':'class'})
@@ -136,6 +162,30 @@ class DataAnalysis():
             consumption_time_gh += self.EnergyConsumptionDEV(df, ghid, row['devID'])
 
         return consumption_time_gh
+    
+    #/////////////////////////////////////////////////////////
+    #/////////////////////////////////////////////////////////
+    # La prossima funzione al momento non ha senso
+    
+    def analysis(self, df):
+        # Checking the shape of the DataFrame
+        print(f"The shape of the dataframe is: {df.shape}")
+        # Checking the number of missing values in each column
+        print(f"The number of missing values is: {df.isnull().sum()}")
+        # Handling missing data 
+        # df = df.dropna(inplace=True) # drop missing values
+        df = df.fillna(df.mean(), inplace=True) # fill the missing values with the mean
+
+        # datetime handling
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+        '''
+        graph with data from a certain year or month or day
+        '''
+        df['year'] = df['timestamp'].dt.year # create year column
+        df['month'] = df['timestamp'].dt.month # create month column
+        df['day'] = df['timestamp'].dt.day # create day column
+        # aggiungere orario
     
 
 class Queries():
