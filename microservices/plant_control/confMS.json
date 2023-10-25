@@ -1,0 +1,16 @@
+{
+    "servID": "PC01",
+    "name": "plant_control",
+    "endpoints": [
+        "REST",
+        "MQTT"
+    ],
+    "endpoints_details": [
+        {
+            "endpoint": "",
+            "address": "",
+            "ip": "",
+            "port": ""
+        }
+      ], "lastUpdate": ""
+} 

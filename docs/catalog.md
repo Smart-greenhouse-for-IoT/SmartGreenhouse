@@ -20,6 +20,9 @@
                 "user?usrID=", #return user with specified usrID
                 "user?usrID=&plant=",   #return the plant if present in owned plants
                 "plant?devID=&sensID="  #return plant associated to sensor sensID and device devID
+                "service",   #return all services
+                "service?servID=",    #return service with servID specified
+                "service?name=", #return service with specified name
             ]
         },
         {
@@ -29,7 +32,7 @@
                 "addUser",
                 "addGreenhouse",
                 "addPlant?usrID=",
-                "addService",
+                "addService"
             ]
         },
         {
