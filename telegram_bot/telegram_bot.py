@@ -448,20 +448,16 @@ class Telegram_Bot:
                                                         "\n/addgrhousedevice_devID")
 
                     # If plant commands are received before a plant is selected send the proper error message
-                    elif (message == "/plantstatus" or message == "/irrigate") and not self.plantSelected:
+                    elif (message == "/plantstatus") and not self.plantSelected:
                         done = True
                         self.bot.sendMessage(chat_ID, text=f"Plant not selected."
                                                             "\nPlease first select a plant with /selectplant")
                         
                     # If a plant is selected then other commands are unlocked
                     if self.plantSelected == True:
-                        # Manually activate the irrigation on the selected plant
-                        if message == "/irrigate":
-                            done = True
-                            self.bot.sendMessage(chat_ID, text="C'mon do something")
                         
                         # Obtain the plant information like its humidity treshold (low and high) and the last moisture level measured
-                        elif message == "/plantstatus":
+                        if message == "/plantstatus":
                             done = True
                             self.bot.sendMessage(chat_ID, text="C'mon do something")
 
@@ -514,6 +510,10 @@ class Telegram_Bot:
                                                         "\n/addplant_Name_lowHumidityTresh_highHumidityTresh"
                                                         "\nWhere the last two data are the level of humidity treshold in %"
                                                         "\nThe humidity thresold are numbers that goes from 0 to 100")
+                elif message == "/getlinkgraph":
+                    link = requests.get(self.addr_cat + f"/something")
+                    self.bot.sendMessage(chat_ID, text=f"To acces nodered click on the following link:\n"
+                                                        f"{link}")
                     
                 ##########################
                 ######### ERRORS #########
@@ -525,7 +525,7 @@ class Telegram_Bot:
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
                     
-                elif (message == "/selectplant" or message == "/plantstatus" or message == "/irrigate") and not self.grHselected:
+                elif (message == "/selectplant" or message == "/plantstatus") and not self.grHselected:
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
@@ -555,10 +555,10 @@ class Telegram_Bot:
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                     
-                elif message == "/addgrhouseplant" or message == "/status" or message == "/plants" or message == "/selectplant":
+                elif message == "/addgrhouseplant" or message == "/status" or message == "/selectplant":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
-                elif message == "/plantstatus" or message == "/irrigate" or message == "/selectplant":
+                elif message == "/plantstatus" or message == "/selectplant" or message == "/plants":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 elif message.startswith('/'):
@@ -627,14 +627,16 @@ class Telegram_Bot:
         help
         ----
         Send a message when the command /help is received.
+        The different type of help messages are for having a dynamic\\
+        printing of help messages in different cases.
         """
 
         if self.userConnected == True and self.grHselected == False:
-            help_message = ("*You can perform the following actions:*\n" 
-                        "- /status: Get info about your greenhouses\n" 
+            help_message = ("*You can perform the following actions:*\n"  
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
-                        "- /addgreenhouse: Add a new empty greenhouse\n")
+                        "- /addgreenhouse: Add a new empty greenhouse\n"
+                        "- /getlinkgraph: Get the link to open the nodered dashboard\n")
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == False:
             help_message = ("*You can perform the following actions:*\n" 
@@ -645,7 +647,8 @@ class Telegram_Bot:
                         "- /addgrhouseplant: Add new plant to the greenhouse\n"
                         "- /addgrhousedevice: Add a new device to the selected greenhouse\n"
                         "- /plants: Get the list of the plants of the selected greenhouse\n"
-                        "- /selectplant: Get the name of the selected greenhouse plants to select one\n")
+                        "- /selectplant: Get the name of the selected greenhouse plants to select one\n"
+                        "- /getlinkgraph: Get the link to open the nodered dashboard\n")
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == True:
             help_message = ("*You can perform the following actions:*\n"
@@ -657,7 +660,7 @@ class Telegram_Bot:
                         "- /addgrhousedevice: Add a new device to the selected greenhouse\n"
                         "- /plants: Get the list of the plants of the selected greenhouse\n"
                         "- /selectplant: Get the name of the selected greenhouse plants to select one\n"
-                        "- /irrigate: Manually irrigate the selected plants\n"
+                        "- /getlinkgraph: Get the link to open the nodered dashboard\n"
                         "- /plantstatus: Get info about the selected plant\n")
         else:
             help_message = ("*Before doing anything please log in into your account*\n" 
