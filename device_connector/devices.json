@@ -156,7 +156,7 @@
                     {
                         "service_type": "MQTT",
                         "topic": [
-                            "smartGreenhouse/d1/a1/"
+                            "smartGreenhouse/d1/a1/fan_control"
                         ]
                     }
                 ],
@@ -173,7 +173,24 @@
                     {
                         "service_type": "MQTT",
                         "topic": [
-                            "smartGreenhouse/d1/a2"
+                            "smartGreenhouse/d1/a2/vaporizer_control"
+                        ]
+                    }
+                ],
+                "lastUpdate": "2023-10-02 18:15:45"
+            },
+            {
+                "device_name": "actuator",
+                "actID": "a7",
+                "pin": 13,
+                "available_services": [
+                    "MQTT"
+                ],
+                "services_details": [
+                    {
+                        "service_type": "MQTT",
+                        "topic": [
+                            "smartGreenhouse/d1/a2/co2_control"
                         ]
                     }
                 ],

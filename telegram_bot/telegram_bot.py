@@ -52,7 +52,8 @@ class Telegram_Bot:
                 "CO2": "",
                 "hum": ""
             },
-            "maxNumPlants": "",
+            "sensors": {},
+            "actuators": {},
             "plantsList": [],
             "lastUpdate": ""
         }
@@ -305,6 +306,30 @@ class Telegram_Bot:
                                     r_assigned_dev = requests.get(self.addr_cat + 
                                                                 f"/greenhouse?devID={devID_gh}")
                                     if req_dev.ok:
+                                        device = req_dev.json()
+                                        device["ghID"] = self.greenhouse["ghID"]
+                                        # Assign sensors to greenhouse
+                                        for sensor in device["resources"]["sensors"]:
+                                            for service in sensor["services_details"]:
+                                                if service["service_type"] == "MQTT":
+                                                    for topic in service["topic"]:
+                                                        if "temperature" in topic:
+                                                            self.greenhouse["sensors"]["temp_hum"] = sensor["sensID"]
+                                                        elif "CO2_level" in topic:
+                                                            self.greenhouse["sensors"]["CO2_level"] = sensor["sensID"]
+                                        
+                                        # Assign actuators to greenhouse
+                                        for sensor in device["resources"]["actuators"]:
+                                            for service in sensor["services_details"]:
+                                                if service["service_type"] == "MQTT":
+                                                    for topic in service["topic"]:
+                                                        if "fan_control" in topic:
+                                                            self.greenhouse["actuators"]["fan_control"] = sensor["actID"]
+                                                        elif "vaporizer_control" in topic:
+                                                            self.greenhouse["actuators"]["vaporizer_control"] = sensor["actID"]
+                                                        elif "co2_control" in topic:
+                                                            self.greenhouse["actuators"]["co2_control"] = sensor["actID"]
+                                                            
                                         if not r_assigned_dev.ok:
                                             self.greenhouse["usrID"] = self.user["usrID"]
                                             self.greenhouse["devID"].append(parameters[0])
@@ -318,8 +343,6 @@ class Telegram_Bot:
                                             # Update user and device adding the new greenhouse
                                             self.user["ghID"].append(self.greenhouse["ghID"])
                                             req_usr = requests.put(self.addr_cat + f"/updateUser", json.dumps(self.user))
-                                            device = req_dev.json()
-                                            device["ghID"] = self.greenhouse["ghID"]
                                             req_dev = requests.put(self.addr_cat + f"/updateDevice", json.dumps(device))
 
                                             if req_gh.ok and req_usr.ok:
