@@ -172,6 +172,7 @@ class Device_Connector(object):
                     time.sleep(1)
             except:
                 print(f"Fail to establish a connection with {self.cat_info['ip']}")
+                time.sleep(1)
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
@@ -199,6 +200,7 @@ class Device_Connector(object):
                     time.sleep(1)
             except:
                 print(f"Fail to establish a connection with {self.cat_info['ip']}")
+                time.sleep(1)
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")

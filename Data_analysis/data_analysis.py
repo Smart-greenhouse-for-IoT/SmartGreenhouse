@@ -250,16 +250,17 @@ class DataAnalysisMicroservice():
         update = False
         while count < tries and not update:
             count += 1
-        try:
-            req_dev = requests.post(self.CatAddr + "/addService", data=json.dumps(self.confDA))
-            if req_dev.ok:
-                print(f"Service {self.confDA['servID']} added successfully!")
-                update = True
-            else:
-                print(f"Service {self.confDA['servID']} could not be added!")
-        except:
-            print(f"Fail to establish a connection with {self.conf['ip']}")
-            time.sleep(1)
+            try:
+                req_dev = requests.post(self.CatAddr + "/addService", data=json.dumps(self.confDA))
+                if req_dev.ok:
+                    print(f"Service {self.confDA['servID']} added successfully!")
+                    update = True
+                else:
+                    print(f"Service {self.confDA['servID']} could not be added!")
+                    time.sleep(1)
+            except:
+                print(f"Fail to establish a connection with {self.conf['ip']}")
+                time.sleep(1)
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.conf['ip']}")  
@@ -490,6 +491,7 @@ class DataAnalysisMicroservice():
                     update = True
                 else:
                     print(f"Service {self.confDA['servID']} could not be updated!")
+                    time.sleep(1)
             except:
                 print(f"Fail to establish a connection with {self.conf['ip']}")
                 time.sleep(1)

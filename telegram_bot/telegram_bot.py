@@ -726,6 +726,7 @@ class Telegram_Bot:
                     update = True
                 else:
                     print("Data analysis microservice not present in the catalog!")
+                    time.sleep(1)
             except:
                 print("The catalog web service is unreachable!")
                 time.sleep(1)
