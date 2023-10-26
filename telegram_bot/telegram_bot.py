@@ -28,7 +28,7 @@ class Telegram_Bot:
         
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
-        #FIXME: what happen if the result is negative? We needt to add a maxtry param like davide did?
+        self.DA_connected = False
         self.DA_info()    
 
         self.userConnected = False
@@ -370,6 +370,10 @@ class Telegram_Bot:
                     # Check the status of the selected greenhouse, including: humidity, temperature and number of plants
                     if message == "/status":
                         done = True
+
+                        if self.DA_connected == False:
+                            self.DA_info()
+                        
                         #TODO: ALE qui bisogna prendere le informazioni di temperatura e umidità della greenhouse
                         try:
                             req_ghINFO = requests.get(self.addr_DA + f"/getLastValue?ghID={self.greenhouse['ghID']}")
@@ -402,6 +406,10 @@ class Telegram_Bot:
                         self.bot.sendMessage(chat_ID, text=f"{message[1:]} plant selected")
                         self.plantSelected = True
                         self.plant["plant"] = message[1:]
+                        
+                        if self.DA_connected == False:
+                            self.DA_info()
+
                         #TODO: ALE ottieni le info della pianta selezionata
                         try:
                             req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
@@ -714,6 +722,7 @@ class Telegram_Bot:
                         "port": str(Da["endpoints_details"][0]["port"])
                     }
                     self.addr_DA = "http://" + DA_info["ip"] + ":" + DA_info["port"]
+                    self.DA_connected = True
                     update = True
                 else:
                     print("Data analysis microservice not present in the catalog!")
@@ -721,8 +730,8 @@ class Telegram_Bot:
                 print("The catalog web service is unreachable!")
                 time.sleep(1)
 
-        if update == False:
-            raise Exception("The catalog web service is unreachable!")
+        #if update == False:
+        #    raise Exception("Data analysis microservice not present in the catalog!")
 
 
 if __name__ == "__main__":
