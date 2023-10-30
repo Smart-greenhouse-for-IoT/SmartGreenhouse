@@ -338,10 +338,28 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-10-26 17:51:49",
-            "ghID": ""
+            "lastUpdate": "2023-10-30 19:24:32"
         }
     ],
-    "services": [],
-    "lastUpdate": "2023-10-26 17:51:49"
+    "services": [
+        {
+            "servID": "16",
+            "name": "data_analysis",
+            "endpoints": [
+                "REST"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "REST",
+                    "address": "http://127.0.0.1:8090",
+                    "ip": "127.0.0.1",
+                    "port": 8090
+                }
+            ],
+            "lastUpdate": "2023-10-30 19:24:46",
+            "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
+            "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
+        }
+    ],
+    "lastUpdate": "2023-10-30 19:24:46"
 }

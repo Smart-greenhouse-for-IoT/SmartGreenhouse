@@ -397,11 +397,13 @@ class Telegram_Bot:
                         if self.DA_connected == False:
                             self.DA_info()
                         
-                        #TODO: ALE qui bisogna prendere le informazioni di temperatura e umidità della greenhouse
                         try:
-                            req_ghINFO = requests.get(self.addr_DA + f"/getLastValue?ghID={self.greenhouse['ghID']}")
-                            ghINFO = req_ghINFO.json() #CHECK: its a csv file? maybe .json is not correct
-                            self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
+                            req_ghINFO = requests.get(self.addr_DA + f"/getAllLastValues?ghID={self.greenhouse['ghID']}")
+                            ghINFO = req_ghINFO.json() 
+                            self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are:"
+                                                    f"\nTemperature: {ghINFO['temperature']} C°"
+                                                    f"\nHumidity: {ghINFO['humidity']} %"
+                                                    f"\nCO2: {ghINFO['CO2']} ppm"
                                                     f"\nNumber of plants: {len(self.greenhouse['plantsList'])}"
                                                     "\nIf you want the list of the plants of this greenhouse click /plants")
                         except:
@@ -429,16 +431,12 @@ class Telegram_Bot:
                         self.bot.sendMessage(chat_ID, text=f"{message[1:]} plant selected")
                         self.plantSelected = True
                         self.plant["plant"] = message[1:]
-                        
-                        if self.DA_connected == False:
-                            self.DA_info()
-
-                        #TODO: ALE ottieni le info della pianta selezionata
-                        try:
-                            req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
-                            plantINFO = req_plantINFO.json() #CHECK: its a csv file? maybe .json is not correct
-                        except:
-                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the data analysis web service is unreachable! Try again later.")
+                        ind, plant = searchDict(self.greenhouse, 'plantsList', 'plant', self.plant["plant"],index=True)
+                        self.plant["th_min"] = plant["th_min"]
+                        self.plant["th_max"] = plant["th_max"]
+                        self.plant["devID"] = plant["devID"]
+                        self.plant["sensID"] = plant["sensID"]
+                        self.plant["actID"] = plant["actID"]
 
                     # Inform the user to the complete command to add a plant to the greenhouse
                     elif message == "/addgrhouseplant":
@@ -490,7 +488,18 @@ class Telegram_Bot:
                         # Obtain the plant information like its humidity treshold (low and high) and the last moisture level measured
                         if message == "/plantstatus":
                             done = True
-                            self.bot.sendMessage(chat_ID, text="C'mon do something")
+                            if self.DA_connected == False:
+                                self.DA_info()
+
+                            try:
+                                req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
+                                plantINFO = req_plantINFO.json() 
+                                self.bot.sendMessage(chat_ID, text=f"Plant {self.plant['plant']} information are:"
+                                                                    f"\nMoisture level: {plantINFO['moisture']} %"
+                                                                    f"\nSensor connected: {self.plant['sensID']}"
+                                                                    f"\nActuator connected: {self.plant['actID']}")
+                            except:
+                                self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the data analysis web service is unreachable! Try again later.")
 
                 ###########################################
                 ######### USER CONNECTED COMMANDS #########

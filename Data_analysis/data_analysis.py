@@ -197,7 +197,7 @@ class Queries():
     def get_last_value(self, df, gh_id, measure):
         selected_rows = df[df['ghID'] == gh_id]
         filtered_rows = selected_rows[selected_rows['quantity'] == measure]
-        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending= True)
+        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=False)
         last_row = sorted_rows.tail(1)
 
         return last_row
@@ -205,10 +205,10 @@ class Queries():
     # Get the last specific value for moisture level for a gh, given a sensor
     def get_last_moisture_level(self, df, gh_id, sens_id):
         selected_rows = df[(df['ghID'] == gh_id) & (df['sensID'] == sens_id)]
-        filtered_rows = selected_rows[selected_rows['quantity'] == "moisture_level"]
-        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=True)
+        filtered_rows = selected_rows[selected_rows['quantity'] == "Soil moisture"]
+        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=False)
         last_row = sorted_rows.tail(1)
-        moisture_level = last_row['value']
+        moisture_level = last_row['value'].iloc[0]
 
         return moisture_level
     
@@ -226,9 +226,9 @@ class DataAnalysisMicroservice():
         with open(conf_DA_path) as f:
             self.confDA = json.load(f)
 
-        self.DA = DataAnalysis("Data_analysis\conf_DA.json")
+        self.DA = DataAnalysis("Data_analysis/conf_DA.json")
 
-        self.TR = ThingspeakReader("Data_analysis\conf.json")
+        self.TR = ThingspeakReader("Data_analysis/conf.json")
         self.df = self.TR.readCSV()
 
         self.queryClass = Queries()
@@ -345,7 +345,7 @@ class DataAnalysisMicroservice():
                     if params.get("sensID"):
                         sensID = params.get("sensID")
                         value_row = self.queryClass.get_last_moisture_level(self.df, ghID, sensID)
-                        return json.dumps(value_row.to_dict())
+                        return json.dumps({"moisture":value_row})
                     else:
                         raise cherrypy.HTTPError(404, f"Sensor not found!")
                 elif params == {}:
@@ -357,11 +357,13 @@ class DataAnalysisMicroservice():
             elif uri[0] == "getAllLastValues":
                 if params.get("ghID"):
                     ghID = params.get("ghID")
-                    last_temperature_row = self.queryClass.get_last_value(self.df, ghID, "temperature")
-                    last_humidity_row = self.queryClass.get_last_value(self.df, ghID, "humidity")
+                    last_temperature_row = self.queryClass.get_last_value(self.df, ghID, "Temperature")
+                    last_humidity_row = self.queryClass.get_last_value(self.df, ghID, "Humidity")
                     last_CO2_row = self.queryClass.get_last_value(self.df, ghID, "CO2")
 
-                    return (last_temperature_row, last_humidity_row, last_CO2_row)
+                    return json.dumps({"temperature":last_temperature_row['value'].iloc[0],
+                                       "humidity":last_humidity_row['value'].iloc[0],
+                                       "CO2":last_CO2_row['value'].iloc[0]})
 
                 elif params == {}:
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
@@ -503,7 +505,7 @@ class DataAnalysisMicroservice():
 
 if __name__ == "__main__": 
 	
-    webService = DataAnalysisMicroservice("Data_analysis\conf.json", "Data_analysis\conf_DA.json")
+    webService = DataAnalysisMicroservice("Data_analysis/conf.json", "Data_analysis/conf_DA.json")
     cherryConf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -514,7 +516,7 @@ if __name__ == "__main__":
     cherrypy.tree.mount(webService, '/', cherryConf)
     cherrypy.engine.start()
 
-    webService.loop(refresh_time=50)
+    webService.loop(refresh_time=30)
 '''
 if __name__ == "__main__":
     
