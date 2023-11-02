@@ -1,0 +1,6 @@
+numpy
+cherrypy
+pandas
+plotly
+scikit-learn
+requests

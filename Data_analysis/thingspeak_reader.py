@@ -44,5 +44,5 @@ class ThingspeakReader():
 
 if __name__ == "__main__":
     
-    TS = ThingspeakReader("Thingspeak\conf.json")
+    TS = ThingspeakReader("conf.json")
     df = TS.readCSV()

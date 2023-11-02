@@ -15,7 +15,7 @@ class Telegram_Bot:
     """
 
     def __init__(self):
-        self.conf = json.load(open("telegram_bot/setting.json"))
+        self.conf = json.load(open("setting.json"))
         self.tokenBot = self.conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         

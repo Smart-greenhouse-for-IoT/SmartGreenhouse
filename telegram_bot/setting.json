@@ -1,5 +1,5 @@
 {
-    "CatIP": "127.0.0.1",
-    "CatPort": "8080",
+    "CatIP": "0.0.0.0",
+    "CatPort": "8081",
     "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo"
 }

@@ -226,9 +226,9 @@ class DataAnalysisMicroservice():
         with open(conf_DA_path) as f:
             self.confDA = json.load(f)
 
-        self.DA = DataAnalysis("Data_analysis/conf_DA.json")
+        self.DA = DataAnalysis("conf_DA.json")
 
-        self.TR = ThingspeakReader("Data_analysis/conf.json")
+        self.TR = ThingspeakReader("conf.json")
         self.df = self.TR.readCSV()
 
         self.queryClass = Queries()
@@ -505,14 +505,14 @@ class DataAnalysisMicroservice():
 
 if __name__ == "__main__": 
 	
-    webService = DataAnalysisMicroservice("Data_analysis/conf.json", "Data_analysis/conf_DA.json")
+    webService = DataAnalysisMicroservice("conf.json", "conf_DA.json")
     cherryConf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.sessions.on': True
         }
     }
-    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
+    cherrypy.config.update({'server.socket_host': webService.confDA["endpoints_details"][0]["ip"], 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
     cherrypy.tree.mount(webService, '/', cherryConf)
     cherrypy.engine.start()
 

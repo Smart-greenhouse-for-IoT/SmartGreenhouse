@@ -1,6 +1,6 @@
 {
-    "ip": "127.0.0.1",
-    "port": "8080",
+    "ip": "172.17.0.2",
+    "port": "8081",
     "url_TS": "https://api.thingspeak.com/update.json",
     "write_key": "6K2SF8DLAG4J7D3L",
     "read_key": "PITP9J8PVKXKS720",
