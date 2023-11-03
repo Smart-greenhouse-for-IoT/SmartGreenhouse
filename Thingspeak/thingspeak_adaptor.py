@@ -2,9 +2,8 @@ import requests
 import json
 from sub.MyMQTT import *
 import time
-import pandas as pd
 
-'''
+"""
 retrieved_data = {
     'n': 'measured quantity',
     'u': 'unit',
@@ -14,47 +13,51 @@ retrieved_data = {
     'sensID': ''
     'actID': ''
 }
-'''
+"""
 
 
-class ThingspeakAdaptor():
-
+class ThingspeakAdaptor:
     def __init__(self, conf_path, confTS_path):
         # Conf_dict contains catalog's information
         with open(conf_path) as f:
             self.conf_dict = json.load(f)
-        
+
         # confTS contains information regarding the adaptor
         with open(confTS_path) as f:
             self.myTS = json.load(f)
 
         self.fields_dict = {
-            'api_key': None, # conf_json
-            'field1': None, # catalog
-            'field2': None, # topic/message
-            'field3': None, # topic/message
-            'field4': None, # message
-            'field5': None, # message
-            'field6': None, # message
-            'field7': None # catalog
+            "api_key": None,  # conf_json
+            "field1": None,  # catalog
+            "field2": None,  # topic/message
+            "field3": None,  # topic/message
+            "field4": None,  # message
+            "field5": None,  # message
+            "field6": None,  # message
+            "field7": None,  # catalog
         }
-        self.url_TS = self.myTS['TS_info']['url_TS']
-        self._topic = self.myTS['endpoints_details'][0]['topic']
+        self.url_TS = self.myTS["TS_info"]["url_TS"]
+        self._topic = self.myTS["endpoints_details"][0]["topic"]
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
 
         self.broker_dict = self.get_broker()
-        
-        self._pubSub = MyMQTT( clientID = "ts_adaptor", broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
-        
+
+        self._pubSub = MyMQTT(
+            clientID="ts_adaptor",
+            broker=self.broker_dict["IP"],
+            port=self.broker_dict["port"],
+            notifier=self,
+        )
+
         self._pubSub.start()
-        
+
         time.sleep(3)
         self._pubSub.mySubscribe(self._topic)
 
         self.registerToCat()
-    
-    def get_broker(self, tries = 10): 
+
+    def get_broker(self, tries=10):
         """
         get_broker
         ----------
@@ -66,19 +69,21 @@ class ThingspeakAdaptor():
         while count < tries and not update:
             count += 1
             try:
-                b_dict = requests.get(self.addr_cat + "/broker").json()  
+                b_dict = requests.get(self.addr_cat + "/broker").json()
                 update = True
             except:
                 print(f"Fail to establish a connection with {self.conf_dict['ip']}")
                 time.sleep(1)
 
         if update == False:
-            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
+            raise Exception(
+                f"Fail to establish a connection with {self.conf_dict['ip']}"
+            )
 
         # Return a json dict with BrokerIP and BrokerPort
-        return b_dict      
+        return b_dict
 
-    def registerToCat(self, tries = 10):
+    def registerToCat(self, tries=10):
         """
         registerToCat
         -------------
@@ -90,7 +95,9 @@ class ThingspeakAdaptor():
         while count < tries and not update:
             count += 1
             try:
-                req_serv = requests.post(self.addr_cat + "/addService", data=json.dumps(self.myTS))
+                req_serv = requests.post(
+                    self.addr_cat + "/addService", data=json.dumps(self.myTS)
+                )
                 if req_serv.ok:
                     print(f"Service {self.myTS['servID']} added successfully!")
                     update = True
@@ -101,23 +108,27 @@ class ThingspeakAdaptor():
                 time.sleep(1)
 
         if update == False:
-            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")  
-    
-    def updateToCat(self, tries = 10):
+            raise Exception(
+                f"Fail to establish a connection with {self.conf_dict['ip']}"
+            )
+
+    def updateToCat(self, tries=10):
         """
         updateToCat
         -----------
         Update the TS adaptor  to the catalog, to let the catalog \n
         know that this service is still 'alive'.
         """
-        
+
         count = 0
         update = False
         while count < tries and not update:
             count += 1
             try:
-                #PUT the TS to the catalog services
-                req = requests.put(self.addr_cat + "/updateService", data=json.dumps(self.myTS))
+                # PUT the TS to the catalog services
+                req = requests.put(
+                    self.addr_cat + "/updateService", data=json.dumps(self.myTS)
+                )
                 if req.ok:
                     update = True
                     print(f"Service {self.myTS['servID']} updated successfully!")
@@ -128,18 +139,20 @@ class ThingspeakAdaptor():
                 time.sleep(1)
 
         if update == False:
-            raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
-     
+            raise Exception(
+                f"Fail to establish a connection with {self.conf_dict['ip']}"
+            )
+
     def dictCreation(self, topic, msg):
         fields = self.fields_dict.copy()
-        fields['api_key'] = self.myTS['TS_info']['write_key']
-        fields['field1'] = self.retrieveGHID(msg.get('devID'))
-        fields['field2'] = msg.get('devID')
-        fields['field3'] = msg.get('sensID')
-        fields['field4'] = msg.get('n')
-        fields['field5'] = msg.get('v')
-        fields['field6'] = msg.get('t')
-        fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
+        fields["api_key"] = self.myTS["TS_info"]["write_key"]
+        fields["field1"] = self.retrieveGHID(msg.get("devID"))
+        fields["field2"] = msg.get("devID")
+        fields["field3"] = msg.get("sensID")
+        fields["field4"] = msg.get("n")
+        fields["field5"] = msg.get("v")
+        fields["field6"] = msg.get("t")
+        fields["field7"] = self.retrievePlant_type(msg.get("devID"), msg.get("sensID"))
         return fields
 
     def sendDataToTS(self, field_dict):
@@ -148,15 +161,15 @@ class ThingspeakAdaptor():
         ------------
 
         """
-        
+
         try:
             response = requests.post(self.url_TS, field_dict)
             if response.ok:
-                print('Data sent to ThingSpeak successfully!')
+                print("Data sent to ThingSpeak successfully!")
             else:
-                print('Failed to send data to ThingSpeak.')
+                print("Failed to send data to ThingSpeak.")
         except:
-            print('ThingSpeak not reachable')
+            print("ThingSpeak not reachable")
 
     def notify(self, topic, msg):
         """
@@ -170,7 +183,7 @@ class ThingspeakAdaptor():
         field_dict = self.dictCreation(topic, msg_json)
         self.sendDataToTS(field_dict)
 
-    def retrieveGHID(self, devID, tries = 10):
+    def retrieveGHID(self, devID, tries=10):
         """
         retrieveGHID
         ------------
@@ -181,7 +194,7 @@ class ThingspeakAdaptor():
         while count < tries and not update:
             count += 1
             try:
-                ghID = requests.get(f'{self.addr_cat}/greenhouse?devID={devID}')
+                ghID = requests.get(f"{self.addr_cat}/greenhouse?devID={devID}")
                 update = True
             except:
                 print(f"Fail to establish a connection with catalog!")
@@ -189,25 +202,27 @@ class ThingspeakAdaptor():
 
         if update == False:
             raise Exception(f"Fail to establish a connection with catalog!")
-        
-        return ghID.json()['ghID']   
-    
-    def retrievePlant_type(self, devID, sensID, tries = 10):
+
+        return ghID.json()["ghID"]
+
+    def retrievePlant_type(self, devID, sensID, tries=10):
         """
         retrievePlant_type
         ------------------
 
         """
-        # if it is different from s1 and s2 
+        # if it is different from s1 and s2
         # (predefined sensor for the greenhouse and not for the plant)
         # then it is possible to retrive the plant name
-        if sensID != 's1' and sensID != 's2':
+        if sensID != "s1" and sensID != "s2":
             count = 0
             update = False
             while count < tries and not update:
                 count += 1
                 try:
-                    plant_type = requests.get(f'{self.addr_cat}/plant?devID={devID}&sensID={sensID}')
+                    plant_type = requests.get(
+                        f"{self.addr_cat}/plant?devID={devID}&sensID={sensID}"
+                    )
                     update = True
                 except:
                     print(f"Fail to establish a connection with catalog!")
@@ -215,13 +230,13 @@ class ThingspeakAdaptor():
 
             if update == False:
                 raise Exception(f"Fail to establish a connection with catalog!")
-            
-            return plant_type.json()['plant']  
-        
+
+            return plant_type.json()["plant"]
+
         else:
             return None
-    
-    def loop(self, refresh_time = 30):
+
+    def loop(self, refresh_time=30):
         """
         Loop
         ----
@@ -239,18 +254,16 @@ class ThingspeakAdaptor():
                 local_time = time.time()
 
                 # Every refresh_time the measure are done and published to the topic
-                if local_time - last_time > refresh_time: 
+                if local_time - last_time > refresh_time:
                     self.updateToCat(tries=15)
                     # self.post_sensor_Cat()
-                    last_time = time.time() 
+                    last_time = time.time()
 
         # To kill the program
-        except KeyboardInterrupt: 
+        except KeyboardInterrupt:
             print("Loop manually interrupted")
 
 
 if __name__ == "__main__":
-    
-    TS = ThingspeakAdaptor("Thingspeak\conf.json", "Thingspeak\confTS.json")
+    TS = ThingspeakAdaptor("conf.json", "confTS.json")
     TS.loop()
-    

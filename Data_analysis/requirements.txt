@@ -4,3 +4,4 @@ pandas
 plotly
 scikit-learn
 requests
+paho.mqtt
