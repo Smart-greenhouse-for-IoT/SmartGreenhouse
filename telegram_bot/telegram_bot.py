@@ -45,15 +45,13 @@ class Telegram_Bot:
 
         self.greenhouse = {
             "ghID": "",
-            "devID": [],
+            "devices": [],
             "usrID": "",
             "gh_params":{
                 "temp": "",
                 "CO2": "",
                 "hum": ""
             },
-            "sensors": {},
-            "actuators": {},
             "plantsList": [],
             "lastUpdate": ""
         }
@@ -118,8 +116,44 @@ class Telegram_Bot:
                                 r_assigned_dev = requests.get(self.addr_cat + 
                                                             f"/greenhouse?devID={parameters[0]}")
                                 if req_dev.ok:
+                                    device = req_dev.json()
                                     if not r_assigned_dev.ok:
-                                        self.greenhouse["devID"].append(parameters[0])
+                                        # Assign sensors to greenhouse
+                                        for sensor in device["resources"]["sensors"]:
+                                            for service in sensor["services_details"]:
+                                                if service["service_type"] == "MQTT":
+                                                    for topic in service["topic"]:
+                                                        if "temperature" in topic:
+                                                            sens_temp =  sensor["sensID"]
+                                                        elif "CO2_level" in topic:
+                                                            sens_co2 = sensor["sensID"]
+                                        
+                                        # Assign actuators to greenhouse
+                                        for sensor in device["resources"]["actuators"]:
+                                            for service in sensor["services_details"]:
+                                                if service["service_type"] == "MQTT":
+                                                    for topic in service["topic"]:
+                                                        if "fan_control" in topic:
+                                                            act_fan= sensor["actID"]
+                                                        elif "vaporizer_control" in topic:
+                                                            act_vap = sensor["actID"]
+                                                        elif "co2_control" in topic:
+                                                            act_co = sensor["actID"]
+                                                            
+                                        self.greenhouse["devices"].append(
+                                            {
+                                                "devID": parameters[0],
+                                                "sensors":{
+                                                    "temp_hum": sens_temp,
+                                                    "CO2_level": sens_co2 
+                                                },
+                                                "actuators": {
+                                                    "fan_control": act_fan,
+                                                    "vaporizer_control": act_vap,
+                                                    "co2_control": act_co
+                                                }
+                                            }
+                                            )
                                         req_gh = requests.put(self.addr_cat + "/updateGreenhouse", json.dumps(self.greenhouse))
                                         self.bot.sendMessage(chat_ID, text=f"Device {parameters[0]} correctly added"
                                                                         f" in greenhouse {self.greenhouse['ghID']}.")
@@ -308,31 +342,10 @@ class Telegram_Bot:
                                     if req_dev.ok:
                                         device = req_dev.json()
                                         device["ghID"] = self.greenhouse["ghID"]
-                                        # Assign sensors to greenhouse
-                                        for sensor in device["resources"]["sensors"]:
-                                            for service in sensor["services_details"]:
-                                                if service["service_type"] == "MQTT":
-                                                    for topic in service["topic"]:
-                                                        if "temperature" in topic:
-                                                            self.greenhouse["sensors"]["temp_hum"] = sensor["sensID"]
-                                                        elif "CO2_level" in topic:
-                                                            self.greenhouse["sensors"]["CO2_level"] = sensor["sensID"]
                                         
-                                        # Assign actuators to greenhouse
-                                        for sensor in device["resources"]["actuators"]:
-                                            for service in sensor["services_details"]:
-                                                if service["service_type"] == "MQTT":
-                                                    for topic in service["topic"]:
-                                                        if "fan_control" in topic:
-                                                            self.greenhouse["actuators"]["fan_control"] = sensor["actID"]
-                                                        elif "vaporizer_control" in topic:
-                                                            self.greenhouse["actuators"]["vaporizer_control"] = sensor["actID"]
-                                                        elif "co2_control" in topic:
-                                                            self.greenhouse["actuators"]["co2_control"] = sensor["actID"]
-                                                            
                                         if not r_assigned_dev.ok:
                                             self.greenhouse["usrID"] = self.user["usrID"]
-                                            self.greenhouse["devID"].append(parameters[0])
+                                            #self.greenhouse["devID"].append(parameters[0])
                                             self.greenhouse["gh_params"]["temp"] = parameters[1]
                                             self.greenhouse["gh_params"]["hum"] = parameters[2]
                                             #FIXME: find a better way to assign the CO2 value
@@ -565,7 +578,7 @@ class Telegram_Bot:
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
                     
-                elif (message == "/selectplant" or message == "/plantstatus") and not self.grHselected:
+                elif (message == "/selectplant" or message == "/plantstatus" or message == "/addgrhousedevice") and not self.grHselected:
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
