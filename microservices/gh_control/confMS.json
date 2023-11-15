@@ -1,24 +1,11 @@
 {
-<<<<<<< Updated upstream
-    "servID": "02",
-    "name": "GH_control",
-    "endpoints": [
-        "REST",
-=======
     "servID": "GH01",
     "name": "gh_control",
     "endpoints": [
->>>>>>> Stashed changes
         "MQTT"
     ],
     "endpoints_details": [
         {
-<<<<<<< Updated upstream
-            "endpoint": "",
-            "address": "",
-            "ip": "",
-            "port": ""
-=======
             "endpoint": "MQTT",
             "bn": "gh_control",
             "topics": [
@@ -26,7 +13,6 @@
                 "smartGreenhouse/+/+/co2_level",
                 "smartGreenhouse/+/+/humidity"
             ]
->>>>>>> Stashed changes
         }
       ], "lastUpdate": ""
 } 

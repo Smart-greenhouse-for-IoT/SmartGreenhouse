@@ -29,7 +29,9 @@ class plantsControl():
         
         self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
-        self._pubSub.mySubscribe(self._topic)
+        
+        for topic in self._topic:
+            self._pubSub.mySubscribe(topic)
         
 
     def notify(self, topic, body):

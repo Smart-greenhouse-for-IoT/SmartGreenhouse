@@ -7,10 +7,11 @@
     ],
     "endpoints_details": [
         {
-            "endpoint": "",
-            "address": "",
-            "ip": "",
-            "port": ""
+            "endpoint": "MQTT",
+            "bn": "plants_control",
+            "topics": [
+                "smartGreenhouse/+/+/soil_moisture"
+            ]
         }
       ], "lastUpdate": ""
 } 

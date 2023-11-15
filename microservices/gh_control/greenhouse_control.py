@@ -188,15 +188,9 @@ class greenhouseControl():
 
 if __name__ == "__main__":
 
-<<<<<<< Updated upstream
-    gh_control = GHControl(
-        conf_path = "microservices/conf.json",
-        confMS_path = "microservices/confMS.json")
-=======
     plant_control = greenhouseControl(
         conf_path = "SmartGreenhouse\microservices\gh_control\conf.json",
         confMS_path = "SmartGreenhouse\microservices\gh_control\confMS.json")
->>>>>>> Stashed changes
 
     plant_control.loop()
     

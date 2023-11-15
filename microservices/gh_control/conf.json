@@ -1,11 +1,7 @@
 {
     "ip": "127.0.0.1",
     "port": "8080",
-<<<<<<< Updated upstream
-    "topic": ["smartGreenhouse/+/+/humidity", "smartGreenhouse/+/+/temperature"],
+    "topic": ["smartGreenhouse/+/+/humidity", "smartGreenhouse/+/+/temperature", "smartGreenhouse/+/+/co2_level"],
     "clientID" : "GHControl"
-=======
-    "clientID" : "GhControl"
->>>>>>> Stashed changes
     
 }
