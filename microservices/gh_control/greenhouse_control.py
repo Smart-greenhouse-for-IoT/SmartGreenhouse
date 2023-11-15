@@ -43,8 +43,9 @@ class greenhouseControl():
         measure_dict = json.loads(body)
         quantity_name = topic.split("/")[-1]
 
-        gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name)        
-        topic_act = self.transformTopic(topic, gh_description.get("actID"))
+        gh_act = self.getActID(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name) 
+        gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"))       
+        topic_act = self.transformTopic(topic, gh_act.get("actID"))
 
         if measure_dict.get("v") < gh_description.get(quantity_name):
 
@@ -150,7 +151,7 @@ class greenhouseControl():
         return b_dict       
 
 
-    def getThresholdsGreenhouse(self, devID, sensID, qname):
+    def getActID(self, devID, sensID, qname):
 
         addr = f"{self.addr_cat}/greenhouse?devID={devID}&sensID={sensID}&name={qname}"
         try:
@@ -158,6 +159,21 @@ class greenhouseControl():
             req = requests.get(addr)
             if req.status_code == 200:
                 return req.json() 
+
+            else:
+                print(f"Request failed!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+        
+    def getThresholdsGreenhouse(self, devID):
+
+        addr = f"{self.addr_cat}/greenhouse?devID={devID}"
+        try:
+            #Get the status to the catalog
+            req = requests.get(addr).json()
+            thresholds = req.get("gh_params")
+            if req.status_code == 200:
+                return thresholds
 
             else:
                 print(f"Request failed!")
