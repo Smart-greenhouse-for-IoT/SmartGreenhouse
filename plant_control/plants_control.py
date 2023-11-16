@@ -20,17 +20,16 @@ class plantsControl():
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
         self.track_actuation_dict = {}
-        self._actuation_time = 2
+        self._actuation_time = 15
 
         self.registerToCat()
-        for end_det in self.myservice["endpoints_details"]:
-            if end_det.get("endpoint") == "MQTT":
-                self._topic = end_det["topics"]
-            
+
+        self._topic = self.conf_dict.get("topic")
         self.broker_dict = self.get_broker()
         
         self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
+        
         for topic in self._topic:
             self._pubSub.mySubscribe(topic)
         
@@ -58,16 +57,16 @@ class plantsControl():
         measure_dict_resp["devID"] = topic.split("/")[1]
         measure_dict_resp["actID"] = topic.split("/")[2]
         measure_dict_resp["timestamp"] = time.time()
-        measure_dict_resp["command"] = True
+        measure_dict_resp["command"] = "start"
         
 
         self._pubSub.myPublish(topic, measure_dict_resp)
 
+        print(f"Actuation started, topic:{topic}")
+
         self.track_actuation_dict[topic] = measure_dict_resp
         self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
         self.track_actuation_dict[topic]["timer"].start()
-        
-        print(f"Actuation started, topic:{topic}")
 
     def stopActuation(self, topic_):
 
@@ -75,12 +74,14 @@ class plantsControl():
         
         message.pop("timer")
         message["timestamp"] = time.time()
-        message["command"] = False
+        message["command"] = "stop"
         self._pubSub.myPublish(topic_, message)
 
         self.track_actuation_dict.pop(topic_)
 
         print(f"Actuation stopped, topic:{topic_}")
+
+
 
 
     def transformTopic(self, topic, actuator):
@@ -159,7 +160,7 @@ class plantsControl():
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
 
-    def loop(self, refresh_time = 10):
+    def loop(self, refresh_time = 100):
 
         last_time = 0
         try:
@@ -183,8 +184,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "plant_control/conf.json",
-        confMS_path = "plant_control/confMS.json")
+        conf_path = "microservices/plant_control/conf.json",
+        confMS_path = "microservices/plant_control/confMS.json")
 
     plant_control.loop()
     

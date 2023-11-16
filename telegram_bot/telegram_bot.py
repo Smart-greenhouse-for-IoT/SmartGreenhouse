@@ -48,9 +48,9 @@ class Telegram_Bot:
             "devices": [],
             "usrID": "",
             "gh_params":{
-                "temp": "",
-                "CO2": "",
-                "hum": ""
+                "temperature": "",
+                "CO2_level": "",
+                "humidity": ""
             },
             "plantsList": [],
             "lastUpdate": ""
@@ -348,10 +348,10 @@ class Telegram_Bot:
                                         if not r_assigned_dev.ok:
                                             self.greenhouse["usrID"] = self.user["usrID"]
                                             #self.greenhouse["devID"].append(parameters[0])
-                                            self.greenhouse["gh_params"]["temp"] = parameters[1]
-                                            self.greenhouse["gh_params"]["hum"] = parameters[2]
+                                            self.greenhouse["gh_params"]["temperature"] = parameters[1]
+                                            self.greenhouse["gh_params"]["humidity"] = parameters[2]
                                             #FIXME: find a better way to assign the CO2 value
-                                            self.greenhouse["gh_params"]["CO2"] = 420
+                                            self.greenhouse["gh_params"]["CO2_level"] = 420
                                             req_gh = requests.post(self.addr_cat + "/addGreenhouse", json.dumps(self.greenhouse))
                                             req_id = requests.get(self.addr_cat + "/greenhouse/recentID")
                                             self.greenhouse["ghID"] = req_id.json()["ghID"]

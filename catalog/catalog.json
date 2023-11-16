@@ -18,10 +18,52 @@
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
         "link": ""
     },
-    "greenhouses": [],
-    "users": [],
+    "greenhouses": [
+        {
+            "ghID": "g1",
+            "devices": [
+                {
+                    "devID": "d1",
+                    "sensors": {
+                        "temp_hum": "s1",
+                        "CO2_level": "s2"
+                    },
+                    "actuators": {
+                        "fan_control": "a1",
+                        "vaporizer_control": "a2",
+                        "co2_control": "a7"
+                    }
+                }
+            ],
+            "usrID": "u1",
+            "gh_params": {
+                "temp": 20,
+                "CO2": 420,
+                "hum": 30
+            },
+            "plantsList": [],
+            "lastUpdate": "2023-11-13 17:56:35"
+        }
+    ],
+    "users": [
+        {
+            "usrID": "u1",
+            "name": "fede",
+            "ghID": [
+                "g1"
+            ],
+            "ownedPlants": [],
+            "lastUpdate": "2023-11-13 17:28:25"
+        },
+        {
+            "usrID": "u2",
+            "name": "Name",
+            "ghID": [],
+            "ownedPlants": [],
+            "lastUpdate": "2023-11-13 17:37:48"
+        }
+    ],
     "devices": [],
-    "services": [ ],
     "services": [],
-    "lastUpdate": "2023-11-13 17:57:00"
+    "lastUpdate": "2023-11-13 18:26:47"
 }
