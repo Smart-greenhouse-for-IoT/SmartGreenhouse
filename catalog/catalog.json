@@ -371,7 +371,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-11-16 11:58:32"
+            "lastUpdate": "2023-11-16 12:32:26"
         }
     ],
     "services": [
@@ -389,10 +389,30 @@
                     "port": 8090
                 }
             ],
-            "lastUpdate": "2023-11-16 11:58:16",
+            "lastUpdate": "2023-11-16 12:32:03",
             "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
             "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
+        },
+        {
+            "servID": "thingspeak_adaptor",
+            "name": "thingspeak",
+            "endpoints": [
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "MQTT",
+                    "topic": "smartGreenhouse/#"
+                }
+            ],
+            "TS_info": {
+                "url_TS": "https://api.thingspeak.com/update.json",
+                "write_key": "6K2SF8DLAG4J7D3L",
+                "read_key": "PITP9J8PVKXKS720",
+                "channel_id": "2055720"
+            },
+            "lastUpdate": "2023-11-16 12:31:53"
         }
     ],
-    "lastUpdate": "2023-11-16 11:58:32"
+    "lastUpdate": "2023-11-16 12:32:26"
 }
