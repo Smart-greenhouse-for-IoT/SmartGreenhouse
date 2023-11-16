@@ -205,8 +205,8 @@ class greenhouseControl():
 if __name__ == "__main__":
 
     plant_control = greenhouseControl(
-        conf_path = "SmartGreenhouse\microservices\gh_control\conf.json",
-        confMS_path = "SmartGreenhouse\microservices\gh_control\confMS.json")
+        conf_path = "SmartGreenhouse\gh_control\conf.json",
+        confMS_path = "SmartGreenhouse\gh_control\confMS.json")
 
     plant_control.loop()
     
