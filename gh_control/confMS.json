@@ -1,16 +1,18 @@
 {
-    "servID": "02",
-    "name": "GH_control",
+    "servID": "GH01",
+    "name": "gh_control",
     "endpoints": [
-        "REST",
         "MQTT"
     ],
     "endpoints_details": [
         {
-            "endpoint": "",
-            "address": "",
-            "ip": "",
-            "port": ""
+            "endpoint": "MQTT",
+            "bn": "gh_control",
+            "topics": [
+                "smartGreenhouse/+/+/temperature",
+                "smartGreenhouse/+/+/co2_level",
+                "smartGreenhouse/+/+/humidity"
+            ]
         }
       ], "lastUpdate": ""
 } 
