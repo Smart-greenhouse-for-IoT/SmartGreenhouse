@@ -2,12 +2,13 @@
     "servID": "PC01",
     "name": "plant_control",
     "endpoints": [
+        "REST",
         "MQTT"
     ],
     "endpoints_details": [
         {
             "endpoint": "MQTT",
-            "bn": "plant_control",
+            "bn": "plants_control",
             "topics": [
                 "smartGreenhouse/+/+/soil_moisture"
             ]

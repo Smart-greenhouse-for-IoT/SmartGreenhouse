@@ -48,9 +48,9 @@ class Telegram_Bot:
             "devices": [],
             "usrID": "",
             "gh_params":{
-                "temp": "",
-                "CO2": "",
-                "hum": ""
+                "temperature": "",
+                "CO2_level": "",
+                "humidity": ""
             },
             "plantsList": [],
             "lastUpdate": ""
@@ -348,10 +348,10 @@ class Telegram_Bot:
                                         if not r_assigned_dev.ok:
                                             self.greenhouse["usrID"] = self.user["usrID"]
                                             #self.greenhouse["devID"].append(parameters[0])
-                                            self.greenhouse["gh_params"]["temp"] = parameters[1]
-                                            self.greenhouse["gh_params"]["hum"] = parameters[2]
+                                            self.greenhouse["gh_params"]["temperature"] = parameters[1]
+                                            self.greenhouse["gh_params"]["humidity"] = parameters[2]
                                             #FIXME: find a better way to assign the CO2 value
-                                            self.greenhouse["gh_params"]["CO2"] = 420
+                                            self.greenhouse["gh_params"]["CO2_level"] = 420
                                             req_gh = requests.post(self.addr_cat + "/addGreenhouse", json.dumps(self.greenhouse))
                                             req_id = requests.get(self.addr_cat + "/greenhouse/recentID")
                                             self.greenhouse["ghID"] = req_id.json()["ghID"]
@@ -458,13 +458,13 @@ class Telegram_Bot:
                         done = True
                         self.bot.sendMessage(chat_ID, text="To add a plant to the greenhouse write:"
                                                         "\n/addgrhouseplant_devID_NameOfThePlant"
-                                                        f"\n{self.greenhouse['ghID']} have {len(self.greenhouse['devID'])} device connector.")
+                                                        f"\n{self.greenhouse['ghID']} have {len(self.greenhouse['devices'])} device connector.")
                         
-                        for dev in self.greenhouse['devID']:
+                        for dev in self.greenhouse['devices']:
                             used_sens = [plant["sensID"] for plant in self.greenhouse["plantsList"] 
-                                         if plant["devID"] == dev]
+                                         if plant["devID"] == dev["devID"]]
                             try:
-                                req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev}")
+                                req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev['devID']}")
                                 
                                 # Assign a sensor and actuator to the plant to be added
                                 if req_sens.ok:
@@ -473,7 +473,7 @@ class Telegram_Bot:
                                     all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
 
                                     free_sens = [sens for sens in all_sens if sens not in used_sens]
-                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev} have {len(free_sens)} sensor available")
+                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev['devID']} have {len(free_sens)} sensor available")
                                 else:
                                     self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
                             except:
