@@ -20,7 +20,7 @@ class greenhouseControl():
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
         self.track_actuation_dict = {}
-        self._actuation_time = 2
+        self._actuation_time = 3
 
         self.registerToCat()
         for end_det in self.myservice["endpoints_details"]:
@@ -39,21 +39,33 @@ class greenhouseControl():
         '''
         This function is the on message callback
         '''
+        if topic.split("/")[2].startswith("s"):
+            measure_dict = json.loads(body)
+            quantity_name = topic.split("/")[-1]
 
-        measure_dict = json.loads(body)
-        quantity_name = topic.split("/")[-1]
+            gh_act = self.getActID(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name) 
+            gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"))       
+            topic_act = self.transformTopic(topic, gh_act.get("actID"))
 
-        gh_act = self.getActID(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name) 
-        gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"))       
-        topic_act = self.transformTopic(topic, gh_act.get("actID"))
+            if quantity_name in ["temperature", "CO2_level"]:
+                if measure_dict.get("v") < gh_description.get(quantity_name):
 
-        if measure_dict.get("v") < gh_description.get(quantity_name):
+                    if topic_act not in self.track_actuation_dict:
+                        self.startActuation(topic_act, measure_dict, )
+                else:
+                    print(f"Threshold respected for sensor {measure_dict['sensID']}")
 
-            if topic_act not in self.track_actuation_dict:
-                self.startActuation(topic_act, measure_dict)
-            
+            if quantity_name == "humidity":
+                if measure_dict.get("v") > gh_description.get(quantity_name):
 
-    def startActuation(self, topic, body, act_ID):
+                    if topic_act not in self.track_actuation_dict:
+                        self.startActuation(topic_act, measure_dict)
+                else:
+                    print(f"Threshold respected for sensor {measure_dict['sensID']}")
+
+                
+
+    def startActuation(self, topic, body):
 
         measure_dict_resp = body
 
@@ -170,9 +182,9 @@ class greenhouseControl():
         addr = f"{self.addr_cat}/greenhouse?devID={devID}"
         try:
             #Get the status to the catalog
-            req = requests.get(addr).json()
-            thresholds = req.get("gh_params")
+            req = requests.get(addr)
             if req.status_code == 200:
+                thresholds = req.json().get("gh_params")
                 return thresholds
 
             else:
@@ -205,8 +217,8 @@ class greenhouseControl():
 if __name__ == "__main__":
 
     plant_control = greenhouseControl(
-        conf_path = "gh_control\conf.json",
-        confMS_path = "gh_control\confMS.json")
+        conf_path = "gh_control/conf.json",
+        confMS_path = "gh_control/confMS.json")
 
     plant_control.loop()
     
