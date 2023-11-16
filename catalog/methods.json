@@ -19,7 +19,8 @@
                 "user",
                 "user?usrID=",
                 "user?usrID=&plant=",
-                "plant?devID=&sensID="
+                "plant?devID=&sensID=",
+                "?devID=&ghID=&sensID=&n="
             ]
         },
         {

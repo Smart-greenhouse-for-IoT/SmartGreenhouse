@@ -26,8 +26,9 @@ class MyMQTT:
         self.notifier.notify(msg.topic, msg.payload)
 
     def myOnPublish(self, paho_mqtt, userdata, mid):
-        print(f"Message {mid} has been delivered")
-
+        #print(f"Message {mid} has been delivered")
+        pass
+    
     def myPublish(self, topic, msg):
         # publish a message with a certain topic
         self._paho_mqtt.publish(topic, json.dumps(msg), 2)

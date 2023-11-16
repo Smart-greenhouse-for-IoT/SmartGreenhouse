@@ -20,7 +20,7 @@ class plantsControl():
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
         self.track_actuation_dict = {}
-        self._actuation_time = 15
+        self._actuation_time = 2
 
         self.registerToCat()
         for end_det in self.myservice["endpoints_details"]:
@@ -58,16 +58,16 @@ class plantsControl():
         measure_dict_resp["devID"] = topic.split("/")[1]
         measure_dict_resp["actID"] = topic.split("/")[2]
         measure_dict_resp["timestamp"] = time.time()
-        measure_dict_resp["command"] = "start"
+        measure_dict_resp["command"] = True
         
 
         self._pubSub.myPublish(topic, measure_dict_resp)
 
-        print(f"Actuation started, topic:{topic}")
-
         self.track_actuation_dict[topic] = measure_dict_resp
         self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
         self.track_actuation_dict[topic]["timer"].start()
+        
+        print(f"Actuation started, topic:{topic}")
 
     def stopActuation(self, topic_):
 
@@ -75,14 +75,12 @@ class plantsControl():
         
         message.pop("timer")
         message["timestamp"] = time.time()
-        message["command"] = "stop"
+        message["command"] = False
         self._pubSub.myPublish(topic_, message)
 
         self.track_actuation_dict.pop(topic_)
 
         print(f"Actuation stopped, topic:{topic_}")
-
-
 
 
     def transformTopic(self, topic, actuator):
@@ -161,7 +159,7 @@ class plantsControl():
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
 
-    def loop(self, refresh_time = 100):
+    def loop(self, refresh_time = 10):
 
         last_time = 0
         try:

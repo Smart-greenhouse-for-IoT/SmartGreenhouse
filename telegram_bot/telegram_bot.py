@@ -28,7 +28,7 @@ class Telegram_Bot:
         
         self.addr_cat = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
 
-        #FIXME: what happen if the result is negative? We needt to add a maxtry param like davide did?
+        self.DA_connected = False
         self.DA_info()    
 
         self.userConnected = False
@@ -45,14 +45,13 @@ class Telegram_Bot:
 
         self.greenhouse = {
             "ghID": "",
-            "devID": [],
+            "devices": [],
             "usrID": "",
             "gh_params":{
                 "temp": "",
                 "CO2": "",
                 "hum": ""
             },
-            "maxNumPlants": "",
             "plantsList": [],
             "lastUpdate": ""
         }
@@ -117,8 +116,44 @@ class Telegram_Bot:
                                 r_assigned_dev = requests.get(self.addr_cat + 
                                                             f"/greenhouse?devID={parameters[0]}")
                                 if req_dev.ok:
+                                    device = req_dev.json()
                                     if not r_assigned_dev.ok:
-                                        self.greenhouse["devID"].append(parameters[0])
+                                        # Assign sensors to greenhouse
+                                        for sensor in device["resources"]["sensors"]:
+                                            for service in sensor["services_details"]:
+                                                if service["service_type"] == "MQTT":
+                                                    for topic in service["topic"]:
+                                                        if "temperature" in topic:
+                                                            sens_temp =  sensor["sensID"]
+                                                        elif "CO2_level" in topic:
+                                                            sens_co2 = sensor["sensID"]
+                                        
+                                        # Assign actuators to greenhouse
+                                        for sensor in device["resources"]["actuators"]:
+                                            for service in sensor["services_details"]:
+                                                if service["service_type"] == "MQTT":
+                                                    for topic in service["topic"]:
+                                                        if "fan_control" in topic:
+                                                            act_fan= sensor["actID"]
+                                                        elif "vaporizer_control" in topic:
+                                                            act_vap = sensor["actID"]
+                                                        elif "co2_control" in topic:
+                                                            act_co = sensor["actID"]
+                                                            
+                                        self.greenhouse["devices"].append(
+                                            {
+                                                "devID": parameters[0],
+                                                "sensors":{
+                                                    "temp_hum": sens_temp,
+                                                    "CO2_level": sens_co2 
+                                                },
+                                                "actuators": {
+                                                    "fan_control": act_fan,
+                                                    "vaporizer_control": act_vap,
+                                                    "co2_control": act_co
+                                                }
+                                            }
+                                            )
                                         req_gh = requests.put(self.addr_cat + "/updateGreenhouse", json.dumps(self.greenhouse))
                                         self.bot.sendMessage(chat_ID, text=f"Device {parameters[0]} correctly added"
                                                                         f" in greenhouse {self.greenhouse['ghID']}.")
@@ -305,9 +340,12 @@ class Telegram_Bot:
                                     r_assigned_dev = requests.get(self.addr_cat + 
                                                                 f"/greenhouse?devID={devID_gh}")
                                     if req_dev.ok:
+                                        device = req_dev.json()
+                                        device["ghID"] = self.greenhouse["ghID"]
+                                        
                                         if not r_assigned_dev.ok:
                                             self.greenhouse["usrID"] = self.user["usrID"]
-                                            self.greenhouse["devID"].append(parameters[0])
+                                            #self.greenhouse["devID"].append(parameters[0])
                                             self.greenhouse["gh_params"]["temp"] = parameters[1]
                                             self.greenhouse["gh_params"]["hum"] = parameters[2]
                                             #FIXME: find a better way to assign the CO2 value
@@ -318,8 +356,6 @@ class Telegram_Bot:
                                             # Update user and device adding the new greenhouse
                                             self.user["ghID"].append(self.greenhouse["ghID"])
                                             req_usr = requests.put(self.addr_cat + f"/updateUser", json.dumps(self.user))
-                                            device = req_dev.json()
-                                            device["ghID"] = self.greenhouse["ghID"]
                                             req_dev = requests.put(self.addr_cat + f"/updateDevice", json.dumps(device))
 
                                             if req_gh.ok and req_usr.ok:
@@ -370,11 +406,17 @@ class Telegram_Bot:
                     # Check the status of the selected greenhouse, including: humidity, temperature and number of plants
                     if message == "/status":
                         done = True
-                        #TODO: ALE qui bisogna prendere le informazioni di temperatura e umidità della greenhouse
+
+                        if self.DA_connected == False:
+                            self.DA_info()
+                        
                         try:
-                            req_ghINFO = requests.get(self.addr_DA + f"/getLastValue?ghID={self.greenhouse['ghID']}")
-                            ghINFO = req_ghINFO.json() #CHECK: its a csv file? maybe .json is not correct
-                            self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are n gradi % umidità"
+                            req_ghINFO = requests.get(self.addr_DA + f"/getAllLastValues?ghID={self.greenhouse['ghID']}")
+                            ghINFO = req_ghINFO.json() 
+                            self.bot.sendMessage(chat_ID, text=f"In greenhouse {self.greenhouse['ghID']} there are:"
+                                                    f"\nTemperature: {ghINFO['temperature']} C°"
+                                                    f"\nHumidity: {ghINFO['humidity']} %"
+                                                    f"\nCO2: {ghINFO['CO2']} ppm"
                                                     f"\nNumber of plants: {len(self.greenhouse['plantsList'])}"
                                                     "\nIf you want the list of the plants of this greenhouse click /plants")
                         except:
@@ -402,12 +444,12 @@ class Telegram_Bot:
                         self.bot.sendMessage(chat_ID, text=f"{message[1:]} plant selected")
                         self.plantSelected = True
                         self.plant["plant"] = message[1:]
-                        #TODO: ALE ottieni le info della pianta selezionata
-                        try:
-                            req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
-                            plantINFO = req_plantINFO.json() #CHECK: its a csv file? maybe .json is not correct
-                        except:
-                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the data analysis web service is unreachable! Try again later.")
+                        ind, plant = searchDict(self.greenhouse, 'plantsList', 'plant', self.plant["plant"],index=True)
+                        self.plant["th_min"] = plant["th_min"]
+                        self.plant["th_max"] = plant["th_max"]
+                        self.plant["devID"] = plant["devID"]
+                        self.plant["sensID"] = plant["sensID"]
+                        self.plant["actID"] = plant["actID"]
 
                     # Inform the user to the complete command to add a plant to the greenhouse
                     elif message == "/addgrhouseplant":
@@ -448,22 +490,29 @@ class Telegram_Bot:
                                                         "\n/addgrhousedevice_devID")
 
                     # If plant commands are received before a plant is selected send the proper error message
-                    elif (message == "/plantstatus" or message == "/irrigate") and not self.plantSelected:
+                    elif (message == "/plantstatus") and not self.plantSelected:
                         done = True
                         self.bot.sendMessage(chat_ID, text=f"Plant not selected."
                                                             "\nPlease first select a plant with /selectplant")
                         
                     # If a plant is selected then other commands are unlocked
                     if self.plantSelected == True:
-                        # Manually activate the irrigation on the selected plant
-                        if message == "/irrigate":
-                            done = True
-                            self.bot.sendMessage(chat_ID, text="C'mon do something")
                         
                         # Obtain the plant information like its humidity treshold (low and high) and the last moisture level measured
-                        elif message == "/plantstatus":
+                        if message == "/plantstatus":
                             done = True
-                            self.bot.sendMessage(chat_ID, text="C'mon do something")
+                            if self.DA_connected == False:
+                                self.DA_info()
+
+                            try:
+                                req_plantINFO = requests.get(self.addr_DA + f"/getLastMoistureLevel?ghID={self.greenhouse['ghID']}&sensID={self.plant['sensID']}")
+                                plantINFO = req_plantINFO.json() 
+                                self.bot.sendMessage(chat_ID, text=f"Plant {self.plant['plant']} information are:"
+                                                                    f"\nMoisture level: {plantINFO['moisture']} %"
+                                                                    f"\nSensor connected: {self.plant['sensID']}"
+                                                                    f"\nActuator connected: {self.plant['actID']}")
+                            except:
+                                self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the data analysis web service is unreachable! Try again later.")
 
                 ###########################################
                 ######### USER CONNECTED COMMANDS #########
@@ -514,6 +563,10 @@ class Telegram_Bot:
                                                         "\n/addplant_Name_lowHumidityTresh_highHumidityTresh"
                                                         "\nWhere the last two data are the level of humidity treshold in %"
                                                         "\nThe humidity thresold are numbers that goes from 0 to 100")
+                elif message == "/getlinkgraph":
+                    link = requests.get(self.addr_cat + f"/something")
+                    self.bot.sendMessage(chat_ID, text=f"To acces nodered click on the following link:\n"
+                                                        f"{link}")
                     
                 ##########################
                 ######### ERRORS #########
@@ -525,7 +578,7 @@ class Telegram_Bot:
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
                     
-                elif (message == "/selectplant" or message == "/plantstatus" or message == "/irrigate") and not self.grHselected:
+                elif (message == "/selectplant" or message == "/plantstatus" or message == "/addgrhousedevice") and not self.grHselected:
                     self.bot.sendMessage(chat_ID, text=f"No greenhouse selected."
                                                         "\nPlease first select a greenhouse with /selectgreenhouse"
                                                         "\nOr create a new one with /addgreenhouse")
@@ -555,10 +608,10 @@ class Telegram_Bot:
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                     
-                elif message == "/addgrhouseplant" or message == "/status" or message == "/plants" or message == "/selectplant":
+                elif message == "/addgrhouseplant" or message == "/status" or message == "/selectplant":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
-                elif message == "/plantstatus" or message == "/irrigate" or message == "/selectplant":
+                elif message == "/plantstatus" or message == "/selectplant" or message == "/plants":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 elif message.startswith('/'):
@@ -627,14 +680,16 @@ class Telegram_Bot:
         help
         ----
         Send a message when the command /help is received.
+        The different type of help messages are for having a dynamic\\
+        printing of help messages in different cases.
         """
 
         if self.userConnected == True and self.grHselected == False:
-            help_message = ("*You can perform the following actions:*\n" 
-                        "- /status: Get info about your greenhouses\n" 
+            help_message = ("*You can perform the following actions:*\n"  
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
-                        "- /addgreenhouse: Add a new empty greenhouse\n")
+                        "- /addgreenhouse: Add a new empty greenhouse\n"
+                        "- /getlinkgraph: Get the link to open the nodered dashboard\n")
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == False:
             help_message = ("*You can perform the following actions:*\n" 
@@ -645,7 +700,8 @@ class Telegram_Bot:
                         "- /addgrhouseplant: Add new plant to the greenhouse\n"
                         "- /addgrhousedevice: Add a new device to the selected greenhouse\n"
                         "- /plants: Get the list of the plants of the selected greenhouse\n"
-                        "- /selectplant: Get the name of the selected greenhouse plants to select one\n")
+                        "- /selectplant: Get the name of the selected greenhouse plants to select one\n"
+                        "- /getlinkgraph: Get the link to open the nodered dashboard\n")
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == True:
             help_message = ("*You can perform the following actions:*\n"
@@ -657,7 +713,7 @@ class Telegram_Bot:
                         "- /addgrhousedevice: Add a new device to the selected greenhouse\n"
                         "- /plants: Get the list of the plants of the selected greenhouse\n"
                         "- /selectplant: Get the name of the selected greenhouse plants to select one\n"
-                        "- /irrigate: Manually irrigate the selected plants\n"
+                        "- /getlinkgraph: Get the link to open the nodered dashboard\n"
                         "- /plantstatus: Get info about the selected plant\n")
         else:
             help_message = ("*Before doing anything please log in into your account*\n" 
@@ -711,15 +767,17 @@ class Telegram_Bot:
                         "port": str(Da["endpoints_details"][0]["port"])
                     }
                     self.addr_DA = "http://" + DA_info["ip"] + ":" + DA_info["port"]
+                    self.DA_connected = True
                     update = True
                 else:
                     print("Data analysis microservice not present in the catalog!")
+                    time.sleep(1)
             except:
                 print("The catalog web service is unreachable!")
                 time.sleep(1)
 
-        if update == False:
-            raise Exception("The catalog web service is unreachable!")
+        #if update == False:
+        #    raise Exception("Data analysis microservice not present in the catalog!")
 
 
 if __name__ == "__main__":

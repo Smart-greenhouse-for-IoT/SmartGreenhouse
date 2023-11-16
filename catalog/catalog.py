@@ -340,7 +340,13 @@ class REST_catalog(catalog):
                                                             to user {usrID}")
                     elif "devID" in params:
                         devID = params["devID"]
-                        search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                        search_gh = {}
+                        for gh in self.catDic["greenhouses"]:
+                            for dev in gh["devices"]:
+                                if dev["devID"] == devID:
+                                    search_gh = gh
+                                    break
+                        
                         if search_gh:
                             return json.dumps(search_gh)
                         else:
@@ -590,7 +596,7 @@ if __name__ == "__main__":
     cherrypy.engine.start()
     try:
         while True:
-            webService.cleaningDev(timeout=100)
-            webService.cleaningServ(timeout=100)
+            webService.cleaningDev(timeout=50)
+            webService.cleaningServ(timeout=50)
     except KeyboardInterrupt:
         cherrypy.engine.block()

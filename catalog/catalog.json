@@ -18,96 +18,10 @@
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
         "link": ""
     },
-    "greenhouses": [
-        {
-            "ghID": "g1",
-            "devID": [
-                "d1"
-            ],
-            "usrID": "u1",
-            "maxNumPlants": "",
-            "plantsList": [
-                {
-                    "plant": "zafferano",
-                    "th_min": 100,
-                    "th_max": 90,
-                    "devID": "d1",
-                    "sensID": "s3",
-                    "actID": "a3"
-                },
-                {
-                    "plant": "zafferano",
-                    "th_min": 100,
-                    "th_max": 90,
-                    "devID": "d1",
-                    "sensID": "s4",
-                    "actID": "a4"
-                },
-                {
-                    "plant": "cicoria",
-                    "th_min": 100,
-                    "th_max": 90,
-                    "devID": "d1",
-                    "sensID": "s5",
-                    "actID": "a5"
-                },
-                {
-                    "plant": "mango",
-                    "th_min": 100,
-                    "th_max": 87,
-                    "devID": "d1",
-                    "sensID": "s6",
-                    "actID": "a6"
-                }
-            ],
-            "lastUpdate": "2023-10-07 10:29:54"
-        },
-        {
-            "ghID": "g2"
-        }
-    ],
-    "users": [
-        {
-            "usrID": "u1",
-            "name": "Jesus",
-            "ghID": [
-                "g1"
-            ],
-            "ownedPlants": [
-                {
-                    "plant": "mango",
-                    "th_min": 20,
-                    "th_max": 87
-                },
-                {
-                    "plant": "baobab",
-                    "th_min": 24,
-                    "th_max": 65
-                }
-            ],
-            "lastUpdate": "2023-10-06 11:21:30"
-        }
-    ],
+    "greenhouses": [],
+    "users": [],
     "devices": [],
-    "services": [
-        {
-            "servID": "16",
-            "name": "data_analysis",
-            "endpoints": [
-                "REST"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "REST",
-                    "address": "http://127.0.0.1:8090",
-                    "ip": "127.0.0.1",
-                    "port": 8090
-                }
-            ],
-            "lastUpdate": "2023-11-11 19:11:01",
-            "path_dataset1": "D:\\GitHub\\SmartGreenHouse\\SmartGreenhouse\\Data_analysis\\sub\\datasets\\20210703_greenhouse_data.csv",
-            "path_dataset2": "D:\\GitHub\\SmartGreenHouse\\SmartGreenhouse\\Data_analysis\\sub\\datasets\\RosesGreenhDB.csv"
-        }
-    ],
-    "lastUpdate": "2023-11-11 19:11:01"
+    "services": [ ],
+    "services": [],
+    "lastUpdate": "2023-11-13 17:57:00"
 }
