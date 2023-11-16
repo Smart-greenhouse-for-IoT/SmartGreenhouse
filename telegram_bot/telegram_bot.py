@@ -456,13 +456,13 @@ class Telegram_Bot:
                         done = True
                         self.bot.sendMessage(chat_ID, text="To add a plant to the greenhouse write:"
                                                         "\n/addgrhouseplant_devID_NameOfThePlant"
-                                                        f"\n{self.greenhouse['ghID']} have {len(self.greenhouse['devID'])} device connector.")
+                                                        f"\n{self.greenhouse['ghID']} have {len(self.greenhouse['devices'])} device connector.")
                         
-                        for dev in self.greenhouse['devID']:
+                        for dev in self.greenhouse['devices']:
                             used_sens = [plant["sensID"] for plant in self.greenhouse["plantsList"] 
-                                         if plant["devID"] == dev]
+                                         if plant["devID"] == dev["devID"]]
                             try:
-                                req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev}")
+                                req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev['devID']}")
                                 
                                 # Assign a sensor and actuator to the plant to be added
                                 if req_sens.ok:
@@ -471,7 +471,7 @@ class Telegram_Bot:
                                     all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
 
                                     free_sens = [sens for sens in all_sens if sens not in used_sens]
-                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev} have {len(free_sens)} sensor available")
+                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev['devID']} have {len(free_sens)} sensor available")
                                 else:
                                     self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
                             except:

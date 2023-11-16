@@ -20,7 +20,7 @@ class plantsControl():
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
         self.track_actuation_dict = {}
-        self._actuation_time = 15
+        self._actuation_time = 3
 
         self.registerToCat()
 
@@ -39,16 +39,20 @@ class plantsControl():
         This function is the on message callback
         '''
 
-        measure_dict = json.loads(body)
+        if topic.split("/")[2].startswith("s"):
+            measure_dict = json.loads(body)
 
-        plant_description = self.getThresholdsPlant(measure_dict.get("devID"), measure_dict.get("sensID"))        
-        topic_act = self.transformTopic(topic, plant_description.get("actID"))
-        measure_dict["plant"] = plant_description.get("plant")
-        if measure_dict.get("v") < plant_description.get("th_min"):
+            plant_description = self.getThresholdsPlant(measure_dict.get("devID"), measure_dict.get("sensID"))
+            if plant_description:       
+                topic_act = self.transformTopic(topic, plant_description.get("actID"))
+                measure_dict["plant"] = plant_description.get("plant")
+                if measure_dict.get("v") < plant_description.get("th_min"):
 
-            if topic_act not in self.track_actuation_dict:
-                self.startActuation(topic_act, measure_dict)
-            
+                    if topic_act not in self.track_actuation_dict:
+                        self.startActuation(topic_act, measure_dict)
+                else:
+                    print(f"Threshold respected for sensor {measure_dict.get('sensID')}")
+                
 
     def startActuation(self, topic, body):
 
@@ -155,12 +159,12 @@ class plantsControl():
                 return req.json() 
 
             else:
-                print(f"Request failed!")
+                print(f"No plant associated to sensor {sensID}!")
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
 
-    def loop(self, refresh_time = 100):
+    def loop(self, refresh_time = 15):
 
         last_time = 0
         try:
@@ -184,8 +188,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "microservices/plant_control/conf.json",
-        confMS_path = "microservices/plant_control/confMS.json")
+        conf_path = "plant_control/conf.json",
+        confMS_path = "plant_control/confMS.json")
 
     plant_control.loop()
     

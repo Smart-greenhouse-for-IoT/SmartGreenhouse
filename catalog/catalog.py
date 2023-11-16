@@ -402,7 +402,13 @@ class REST_catalog(catalog):
             elif uri[0] == "plant":
                 if "devID" in params and "sensID" in params:
                     devID = params["devID"]
-                    search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                    search_gh = {}
+                    for gh in self.catDic["greenhouses"]:
+                        for dev in gh["devices"]:
+                            if dev["devID"] == devID:
+                                search_gh = gh.copy()
+                                sensors = dev["sensors"]
+                                actuators = dev["actuators"]
                     
                     if search_gh:
                         sensID = params["sensID"]
