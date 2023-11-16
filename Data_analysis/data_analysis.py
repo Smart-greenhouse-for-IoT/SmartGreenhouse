@@ -198,7 +198,7 @@ class Queries():
     def get_last_value(self, df, gh_id, measure):
         selected_rows = df[df['ghID'] == gh_id]
         filtered_rows = selected_rows[selected_rows['quantity'] == measure]
-        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=False)
+        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=True)
         last_row = sorted_rows.tail(1)
 
         return last_row
@@ -207,7 +207,7 @@ class Queries():
     def get_last_moisture_level(self, df, gh_id, sens_id):
         selected_rows = df[(df['ghID'] == gh_id) & (df['sensID'] == sens_id)]
         filtered_rows = selected_rows[selected_rows['quantity'] == "Soil moisture"]
-        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=False)
+        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=True)
         last_row = sorted_rows.tail(1)
         moisture_level = last_row['value'].iloc[0]
 

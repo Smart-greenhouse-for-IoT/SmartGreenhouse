@@ -164,7 +164,7 @@ class ThingspeakAdaptor():
         ------
 
         """
-        print("File correctly received")
+        print(f"Msg:received from topic: {topic}")
         msg_json = json.loads(msg)
         # print(msg_json)
         field_dict = self.dictCreation(topic, msg_json)
@@ -251,6 +251,6 @@ class ThingspeakAdaptor():
 
 if __name__ == "__main__":
     
-    TS = ThingspeakAdaptor("Thingspeak\conf.json", "Thingspeak\confTS.json")
+    TS = ThingspeakAdaptor("Thingspeak/conf.json", "Thingspeak/confTS.json")
     TS.loop()
     

@@ -226,7 +226,7 @@ class Telegram_Bot:
                                          if plant["devID"] == device]
                             used_act = [plant["actID"] for plant in self.greenhouse["plantsList"] 
                                          if plant["devID"] == device]
-                            
+                            out = False
                             try:
                                 req_plant = requests.get(self.addr_cat + f"/user?usrID={self.user['usrID']}&plant={plant_name}")
                                 req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={device}")
@@ -248,37 +248,38 @@ class Telegram_Bot:
                                         sensID = free_sens.pop(0)
                                         actID = free_act.pop(free_act.index("a" + sensID[1:]))
                                     except:
+                                        out = True
                                         self.bot.sendMessage(chat_ID, text=f"Device {device} does not have more free sensor!")
                                 else:
                                     self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
                                 
-
-                                # Check if the plant exist in user owned plants
-                                if req_plant.ok: 
-                                    
-                                    # Check if there is a free sensors to be assigned
-                                    if sensID and actID:
-                                        plant = req_plant.json()
-
-                                        # Add device, sensor, actuators info to the plant
-                                        plant["devID"] = device
-                                        plant["sensID"] = sensID
-                                        plant["actID"] = actID
-
-                                        self.greenhouse["plantsList"].append(plant)
+                                if not out:
+                                    # Check if the plant exist in user owned plants
+                                    if req_plant.ok: 
                                         
-                                        # Update the greenhouse in catalog
-                                        try:
-                                            req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
-                                            self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added "
-                                                                f"to greenhouse {self.greenhouse['ghID']}"
-                                                                f"\nPlease insert in the pot the sensor {plant['sensID']} and actuator {plant['actID']}")
-                                        except:
-                                            self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
-                                    else: 
-                                        self.bot.sendMessage(chat_ID, text=f"There are no more free sensor in device {device}!")
-                                else:
-                                    self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
+                                        # Check if there is a free sensors to be assigned
+                                        if sensID and actID:
+                                            plant = req_plant.json()
+
+                                            # Add device, sensor, actuators info to the plant
+                                            plant["devID"] = device
+                                            plant["sensID"] = sensID
+                                            plant["actID"] = actID
+
+                                            self.greenhouse["plantsList"].append(plant)
+                                            
+                                            # Update the greenhouse in catalog
+                                            try:
+                                                req_gh = requests.put(self.addr_cat + f"/updateGreenhouse", json.dumps(self.greenhouse))
+                                                self.bot.sendMessage(chat_ID, text=f"{plant_name} correctly added "
+                                                                    f"to greenhouse {self.greenhouse['ghID']}"
+                                                                    f"\nPlease insert in the pot the sensor {plant['sensID']} and actuator {plant['actID']}")
+                                            except:
+                                                self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
+                                        else: 
+                                            self.bot.sendMessage(chat_ID, text=f"There are no more free sensor in device {device}!")
+                                    else:
+                                        self.bot.sendMessage(chat_ID, text=f"{plant_name} does not exist in user {self.user['usrID']} owned plants!")
 
                             except:
                                 self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
@@ -458,13 +459,13 @@ class Telegram_Bot:
                         done = True
                         self.bot.sendMessage(chat_ID, text="To add a plant to the greenhouse write:"
                                                         "\n/addgrhouseplant_devID_NameOfThePlant"
-                                                        f"\n{self.greenhouse['ghID']} have {len(self.greenhouse['devID'])} device connector.")
+                                                        f"\n{self.greenhouse['ghID']} have {len(self.greenhouse['devices'])} device connector.")
                         
-                        for dev in self.greenhouse['devID']:
+                        for dev in self.greenhouse['devices']:
                             used_sens = [plant["sensID"] for plant in self.greenhouse["plantsList"] 
-                                         if plant["devID"] == dev]
+                                         if plant["devID"] == dev['devID']]
                             try:
-                                req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev}")
+                                req_sens = requests.get(self.addr_cat + f"/device/sensors?devID={dev['devID']}")
                                 
                                 # Assign a sensor and actuator to the plant to be added
                                 if req_sens.ok:
@@ -473,9 +474,9 @@ class Telegram_Bot:
                                     all_sens = [sens["sensID"] for sens in sensors if sens["device_name"] == "chirp"]
 
                                     free_sens = [sens for sens in all_sens if sens not in used_sens]
-                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev} have {len(free_sens)} sensor available")
+                                    self.bot.sendMessage(chat_ID, text=f"Device connector {dev['devID']} have {len(free_sens)} sensors available")
                                 else:
-                                    self.bot.sendMessage(chat_ID, text=f"Device {device} does not exist!")
+                                    self.bot.sendMessage(chat_ID, text=f"Device {dev['devID']} does not exist in the catalog!")
                             except:
                                 self.bot.sendMessage(chat_ID, text=f"Sorry, the catalog web service is unreachable! Try again later.")
                         
@@ -669,11 +670,13 @@ class Telegram_Bot:
                 if req_users.ok:
                     user = req_users.json()
                     ownedPlants = user['ownedPlants']
-                    self.bot.sendMessage(chat_ID, text=f"Plant list:")
-                    for plant in ownedPlants:
-                        self.bot.sendMessage(chat_ID, text=f"{plant['plant']}")
-                else:
-                    self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} does not have plants in its database!")
+                    if len(ownedPlants) != 0:
+                        self.bot.sendMessage(chat_ID, text=f"Plant list:")
+                        for plant in ownedPlants:
+                            self.bot.sendMessage(chat_ID, text=f"{plant['plant']}")
+                    else:
+                        self.bot.sendMessage(chat_ID, text=f"User {self.user['usrID']} does not have plants in its database!"
+                                                            "\nTo add a new plant to the user databese click /addplant")
             except:
                 self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
 
