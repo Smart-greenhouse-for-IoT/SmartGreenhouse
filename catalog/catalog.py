@@ -344,9 +344,27 @@ class REST_catalog(catalog):
                                                             to user {usrID}")
                     elif "devID" in params:
                         devID = params["devID"]
-                        search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                        search_gh = {}
+                        for gh in self.catDic["greenhouses"]:
+                            for dev in gh["devices"]:
+                                if dev["devID"] == devID:
+                                    search_gh = gh.copy()
+                                    sensors = dev["sensors"]
+                                    actuators = dev["actuators"]
+                        
                         if search_gh:
-                            return json.dumps(search_gh)
+                            if "name" and "sensID" in params:
+                                name_sens = list(sensors.keys())[list(sensors.values()).index(params["sensID"])]
+                                if name_sens == "temp_hum" and params["name"] == "temperature":
+                                    actID = actuators["fan_control"]
+                                elif name_sens == "CO2_level" and params["name"] == "CO2_level":
+                                    actID = actuators["co2_control"]
+                                elif name_sens == "temp_hum" and params["name"] == "humidity":
+                                    actID = actuators["vaporizer_control"]
+                                return json.dumps({"actID": actID})
+
+                            else:   
+                                return json.dumps(search_gh)
                         else:
                             raise cherrypy.HTTPError(404, f"No greenhouses associated\
                                                             to device {devID}")
@@ -388,7 +406,13 @@ class REST_catalog(catalog):
             elif uri[0] == "plant":
                 if "devID" in params and "sensID" in params:
                     devID = params["devID"]
-                    search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                    search_gh = {}
+                    for gh in self.catDic["greenhouses"]:
+                        for dev in gh["devices"]:
+                            if dev["devID"] == devID:
+                                search_gh = gh.copy()
+                                sensors = dev["sensors"]
+                                actuators = dev["actuators"]
                     
                     if search_gh:
                         sensID = params["sensID"]

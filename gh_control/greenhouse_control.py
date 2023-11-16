@@ -3,13 +3,11 @@ import json
 from sub.MyMQTT import * 
 import time
 from datetime import datetime
-from catalogInterface import *
 import threading
 
 
-
 # Open and initialize with config.json
-class GHControl():
+class greenhouseControl():
 
     def __init__(self, conf_path, confMS_path):
 
@@ -21,18 +19,95 @@ class GHControl():
             self.myservice = json.load(f)
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
+        self.track_actuation_dict = {}
+        self._actuation_time = 3
 
         self.registerToCat()
-
-        self._topic = self.conf_dict.get("topic")
+        for end_det in self.myservice["endpoints_details"]:
+            if end_det.get("endpoint") == "MQTT":
+                self._topic = end_det["topics"]
+            
         self.broker_dict = self.get_broker()
         
         self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
-
         for topic in self._topic:
             self._pubSub.mySubscribe(topic)
+        
 
+    def notify(self, topic, body):
+        '''
+        This function is the on message callback
+        '''
+        if topic.split("/")[2].startswith("s"):
+            measure_dict = json.loads(body)
+            quantity_name = topic.split("/")[-1]
+
+            gh_act = self.getActID(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name) 
+            gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"))       
+            topic_act = self.transformTopic(topic, gh_act.get("actID"))
+
+            if quantity_name in ["temperature", "CO2_level"]:
+                if measure_dict.get("v") < gh_description.get(quantity_name):
+
+                    if topic_act not in self.track_actuation_dict:
+                        self.startActuation(topic_act, measure_dict, )
+                else:
+                    print(f"Threshold respected for sensor {measure_dict['sensID']}")
+
+            if quantity_name == "humidity":
+                if measure_dict.get("v") > gh_description.get(quantity_name):
+
+                    if topic_act not in self.track_actuation_dict:
+                        self.startActuation(topic_act, measure_dict)
+                else:
+                    print(f"Threshold respected for sensor {measure_dict['sensID']}")
+
+                
+
+    def startActuation(self, topic, body):
+
+        measure_dict_resp = body
+
+        measure_dict_resp["devID"] = topic.split("/")[1]
+        measure_dict_resp["actID"] = topic.split("/")[2]
+        measure_dict_resp["timestamp"] = time.time()
+        measure_dict_resp["command"] = True
+        
+
+        self._pubSub.myPublish(topic, measure_dict_resp)
+
+        self.track_actuation_dict[topic] = measure_dict_resp
+        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
+        self.track_actuation_dict[topic]["timer"].start()
+        
+        print(f"Actuation started, topic:{topic}")
+
+
+    def stopActuation(self, topic_):
+        """
+        Function callback of the threading timer.
+        When the actuation timer runs out this function publish at the acturator topic to stop.
+        """
+
+        message = self.track_actuation_dict.get(topic_)
+        
+        message.pop("timer")
+        message["timestamp"] = time.time()
+        message["command"] = False
+        self._pubSub.myPublish(topic_, message)
+
+        self.track_actuation_dict.pop(topic_)
+
+        print(f"Actuation stopped, topic:{topic_}")
+
+
+    def transformTopic(self, topic, actuator):
+        
+        topic_ = topic.split("/")
+        topic_[2] = actuator
+        topic_ = ("/").join(topic_)
+        return topic_
 
     
     def registerToCat(self):
@@ -51,7 +126,6 @@ class GHControl():
                 print(f"Plant control service {self.myservice['servID']} could not be added!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
-
 
     def updateToCat(self):
         """
@@ -72,22 +146,6 @@ class GHControl():
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
     
-
-    def getThresholdsGH(self, devID, sensID):
-
-        addr = f"{self.addr_cat}/greenhouse?devID={devID}&sensID={sensID}"
-        try:
-            #Get the status to the catalog
-            req = requests.get(addr)
-            if req.status_code == 200:
-                return req.json() 
-
-            else:
-                print(f"Request failed!")
-        except:
-            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
-        
-
     def get_broker(self): 
         """
         get_broker
@@ -105,109 +163,47 @@ class GHControl():
         return b_dict       
 
 
+    def getActID(self, devID, sensID, qname):
 
-    def notify(self, topic, body):
-        '''
-        This function is the on message callback
-        '''
-        
-        measure_dict = json.loads(body)
-        measure_dict_resp = {}
-
-        GH_description = self.getThresholdsGH(measure_dict.get("device"), measure_dict.get("sensor"))
-
-        if topic.split("/")[3] == "humidity":
-            if measure_dict.get("v") < GH_description("th_min"):
-                measure_dict_resp["command"] = "start"
+        addr = f"{self.addr_cat}/greenhouse?devID={devID}&sensID={sensID}&name={qname}"
+        try:
+            #Get the status to the catalog
+            req = requests.get(addr)
+            if req.status_code == 200:
+                return req.json() 
 
             else:
-                measure_dict_resp["command"] = "stop"
-                
+                print(f"Request failed!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+        
+    def getThresholdsGreenhouse(self, devID):
 
-        if topic.split("/")[3] == "temperature":
-            if measure_dict.get("v") < GH_description("th_min"): 
-                measure_dict_resp["command"] = "start"
+        addr = f"{self.addr_cat}/greenhouse?devID={devID}"
+        try:
+            #Get the status to the catalog
+            req = requests.get(addr)
+            if req.status_code == 200:
+                thresholds = req.json().get("gh_params")
+                return thresholds
+
             else:
-                measure_dict_resp["command"] = "stop"
-                
-               
-        #set up response message
-        topic_ = topic.split("/")
-        measure_dict_resp["devID"] = topic_[1]
-        topic_[2] = GH_description.get("actID")
-        measure_dict_resp["devID"] = topic_[2]
-        measure_dict_resp["timestamp"] = time.now()
-
-        self._pubSub.myPublish("/".join(topic_), measure_dict)
-
-
-
-    def notify(self, topic, body):
-        '''
-        This function is the on message callback
-        '''
-
-        measure_dict = json.loads(body)
-
-        plant_description = self.getThresholdsPlant(measure_dict.get("devID"), measure_dict.get("sensID"))        
-        topic_act = self.transformTopic(topic, plant_description.get("actID"))
-        measure_dict["plant"] = plant_description.get("plant")
-        if measure_dict.get("v") < plant_description.get("th_min"):
-
-            if topic_act not in self.track_actuation_dict:
-                self.startActuation(topic_act, measure_dict)
-            
-
-    def startActuation(self, topic, body):
-
-        measure_dict_resp = body
-
-        measure_dict_resp["devID"] = topic.split("/")[1]
-        measure_dict_resp["actID"] = topic.split("/")[2]
-        measure_dict_resp["timestamp"] = time.time()
-        measure_dict_resp["command"] = "start"
+                print(f"Request failed!")
+        except:
+            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
 
-        self._pubSub.myPublish(topic, measure_dict_resp)
-
-        print(f"Actuation started, topic:{topic}")
-
-        self.track_actuation_dict[topic] = measure_dict_resp
-        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
-        self.track_actuation_dict[topic]["timer"].start()
-
-    def stopActuation(self, topic_):
-
-        message = self.track_actuation_dict.get(topic_)
-        
-        message.pop("timer")
-        message["timestamp"] = time.time()
-        message["command"] = "stop"
-        self._pubSub.myPublish(topic_, message)
-
-        self.track_actuation_dict.pop(topic_)
-
-        print(f"Actuation stopped, topic:{topic_}")
-
-
-
-    def transformTopic(self, topic, actuator):
-        
-        topic_ = topic.split("/")
-        topic_[2] = actuator
-        topic_ = ("/").join(topic_)
-        return topic_
     def loop(self, refresh_time = 10):
 
         last_time = 0
         try:
             while True:
-                print("looping\n")
+                
                 local_time = time.time()
 
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
-
+                    print("looping\n")
                     self.updateToCat()
 
                     last_time = time.time() 
@@ -217,11 +213,12 @@ class GHControl():
             pass
 
 
+
 if __name__ == "__main__":
 
-    gh_control = GHControl(
+    plant_control = greenhouseControl(
         conf_path = "gh_control/conf.json",
         confMS_path = "gh_control/confMS.json")
 
-    gh_control.loop()
+    plant_control.loop()
     

@@ -23,6 +23,7 @@ class MyMQTT:
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # A new message is received
+
         self.notifier.notify(msg.topic, msg.payload)
 
     def myOnPublish(self, paho_mqtt, userdata, mid):
