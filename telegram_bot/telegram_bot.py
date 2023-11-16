@@ -102,7 +102,9 @@ class Telegram_Bot:
                             req = requests.post(self.addr_cat + "/addUser", json.dumps(newUser))
                             req_id = requests.get(self.addr_cat + "/user/recentID")
                             self.bot.sendMessage(chat_ID, text=f"User {parameters[0]} correctly created.")
-                            self.bot.sendMessage(chat_ID, text=f"Your ID is {req_id.json()['usrID']}")
+                            self.bot.sendMessage(chat_ID, text=f"Your ID is {req_id.json()['usrID']}"
+                                                                "\nPlease remember it because for the log in"
+                                                                " you will need to write your username and ID!")
                         except:
                             self.bot.sendMessage(chat_ID, text=f"Sorry, in this moment the catalog web service is unreachable! Try again later.")
                     
@@ -550,7 +552,15 @@ class Telegram_Bot:
                                                         "\n/addplant_Name_lowHumidityTresh_highHumidityTresh"
                                                         "\nWhere the last two data are the level of humidity treshold in %"
                                                         "\nThe humidity thresold are numbers that goes from 0 to 100")
+                # Used to signout the user
+                elif message == "/signout":
+                    self.userConnected = False
+                    self.grHselected = False
+                    self.plantSelected = False
+                    self.bot.sendMessage(chat_ID, text=f"User correctly signed out."
+                                                        "\nPlease sign in with another user clicking on /start")
                 elif message == "/getlinkgraph":
+                    #TODO: to be finished
                     link = requests.get(self.addr_cat + f"/something")
                     self.bot.sendMessage(chat_ID, text=f"To acces nodered click on the following link:\n"
                                                         f"{link}")
@@ -595,7 +605,7 @@ class Telegram_Bot:
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                     
-                elif message == "/addgrhouseplant" or message == "/status" or message == "/selectplant":
+                elif message == "/addgrhouseplant" or message == "/status" or message == "/selectplant" or message == "/signout":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 elif message == "/plantstatus" or message == "/selectplant" or message == "/plants":
@@ -672,14 +682,16 @@ class Telegram_Bot:
         """
 
         if self.userConnected == True and self.grHselected == False:
-            help_message = ("*You can perform the following actions:*\n"  
+            help_message = ("*You can perform the following actions:*\n" 
+                        "- /signout: To log out from this user\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
                         "- /addgreenhouse: Add a new empty greenhouse\n"
                         "- /getlinkgraph: Get the link to open the nodered dashboard\n")
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == False:
-            help_message = ("*You can perform the following actions:*\n" 
+            help_message = ("*You can perform the following actions:*\n"
+                        "- /signout: To log out from this user\n" 
                         "- /status: Get info about your greenhouse\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
@@ -692,6 +704,7 @@ class Telegram_Bot:
             
         elif self.userConnected == True and self.grHselected == True and self.plantSelected == True:
             help_message = ("*You can perform the following actions:*\n"
+                        "- /signout: To log out from this user\n" 
                         "- /status: Get info about your greenhouse\n" 
                         "- /addplant: Add new plant to the user database\n"
                         "- /selectgreenhouse: Get the ID of your greenhouse to select one\n"
