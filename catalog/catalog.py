@@ -340,7 +340,13 @@ class REST_catalog(catalog):
                                                             to user {usrID}")
                     elif "devID" in params:
                         devID = params["devID"]
-                        search_gh = searchDict(self.catDic, "greenhouses", "devID", devID)
+                        search_gh = {}
+                        for gh in self.catDic["greenhouses"]:
+                            for dev in gh["devices"]:
+                                if dev["devID"] == devID:
+                                    search_gh = gh
+                                    break
+                        
                         if search_gh:
                             return json.dumps(search_gh)
                         else:
