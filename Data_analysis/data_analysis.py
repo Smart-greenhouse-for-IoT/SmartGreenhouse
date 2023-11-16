@@ -1,3 +1,4 @@
+from datetime import datetime
 import numpy as np
 from thingspeak_reader import * 
 import cherrypy
@@ -269,11 +270,14 @@ class DataAnalysisMicroservice():
         Function used to retrieve the ghid list, used for dropdown menu in nodered dashboard
         '''
         ghid_list = []
-        response = requests.get(f'{self.CatAddr}/greenhouses')
+        response = requests.get(f'{self.CatAddr}/greenhouse')
         if response.status_code == 200:
             print("Greenhouses' list obtained successfully!")
-            for gh in response.json():
+        
+            data = response.json()
+            for gh in data:
                 ghid_list.append(gh.get("ghID"))
+            # print(ghid_list)
         else:
             print('Failed to get the list of greenhouses.')
         
@@ -290,24 +294,31 @@ class DataAnalysisMicroservice():
         df_filtered = self.df[(self.df['ghID'] == ghid) & (self.df['quantity'] == n)] # df for the selected ghid and quantity
         
         current_date = pd.to_datetime('today').date()
+        current_date_sec = (current_date - pd.Timestamp("1970-01-01").date()).total_seconds()
+
+        timestamp = 1698238111.85808
+
+        date_time = datetime.fromtimestamp(timestamp)
 
         if t == 'day':
-            last_day = current_date - pd.DateOffset(days=1)
-            last_t_df = df_filtered[df_filtered['timestamp'].dt.date == last_day]
+            last_day = (current_date - pd.DateOffset(days=1)).to_pydatetime().timestamp()
+            last_t_df = df_filtered[df_filtered['timestamp'] >= last_day]
             
         elif t == 'week':
-            last_week = current_date - pd.DateOffset(weeks=1)
-            last_t_df = df_filtered[(df_filtered['timestamp'].dt.date >= last_week) & (df_filtered['timestamp'].dt.date < current_date)]
+            last_week = (current_date - pd.DateOffset(weeks=1)).to_pydatetime().timestamp()
+            last_t_df = df_filtered[(df_filtered['timestamp'] >= last_week) & (df_filtered['timestamp'] < current_date_sec)]
+        
         elif t == 'month':
-            last_month = current_date - pd.DateOffset(months=1)
-            last_t_df = df_filtered[(df_filtered['timestamp'].dt.date >= last_month) & (df_filtered['timestamp'].dt.date < current_date)]
+            last_month = (current_date - pd.DateOffset(months=1)).to_pydatetime().timestamp()
+            last_t_df = df_filtered[(df_filtered['timestamp'] >= last_month) & (df_filtered['timestamp'] < current_date_sec)]
+        
         else:
             print('Error in getting the input date')
 
         result = [{
-            "series": ["1"],
-            "data": [{"x": row['timestamp'], "y": row['value']} for _, row in last_t_df.iterrows()],
-            "labels": [f"{n} for {ghid} in the last {t}"]
+            "series": ["A"],
+            "data": [[{"x": row['timestamp']*1000, "y": row['value']} for _, row in last_t_df.iterrows()]],
+            "labels": [""]
         }]
         return result
 
@@ -423,10 +434,11 @@ class DataAnalysisMicroservice():
             # Get the list of ghids
             elif uri[0] == "getGHIDlist":
                 ghID_list = self.getGHIDlist()
+                print(ghID_list)
                 return ghID_list
             
             # Get the data to be used for the chart
-            elif uri[0] == "getDataChart?ghID=&n=&t=":
+            elif uri[0] == "getDataChart":
                 if params.get("ghID"):
                     ghid = params.get("ghID")
                     if params.get("n"):
