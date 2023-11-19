@@ -6,10 +6,11 @@
                 "getLastMoistureLevel?ghID=&sensID=",
                 "getAllLastValues?ghID=",
                 "getGHIDlist",
+                "getDevIDlist?ghID=",
+                "getActIDlist?ghID=&devID=",
                 "getDataChart?ghID=&n=&t=",
-                "EnergyConsumptionACT?ghid=&devid=&actid=",
-                "EnergyConsumptionDEV?ghid=&devid=",
-                "EnergyConsumptionGH?ghid="
+                "getWaterCoefficient?ghid=&moisture=",
+                "getDataGauge?action=&t="
             ]
         }
     ]
