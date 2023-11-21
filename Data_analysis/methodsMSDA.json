@@ -10,7 +10,7 @@
                 "getActIDlist?ghID=&devID=",
                 "getDataChart?ghID=&n=&t=",
                 "getWaterCoefficient?ghid=&moisture=",
-                "getDataGauge?action=&t="
+                "getDataPowerConsumption?ghID=&action=&t="
             ]
         }
     ]
