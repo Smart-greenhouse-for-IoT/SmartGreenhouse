@@ -1,5 +1,5 @@
 {
-    "servID": "123",
+    "servID": "thingspeak_adaptor",
     "name": "thingspeak",
     "endpoints": [
         "MQTT"
