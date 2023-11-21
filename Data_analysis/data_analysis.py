@@ -13,7 +13,7 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.model_selection import cross_val_score
 
 
-class DataAnalysisMicroservice():
+class DataAnalysisMicroservice:
     
     exposed = True
 
