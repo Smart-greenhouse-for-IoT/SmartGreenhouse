@@ -21,7 +21,25 @@
     "greenhouses": [],
     "users": [],
     "devices": [],
-    "services": [ ],
-    "services": [],
-    "lastUpdate": "2023-11-13 17:57:00"
+    "services": [
+        {
+            "servID": "16",
+            "name": "data_analysis",
+            "endpoints": [
+                "REST"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "REST",
+                    "address": "http://127.0.0.1:8090",
+                    "ip": "127.0.0.1",
+                    "port": 8090
+                }
+            ],
+            "lastUpdate": "2023-11-20 18:42:06",
+            "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
+            "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
+        }
+    ],
+    "lastUpdate": "2023-11-20 18:42:06"
 }

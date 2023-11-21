@@ -199,12 +199,6 @@ class DataAnalysisMicroservice():
         
         return json.dumps(ghid_list)
     
-    def getDevIDlist(self, ghid):
-        pass
-
-    def getActIDlist(self, ghid, devid):
-        pass
-    
     # Function used to retrieve data using node-red
     def prepareDataForChart(self, ghid, n, t):
         '''
@@ -244,17 +238,11 @@ class DataAnalysisMicroservice():
         }]
         return result
     
-    def prepareDataForGauge(self, action, t, ghid, devid, actid):
+    def powerConsumptionChart(self, ghid, action, t):
 
-        if action == "Actuator":
-            df_first_filter = self.df[(self.df['ghID'] == ghid) & (self.df['devID'] == devid) & (self.df['actID'] == actid)]
-        elif action == "Device":
-            df_first_filter = self.df[(self.df['ghID'] == ghid) & (self.df['devID'] == devid)]
-        elif action == "Greenhouse":
-            df_first_filter = self.df[(self.df['ghID'] == ghid)]
-        else:
-            raise ValueError("Invalid Action.")
-        
+        # Filter DataFrame based on greenhouse ID
+        df_first_filter = self.df[(self.df['ghID'] == ghid)]
+
         # Filter DataFrame based on the specified time period
         end_time = pd.Timestamp.now()
         if t == 'day':
@@ -265,29 +253,91 @@ class DataAnalysisMicroservice():
             start_time = end_time - pd.DateOffset(months=1)
         else:
             raise ValueError("Invalid time period. Supported values are 'day', 'week', or 'month'")
-        
-        df_filtered = df_first_filter[(df_first_filter['timestamp'] >= start_time) & (df_first_filter['timestamp'] <= end_time)]
-        
+
+        df_filtered = df_first_filter[(df_first_filter['timestamp'] >= int(start_time.timestamp())) & (df_first_filter['timestamp'] <= int(end_time.timestamp()))]
+
         # Sort DataFrame by timestamp
         df_filtered = df_filtered.sort_values(by='timestamp')
-        
-        # Calculate power consumption
-        consumption_time = 0
-        start = None
 
-        for index, row in df_filtered.iterrows():
-            if row['v'] == 1:
-                start = row['timestamp']
-            elif row['v'] == 0 and start is not None:
-                stop = row['timestamp']
-                consumption_time += (stop - start).total_seconds()
+        # Calculate power consumption
+        power_consumption = []
+        result = []
+
+        if action == "Greenhouse":
+            # Calculate power consumption for the entire greenhouse
+            consumption_time = 0
+            start = None
+
+            for index, row in df_filtered.iterrows():
+                if row['value'] == 1:
+                    start = row['timestamp']
+                elif row['value'] == 0 and start is not None:
+                    stop = row['timestamp']
+                    consumption_time += (stop - start).total_seconds()
+                    start = None
+
+            # Calculate power consumption (assuming energy consumption is measured in Watt-seconds)
+            power_consumption.append(consumption_time / 3600)  # Convert seconds to hours
+            #TODO controllare se devo togliere la [] in data
+            data = [{"x": f"Last {t}", "y": power_consumption}] 
+            labels = [f"Last {t}"]
+            result.append({"data": [data], "labels": labels})
+        
+        elif action == "Device":
+            # Calculate power consumption for each device in the greenhouse
+            devices = df_filtered['devID'].unique()
+            for device in devices:
+                device_df = df_filtered[df_filtered['devID'] == device]
+
+                consumption_time = 0
                 start = None
 
-        # Calculate power consumption (assuming energy consumption is measured in Watt-seconds)
-        power_consumption = consumption_time / 3600  # Convert seconds to hours
+                for index, row in device_df.iterrows():
+                    if row['value'] == 1:
+                        start = row['timestamp']
+                    elif row['value'] == 0 and start is not None:
+                        stop = row['timestamp']
+                        consumption_time += (stop - start).total_seconds()
+                        start = None
 
-        return power_consumption
-        pass
+                # Calculate power consumption for each device
+                power_consumption.append(consumption_time / 3600)  # Convert seconds to hours
+                
+                data = [{"x": f"Device {device}", "y": power_consumption}]
+                labels = [f"Device {device}"]
+                result.append({"data": [data], "labels": labels})
+        
+        
+        elif action == "Actuator":
+            # Calculate power consumption for each actuator and return in a list
+            actuators = df_filtered['actID'].unique()
+            for actuator in actuators:
+                actuator_df = df_filtered[df_filtered['actID'] == actuator]
+
+                consumption_time = 0
+                start = None
+
+                for index, row in actuator_df.iterrows():
+                    if row['value'] == 1:
+                        start = row['timestamp']
+                    elif row['value'] == 0 and start is not None:
+                        stop = row['timestamp']
+                        consumption_time += (stop - start).total_seconds()
+                        start = None
+
+                # Calculate power consumption for each actuator
+                power_consumption.append(consumption_time / 3600)  # Convert seconds to hours
+
+                data = [{"x": f"Actuator {actuator}", "y": power_consumption}]
+                labels = [f"Actuator {actuator}"]
+                result.append({"data": [data], "labels": labels})
+        
+        else:
+            raise ValueError("Invalid Action. Supported values are 'gh', 'dev', or 'act'.")
+
+        
+        return result
+
 
     #///////////////////////////////////////////////////////////////////////////
     #///////////////////////////////////////////////////////////////////////////
@@ -375,32 +425,6 @@ class DataAnalysisMicroservice():
                 print(ghID_list)
                 return ghID_list
             
-            # Get the list of devices
-            elif uri[0] == "getDevIDlist":
-                if params.get("ghID"):
-                    ghid = params.get("ghID")
-                    devID_list = self.getDevIDlist(ghid)
-                    return devID_list
-                elif params == {}:
-                    raise cherrypy.HTTPError(400, f"Missing parameters!")
-                else:
-                    raise cherrypy.HTTPError(400, f"Not recognised parameters!")
-                
-            # Get the list of actuators
-            elif uri[0] == "getActIDlist":
-                if params.get("ghID"):
-                    ghid = params.get("ghID")
-                    if params.get("devID"):
-                        devID = params.get("devID")
-                        actID_list = self.getActIDlist(ghid, devID)
-                        return actID_list
-                    else: 
-                        raise cherrypy.HTTPError(400, f"Device parameter not found!")
-                elif params == {}:
-                    raise cherrypy.HTTPError(400, f"Missing parameters!")
-                else:
-                    raise cherrypy.HTTPError(400, f"Not recognised parameters!")
-            
             # Get the data to be used for the chart
             elif uri[0] == "getDataChart":
                 if params.get("ghID"):
@@ -422,15 +446,19 @@ class DataAnalysisMicroservice():
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
 
-            elif uri[0] == "getDataGauge":
-                if params.get("action"):
-                    action = params.get("action")
-                    if params.get("t"):
-                        t = params.get("t")
-                        resultForGauge = self.prepareDataForGauge(action, t)
-                        return json.dumps(resultForGauge)
+            elif uri[0] == "getDataPowerConsumption":
+                if params.get("ghID"):
+                    ghid = params.get("ghID")
+                    if params.get("action"):
+                        action = params.get("action")
+                        if params.get("t"):
+                            t = params.get("t")
+                            resultForGauge = self.powerConsumptionChart(ghid, action, t)
+                            return json.dumps(resultForGauge)
+                        else:
+                            raise cherrypy.HTTPError(400, f"Time parameter not found!")
                     else:
-                        raise cherrypy.HTTPError(400, f"Time parameter not found!")
+                        raise cherrypy.HTTPError(400, f"Measure parameter not found!")
                         
                 elif params == {}:
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
