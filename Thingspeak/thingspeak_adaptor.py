@@ -34,6 +34,7 @@ class ThingspeakAdaptor():
         }
         
         self.fields_dict = {
+            'created_at': None,
             'field1': None, # catalog
             'field2': None, # topic/message
             'field3': None, # topic/message
@@ -143,13 +144,14 @@ class ThingspeakAdaptor():
      
     def dictCreation(self, topic, msg):
         fields = self.fields_dict.copy()
-        fields['api_key'] = self.myTS['TS_info']['write_key']
+
         fields['field1'] = self.retrieveGHID(msg.get('devID'))
         fields['field2'] = msg.get('devID')
         fields['field3'] = msg.get('sensID')
         fields['field4'] = msg.get('n')
         fields['field5'] = msg.get('v')
         fields['field6'] = msg.get('t')
+        fields['created_at'] = msg.get('t')
         if topic.split("/")[3] == 'moisture_level':
             fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
 

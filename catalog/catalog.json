@@ -371,7 +371,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-04 16:33:06"
+            "lastUpdate": "2023-12-04 16:34:04"
         }
     ],
     "services": [
@@ -392,7 +392,7 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 16:33:14"
+            "lastUpdate": "2023-12-04 16:34:19"
         },
         {
             "servID": "PC01",
@@ -410,7 +410,7 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 16:33:12"
+            "lastUpdate": "2023-12-04 16:34:16"
         },
         {
             "servID": "thingspeak_adaptor",
@@ -432,8 +432,8 @@
                 "read_key": "PITP9J8PVKXKS720",
                 "channel_id": "2055720"
             },
-            "lastUpdate": "2023-12-04 16:33:03"
+            "lastUpdate": "2023-12-04 16:34:08"
         }
     ],
-    "lastUpdate": "2023-12-04 16:33:14"
+    "lastUpdate": "2023-12-04 16:34:19"
 }
