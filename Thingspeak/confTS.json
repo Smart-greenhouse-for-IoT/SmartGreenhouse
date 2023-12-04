@@ -7,7 +7,7 @@
     "endpoints_details": [
         {
             "endpoint": "MQTT",
-            "topic": "smartGreenhouse/#"
+            "topic": ["smartGreenhouse/d1/a1/#", "smartGreenhouse/d1/a2/#"]
         }
       ], 
     "TS_info": {

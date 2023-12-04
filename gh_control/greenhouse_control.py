@@ -71,6 +71,7 @@ class greenhouseControl():
 
         measure_dict_resp["devID"] = topic.split("/")[1]
         measure_dict_resp["actID"] = topic.split("/")[2]
+        measure_dict_resp["sensID"] = topic.split("/")[2]
         measure_dict_resp["timestamp"] = time.time()
         measure_dict_resp["command"] = True
         

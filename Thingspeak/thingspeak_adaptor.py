@@ -50,7 +50,8 @@ class ThingspeakAdaptor():
         self._pubSub.start()
         
         time.sleep(3)
-        self._pubSub.mySubscribe(self._topic)
+        for topic in self._topic:
+            self._pubSub.mySubscribe(topic)
 
         self.registerToCat()
     
@@ -139,7 +140,8 @@ class ThingspeakAdaptor():
         fields['field4'] = msg.get('n')
         fields['field5'] = msg.get('v')
         fields['field6'] = msg.get('t')
-        fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
+        if topic.split("/")[3] == 'moisture_level':
+            fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
         return fields
 
     def sendDataToTS(self, field_dict):
