@@ -28,6 +28,10 @@ class ThingspeakAdaptor():
         with open(confTS_path) as f:
             self.myTS = json.load(f)
 
+        self.headers = {
+            'Content-Type': 'application/json',
+            'X-THINGSPEAKAPIKEY': self.myTS['TS_info']['write_key']}
+        
         self.format = {
             'write_api_key': self.myTS['TS_info']['write_key'], # conf_json
             'updates' : []
@@ -152,7 +156,7 @@ class ThingspeakAdaptor():
         fields['field4'] = msg.get('n')
         fields['field5'] = msg.get('v')
         fields['field6'] = msg.get('t')
-        fields['created_at'] = msg.get('t')
+        fields['delta_t'] = 1
         if topic.split("/")[3] == 'moisture_level':
             fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
 
@@ -175,7 +179,7 @@ class ThingspeakAdaptor():
                 dict = self.format.copy()
                 dict['updates'] = self.tot_dict
 
-                response = requests.post(self.url_TS, json.dumps(dict))
+                response = requests.post(self.url_TS, headers=self.headers, data=json.dumps(dict))
                 if response.ok:
                     print('Data sent to ThingSpeak successfully!')
                 else:
