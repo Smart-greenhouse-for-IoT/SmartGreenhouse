@@ -371,50 +371,10 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-04 16:16:29"
+            "lastUpdate": "2023-12-04 16:33:06"
         }
     ],
     "services": [
-        {
-            "servID": "PC01",
-            "name": "plant_control",
-            "endpoints": [
-                "REST",
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "bn": "plants_control",
-                    "topics": [
-                        "smartGreenhouse/+/+/soil_moisture"
-                    ]
-                }
-            ],
-            "lastUpdate": "2023-12-04 16:16:20"
-        },
-        {
-            "servID": "thingspeak_adaptor",
-            "name": "thingspeak",
-            "endpoints": [
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "topic": [
-                        "smartGreenhouse/#"
-                    ]
-                }
-            ],
-            "TS_info": {
-                "url_TS": "https://api.thingspeak.com/update.json",
-                "write_key": "6K2SF8DLAG4J7D3L",
-                "read_key": "PITP9J8PVKXKS720",
-                "channel_id": "2055720"
-            },
-            "lastUpdate": "2023-12-04 16:16:28"
-        },
         {
             "servID": "GH01",
             "name": "gh_control",
@@ -432,8 +392,48 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 16:16:22"
+            "lastUpdate": "2023-12-04 16:33:14"
+        },
+        {
+            "servID": "PC01",
+            "name": "plant_control",
+            "endpoints": [
+                "REST",
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "MQTT",
+                    "bn": "plants_control",
+                    "topics": [
+                        "smartGreenhouse/+/+/soil_moisture"
+                    ]
+                }
+            ],
+            "lastUpdate": "2023-12-04 16:33:12"
+        },
+        {
+            "servID": "thingspeak_adaptor",
+            "name": "thingspeak",
+            "endpoints": [
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "MQTT",
+                    "topic": [
+                        "smartGreenhouse/#"
+                    ]
+                }
+            ],
+            "TS_info": {
+                "url_TS": "https://api.thingspeak.com/bulk_update.json",
+                "write_key": "6K2SF8DLAG4J7D3L",
+                "read_key": "PITP9J8PVKXKS720",
+                "channel_id": "2055720"
+            },
+            "lastUpdate": "2023-12-04 16:33:03"
         }
     ],
-    "lastUpdate": "2023-12-04 16:16:29"
+    "lastUpdate": "2023-12-04 16:33:14"
 }

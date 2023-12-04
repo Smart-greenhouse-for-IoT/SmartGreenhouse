@@ -265,7 +265,7 @@ class ThingspeakAdaptor():
 
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
-                    self.sendDataToTS(self.tot_dict)
+                    self.sendDataToTS()
                     self.cleanDict()
 
                     self.updateToCat(tries=15)
