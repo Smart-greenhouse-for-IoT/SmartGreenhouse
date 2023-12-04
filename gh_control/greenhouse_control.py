@@ -20,7 +20,7 @@ class greenhouseControl():
 
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
         self.track_actuation_dict = {}
-        self._actuation_time = 5
+        self._actuation_time = 3
 
         self.registerToCat()
         for end_det in self.myservice["endpoints_details"]:
