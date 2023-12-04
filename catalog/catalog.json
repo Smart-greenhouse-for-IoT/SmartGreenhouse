@@ -371,7 +371,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-04 16:54:43"
+            "lastUpdate": "2023-12-04 17:21:32"
         }
     ],
     "services": [
@@ -392,26 +392,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 16:54:53"
-        },
-        {
-            "servID": "PC01",
-            "name": "plant_control",
-            "endpoints": [
-                "REST",
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "bn": "plants_control",
-                    "topics": [
-                        "smartGreenhouse/+/+/soil_moisture"
-                    ]
-                }
-            ],
-            "lastUpdate": "2023-12-04 16:54:50"
+            "lastUpdate": "2023-12-04 17:21:32"
         }
     ],
-    "lastUpdate": "2023-12-04 16:54:53"
+    "lastUpdate": "2023-12-04 17:21:32"
 }

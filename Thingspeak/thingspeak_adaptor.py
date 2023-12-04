@@ -34,7 +34,7 @@ class ThingspeakAdaptor():
         }
         
         self.fields_dict = {
-            'write_api_key': self.myTS['TS_info']['write_key'],
+            'api_key': self.myTS['TS_info']['write_key'],
             'created_at': None,
             'field1': None, # catalog
             'field2': None, # topic/message
@@ -106,9 +106,10 @@ class ThingspeakAdaptor():
                     update = True
                 else:
                     print(f"Service {self.myTS['servID']} could not be added!")
+                    time.sleep(3)
             except:
                 print(f"Fail to establish a connection with {self.conf_dict['ip']}")
-                time.sleep(1)
+               
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")  
