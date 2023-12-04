@@ -109,9 +109,9 @@ class greenhouseControl():
         try:
             req_dev = requests.post(self.addr_cat + "/addService", data=json.dumps(self.myservice))
             if req_dev.ok:
-                print(f"Plant control service {self.myservice['servID']} added successfully!")
+                print(f"GH control service {self.myservice['servID']} added successfully!")
             else:
-                print(f"Plant control service {self.myservice['servID']} could not be added!")
+                print(f"GH control service {self.myservice['servID']} could not be added!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
 
@@ -128,9 +128,9 @@ class greenhouseControl():
             #PUT the devices to the catalog
             req = requests.put(self.addr_cat + "/updateService", data=json.dumps(self.myservice))
             if req.ok:
-                print(f"Plant control service {self.myservice['servID']} updated successfully!")
+                print(f"GH control service {self.myservice['servID']} updated successfully!")
             else:
-                print(f"Plant control service {self.myservice['servID']} could not be updated!")
+                print(f"GH control service {self.myservice['servID']} could not be updated!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
     
@@ -163,22 +163,23 @@ class greenhouseControl():
             else:
                 print(f"Request failed!")
         except:
-            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+            raise Exception(f"Fail to establish a connection with {self.addr_cat['ip']}")
         
     def getThresholdsGreenhouse(self, devID):
 
         addr = f"{self.addr_cat}/greenhouse?devID={devID}"
         try:
             #Get the status to the catalog
-            req = requests.get(addr).json()
-            thresholds = req.get("gh_params")
+            req = requests.get(addr)
+            resp = req.json()
+            thresholds = resp.get("gh_params")
             if req.status_code == 200:
                 return thresholds
 
             else:
                 print(f"Request failed!")
         except:
-            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+            raise Exception(f"Fail to establish a connection with {self.addr_cat['ip']}")
         
 
     def loop(self, refresh_time = 10):
@@ -205,8 +206,8 @@ class greenhouseControl():
 if __name__ == "__main__":
 
     plant_control = greenhouseControl(
-        conf_path = "SmartGreenhouse\gh_control\conf.json",
-        confMS_path = "SmartGreenhouse\gh_control\confMS.json")
+        conf_path = "gh_control/conf.json",
+        confMS_path = "gh_control/confMS.json")
 
     plant_control.loop()
     

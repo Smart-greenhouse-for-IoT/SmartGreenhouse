@@ -253,6 +253,6 @@ class ThingspeakAdaptor():
 
 if __name__ == "__main__":
     
-    TS = ThingspeakAdaptor("Thingspeak\conf.json", "Thingspeak\confTS.json")
+    TS = ThingspeakAdaptor("Thingspeak/conf.json", "Thingspeak/confTS.json")
     TS.loop()
     
