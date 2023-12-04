@@ -29,7 +29,7 @@ class ThingspeakAdaptor():
             self.myTS = json.load(f)
 
         self.format = {
-            'api_key': self.myTS['TS_info']['wirte_key'], # conf_json
+            'api_key': self.myTS['TS_info']['write_key'], # conf_json
             'updates' : []
         }
         
