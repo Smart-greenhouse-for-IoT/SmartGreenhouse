@@ -371,7 +371,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-04 16:45:48"
+            "lastUpdate": "2023-12-04 16:53:12"
         }
     ],
     "services": [
@@ -392,7 +392,7 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 16:45:59"
+            "lastUpdate": "2023-12-04 16:53:34"
         },
         {
             "servID": "PC01",
@@ -410,8 +410,30 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 16:45:56"
+            "lastUpdate": "2023-12-04 16:53:35"
+        },
+        {
+            "servID": "thingspeak_adaptor",
+            "name": "thingspeak",
+            "endpoints": [
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "MQTT",
+                    "topic": [
+                        "smartGreenhouse/#"
+                    ]
+                }
+            ],
+            "TS_info": {
+                "url_TS": "https://api.thingspeak.com/channels/2055720/bulk_update.json",
+                "write_key": "6K2SF8DLAG4J7D3L",
+                "read_key": "PITP9J8PVKXKS720",
+                "channel_id": "2055720"
+            },
+            "lastUpdate": "2023-12-04 16:53:11"
         }
     ],
-    "lastUpdate": "2023-12-04 16:45:59"
+    "lastUpdate": "2023-12-04 16:53:35"
 }
