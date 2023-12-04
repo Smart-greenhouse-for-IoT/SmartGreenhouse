@@ -168,14 +168,15 @@ class ThingspeakAdaptor():
         try:
 
             #formatting
-            dict = self.format.copy()
-            dict['updates'] = self.tot_dict
+            if self.tot_dict: 
+                dict = self.format.copy()
+                dict['updates'] = self.tot_dict
 
-            response = requests.post(self.url_TS, dict)
-            if response.ok:
-                print('Data sent to ThingSpeak successfully!')
-            else:
-                print('Failed to send data to ThingSpeak.')
+                response = requests.post(self.url_TS, dict)
+                if response.ok:
+                    print('Data sent to ThingSpeak successfully!')
+                else:
+                    print('Failed to send data to ThingSpeak.')
         except:
             print('ThingSpeak not reachable')
 
