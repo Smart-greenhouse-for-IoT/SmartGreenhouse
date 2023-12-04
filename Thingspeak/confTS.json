@@ -11,7 +11,7 @@
         }
       ], 
     "TS_info": {
-            "url_TS": "https://api.thingspeak.com/bulk_update.json",
+            "url_TS": "https://api.thingspeak.com/channels/2055720/bulk_update.json",
             "write_key": "6K2SF8DLAG4J7D3L",
             "read_key": "PITP9J8PVKXKS720",
             "channel_id": "2055720"
