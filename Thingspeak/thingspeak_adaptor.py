@@ -36,7 +36,20 @@ class ThingspeakAdaptor():
             'field4': None, # message
             'field5': None, # message
             'field6': None, # message
-            'field7': None # catalog
+            'field7': None, # catalog
+            'field8': None
+        }
+
+        self.tot_dict = {
+            'api_key': [], # conf_json
+            'field1': [], # catalog
+            'field2': [], # topic/message
+            'field3': [], # topic/message
+            'field4': [], # message
+            'field5': [], # message
+            'field6': [], # message
+            'field7': [], # catalog
+            'field8': []
         }
         self.url_TS = self.myTS['TS_info']['url_TS']
         self._topic = self.myTS['endpoints_details'][0]['topic']
@@ -130,6 +143,11 @@ class ThingspeakAdaptor():
 
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
+    
+    def tot_dictCreation(self, partial_dict):
+
+        for key in partial_dict.keys:
+            self.tot_dict[key].append(partial_dict.get(key))
      
     def dictCreation(self, topic, msg):
         fields = self.fields_dict.copy()
@@ -142,9 +160,13 @@ class ThingspeakAdaptor():
         fields['field6'] = msg.get('t')
         if topic.split("/")[3] == 'moisture_level':
             fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
+
+        if topic.split("/")[2].startswith('a'):
+            fields['field8'] = msg.get('command')
+
         return fields
 
-    def sendDataToTS(self, field_dict):
+    def sendDataToTS(self, dict):
         """
         sendDataToTS
         ------------
@@ -152,7 +174,7 @@ class ThingspeakAdaptor():
         """
         
         try:
-            response = requests.post(self.url_TS, field_dict)
+            response = requests.post(self.url_TS, dict)
             if response.ok:
                 print('Data sent to ThingSpeak successfully!')
             else:
@@ -170,8 +192,7 @@ class ThingspeakAdaptor():
         msg_json = json.loads(msg)
         # print(msg_json)
         field_dict = self.dictCreation(topic, msg_json)
-        self.sendDataToTS(field_dict)
-        time.sleep(12)
+        self.tot_dictCreation(field_dict)
 
     def retrieveGHID(self, devID, tries = 10):
         """
@@ -224,7 +245,20 @@ class ThingspeakAdaptor():
         else:
             return None
     
-    def loop(self, refresh_time = 30):
+    def cleanDict(self):
+           self.tot_dict = {
+            'api_key': [], # conf_json
+            'field1': [], # catalog
+            'field2': [], # topic/message
+            'field3': [], # topic/message
+            'field4': [], # message
+            'field5': [], # message
+            'field6': [], # message
+            'field7': [], # catalog
+            'field8': []
+        }
+    
+    def loop(self, refresh_time = 60):
         """
         Loop
         ----
@@ -244,8 +278,11 @@ class ThingspeakAdaptor():
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time: 
                     self.updateToCat(tries=15)
+                    self.sendDataToTS(self.tot_dict)
+                    self.cleanDict()
                     # self.post_sensor_Cat()
                     last_time = time.time() 
+                
 
         # To kill the program
         except KeyboardInterrupt: 

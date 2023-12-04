@@ -371,29 +371,10 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-04 14:46:16"
+            "lastUpdate": "2023-12-04 15:29:44"
         }
     ],
     "services": [
-        {
-            "servID": "GH01",
-            "name": "gh_control",
-            "endpoints": [
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "bn": "gh_control",
-                    "topics": [
-                        "smartGreenhouse/+/+/temperature",
-                        "smartGreenhouse/+/+/co2_level",
-                        "smartGreenhouse/+/+/humidity"
-                    ]
-                }
-            ],
-            "lastUpdate": "2023-12-04 14:46:12"
-        },
         {
             "servID": "thingspeak_adaptor",
             "name": "thingspeak",
@@ -415,8 +396,27 @@
                 "read_key": "PITP9J8PVKXKS720",
                 "channel_id": "2055720"
             },
-            "lastUpdate": "2023-12-04 14:45:54"
+            "lastUpdate": "2023-12-04 15:29:51"
+        },
+        {
+            "servID": "GH01",
+            "name": "gh_control",
+            "endpoints": [
+                "MQTT"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "MQTT",
+                    "bn": "gh_control",
+                    "topics": [
+                        "smartGreenhouse/+/+/temperature",
+                        "smartGreenhouse/+/+/co2_level",
+                        "smartGreenhouse/+/+/humidity"
+                    ]
+                }
+            ],
+            "lastUpdate": "2023-12-04 15:29:45"
         }
     ],
-    "lastUpdate": "2023-12-04 14:46:16"
+    "lastUpdate": "2023-12-04 15:29:51"
 }
