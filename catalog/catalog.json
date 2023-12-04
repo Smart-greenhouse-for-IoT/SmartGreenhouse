@@ -371,33 +371,10 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-04 15:29:44"
+            "lastUpdate": "2023-12-04 15:36:25"
         }
     ],
     "services": [
-        {
-            "servID": "thingspeak_adaptor",
-            "name": "thingspeak",
-            "endpoints": [
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "topic": [
-                        "smartGreenhouse/d1/a1/#",
-                        "smartGreenhouse/d1/a2/#"
-                    ]
-                }
-            ],
-            "TS_info": {
-                "url_TS": "https://api.thingspeak.com/update.json",
-                "write_key": "6K2SF8DLAG4J7D3L",
-                "read_key": "PITP9J8PVKXKS720",
-                "channel_id": "2055720"
-            },
-            "lastUpdate": "2023-12-04 15:29:51"
-        },
         {
             "servID": "GH01",
             "name": "gh_control",
@@ -415,8 +392,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-04 15:29:45"
+            "lastUpdate": "2023-12-04 15:36:30"
         }
     ],
-    "lastUpdate": "2023-12-04 15:29:51"
+    "lastUpdate": "2023-12-04 15:36:30"
 }

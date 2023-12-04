@@ -146,7 +146,7 @@ class ThingspeakAdaptor():
     
     def tot_dictCreation(self, partial_dict):
 
-        for key in partial_dict.keys:
+        for key in partial_dict.keys():
             self.tot_dict[key].append(partial_dict.get(key))
      
     def dictCreation(self, topic, msg):
