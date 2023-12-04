@@ -258,7 +258,7 @@ class ThingspeakAdaptor():
             'field8': []
         }
     
-    def loop(self, refresh_time = 60):
+    def loop(self, refresh_time = 30):
         """
         Loop
         ----
