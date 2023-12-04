@@ -37,9 +37,9 @@
             ],
             "usrID": "u1",
             "gh_params": {
-                "temperature": 20,
+                "temperature": 10,
                 "CO2": 420,
-                "humidity": 30
+                "humidity": 35
             },
             "plantsList": [
                 {

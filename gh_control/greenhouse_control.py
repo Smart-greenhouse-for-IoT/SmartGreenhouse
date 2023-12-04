@@ -48,7 +48,7 @@ class greenhouseControl():
             topic_act = self.transformTopic(topic, gh_act.get("actID"))
 
             if quantity_name in ["temperature", "CO2_level"]:
-                if measure_dict.get("v") < gh_description.get(quantity_name):
+                if measure_dict.get("v") > gh_description.get(quantity_name):
 
                     if topic_act not in self.track_actuation_dict:
                         self.startActuation(topic_act, measure_dict, )
@@ -56,7 +56,7 @@ class greenhouseControl():
                     print(f"Threshold respected for sensor {measure_dict['sensID']}")
 
             if quantity_name == "humidity":
-                if measure_dict.get("v") > gh_description.get(quantity_name):
+                if measure_dict.get("v") < gh_description.get(quantity_name):
 
                     if topic_act not in self.track_actuation_dict:
                         self.startActuation(topic_act, measure_dict)
