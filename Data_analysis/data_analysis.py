@@ -269,9 +269,9 @@ class DataAnalysisMicroservice:
             start = None
 
             for index, row in df_filtered.iterrows():
-                if row['value'] == 1:
+                if row['actuation_level'] == True:
                     start = row['timestamp']
-                elif row['value'] == 0 and start is not None:
+                elif row['actuation_level'] == False and start is not None:
                     stop = row['timestamp']
                     consumption_time += (stop - start).total_seconds()
                     start = None
@@ -293,9 +293,9 @@ class DataAnalysisMicroservice:
                 start = None
 
                 for index, row in device_df.iterrows():
-                    if row['value'] == 1:
+                    if row['actuation_level'] == True:
                         start = row['timestamp']
-                    elif row['value'] == 0 and start is not None:
+                    elif row['actuation_level'] == False and start is not None:
                         stop = row['timestamp']
                         consumption_time += (stop - start).total_seconds()
                         start = None
@@ -318,9 +318,9 @@ class DataAnalysisMicroservice:
                 start = None
 
                 for index, row in actuator_df.iterrows():
-                    if row['value'] == 1:
+                    if row['actuation_level'] == True:
                         start = row['timestamp']
-                    elif row['value'] == 0 and start is not None:
+                    elif row['actuation_level'] == False and start is not None:
                         stop = row['timestamp']
                         consumption_time += (stop - start).total_seconds()
                         start = None
@@ -333,7 +333,7 @@ class DataAnalysisMicroservice:
                 result.append({"data": [data], "labels": labels})
         
         else:
-            raise ValueError("Invalid Action. Supported values are 'gh', 'dev', or 'act'.")
+            raise ValueError("Invalid Action.")
 
         
         return result
