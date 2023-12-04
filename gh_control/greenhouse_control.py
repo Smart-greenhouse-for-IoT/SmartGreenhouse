@@ -121,9 +121,9 @@ class greenhouseControl():
         try:
             req_dev = requests.post(self.addr_cat + "/addService", data=json.dumps(self.myservice))
             if req_dev.ok:
-                print(f"Plant control service {self.myservice['servID']} added successfully!")
+                print(f"GH control service {self.myservice['servID']} added successfully!")
             else:
-                print(f"Plant control service {self.myservice['servID']} could not be added!")
+                print(f"GH control service {self.myservice['servID']} could not be added!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
 
@@ -140,9 +140,9 @@ class greenhouseControl():
             #PUT the devices to the catalog
             req = requests.put(self.addr_cat + "/updateService", data=json.dumps(self.myservice))
             if req.ok:
-                print(f"Plant control service {self.myservice['servID']} updated successfully!")
+                print(f"GH control service {self.myservice['servID']} updated successfully!")
             else:
-                print(f"Plant control service {self.myservice['servID']} could not be updated!")
+                print(f"GH control service {self.myservice['servID']} could not be updated!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
     
