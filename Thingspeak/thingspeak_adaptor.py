@@ -170,6 +170,7 @@ class ThingspeakAdaptor():
         # print(msg_json)
         field_dict = self.dictCreation(topic, msg_json)
         self.sendDataToTS(field_dict)
+        time.sleep(12)
 
     def retrieveGHID(self, devID, tries = 10):
         """
