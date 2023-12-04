@@ -29,11 +29,12 @@ class ThingspeakAdaptor():
             self.myTS = json.load(f)
 
         self.format = {
-            'api_key': self.myTS['TS_info']['write_key'], # conf_json
+            'write_api_key': self.myTS['TS_info']['write_key'], # conf_json
             'updates' : []
         }
         
         self.fields_dict = {
+            'write_api_key': self.myTS['TS_info']['write_key'],
             'created_at': None,
             'field1': None, # catalog
             'field2': None, # topic/message
