@@ -13,10 +13,28 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.model_selection import cross_val_score
 
 
+class DataAnalysisMicroservice:
+    
+    exposed = True
 
-class DataAnalysis():
+    def __init__(self, conf_path, conf_DA_path):
 
-    def __init__(self, conf_DA_path):
+        with open(conf_path) as f:
+            self.conf = json.load(f)
+
+        with open(conf_DA_path) as ff:
+            self.confDA = json.load(ff)
+
+        self.TR = ThingspeakReader("Data_analysis/conf.json")
+        self.df = self.TR.readCSV()
+
+        self.queryClass = Queries()
+
+        # Address of the catalog for adding the devices
+        self.CatAddr = "http://" + self.conf["ip"] + ":" + self.conf["port"]
+
+        # Register to catalog
+        self.registerToCat()
 
         '''
         df1: 17164 rows × 5 columns
@@ -28,7 +46,7 @@ class DataAnalysis():
             timestamp: yyyy-dd-mm hh:mm
 
         -
-        df2: 300 rows × 5 columns
+        df2: 300 rows × 5 columns - roses dataset
 
             HS (Analog): soil humidity
             T(°) : greenhouse temperature
@@ -41,204 +59,8 @@ class DataAnalysis():
                 4: very cold - bagno poco
         '''
 
-        with open(conf_DA_path) as f:
-            self.confDA = json.load(f)
-
-        csv_data = self.confDA.get("path_dataset1")
+        csv_data = self.confDA.get("path_dataset2")
         self.df2 = pd.read_csv(csv_data, sep=";", decimal='.')
-
-
-    def dfAnalysis(self):
-        
-        self.df2.isna().any().any() # there are not NaN values
-        self.df2 = self.df2.drop(columns=["L (Lux)"])
-        self.df2 = self.df2.rename(columns={'clase':'class'})
-        target = self.df2['class']
-        features = self.df2.columns.drop('class')
-
-        self.graphDFAnalysis()
-
-        # Splitting the data into a training set and combined validation/test set
-        train_df_, test_df = train_test_split(self.df2, test_size=0.2, random_state=1, shuffle=True)
-
-        # Splitting the combined validation/test set into validation and test sets
-        train_df, val_df  = train_test_split(train_df_, test_size=0.20, random_state=1, shuffle=True)
-
-        # Printing the sizes of the resulting sets
-        print("Training set size:", len(train_df)) # 192
-        print("Validation set size:", len(val_df)) # 48
-        print("Test set size:", len(test_df)) # 60
-
-        classifier = RandomForestClassifier()
-        pipe = Pipeline([
-            ('standardization', StandardScaler()),
-            ('featureS', VarianceThreshold()),
-            ('ridge', classifier )
-            ])
-        pipe.fit(train_df[features], train_df['class'])
-        val_predictions = pipe.predict(val_df[features])
-
-        # train, val and test scores:
-        train_score = pipe.score(train_df[features], train_df['class'])
-        print("Training set score:", train_score)
-
-        val_score = pipe.score(val_df[features], val_df['class'])
-        print("Validation set score:", val_score)
-
-        test_score = pipe.score(test_df[features], test_df['class'])
-        print("Test set score:", test_score)
-
-        # cross validation:
-        combined_data = pd.concat([train_df, val_df])
-        cross_val_scores = cross_val_score(pipe, combined_data[features], combined_data['class'], cv=5)
-        print("Cross-Validation Scores:", cross_val_scores)
-        mean_cv_score = cross_val_scores.mean()
-        print("Mean Cross-Validation Score:", mean_cv_score)
-
-        # aggiungere accuracy, capire come si vuole restituire il valore
-
-
-    def graphDFAnalysis(self):
-    
-        figHS = px.scatter(self.df2, x='HS (Analog)', y='class', color='class', title='Data Clustering by Class')
-        figHS.show()
-
-        figT = px.scatter(self.df2, x='T (°)', y='class', color='class', title='Data Clustering by Class')
-        figT.show()
-
-        figCO2 = px.scatter(self.df2, x='CO2 (Analog)', y='class', color='class', title='Data Clustering by Class')
-        figCO2.show()
-
-        figHR = px.scatter(self.df2, x='HR (%)', y='class', color='class', title='Data Clustering by Class')
-        figHR.show()
-
-        fig2 = px.scatter(self.df2, x='HS (Analog)', y='T (°)', color='class', title='Data Clustering by Class')
-        fig2.show()
-
-        fig3 = px.scatter(self.df2, x='HS (Analog)', y='HR (%)', color='class', title='Data Clustering by Class')
-        fig3.show()
-
-        fig4 = px.scatter(self.df2, x='HS (Analog)', y='CO2 (Analog)', color='class', title='Data Clustering by Class')
-        fig4.show()
-
-    #/////////////////////////////////////////////////////////
-    #/////////////////////////////////////////////////////////
-
-    #TODO add some time reference and allow the choice of the time interval
-
-    # Energy consumption analysis for the actuator
-    def EnergyConsumptionACT(self, df, ghid, devid, actid):
-        consumption_time = 0
-        start, stop = 0
-        df_filtered = df[(df['ghID'] == ghid) & (df['devID'] == devid) & (df['actID'] == actid)]
-        df_filtered.orderby(by='timestamp')
-
-        for index, row in df_filtered.iterrows():
-            if (row['v'] == 1):
-                start = df_filtered['timestamp']
-            elif ((row['v'] == 0) & (start != 0)):
-                stop = df_filtered['timestamp']
-                consumption_time += stop - start
-            else:
-                print('Error! Actuation is not working!')
-            
-        return consumption_time
-    
-    # Energy consumption for the device
-    def EnergyConsumptionDEV(self, df, ghid, devid):
-        consumption_time_dev = 0
-        df_filtered = df[(df['ghID'] == ghid) & (df['devID'] == devid)]
-
-        for index, row in df_filtered.iterrows():
-            consumption_time_dev += self.EnergyConsumptionACT(df, ghid, devid, row['actID'])
-
-        return consumption_time_dev
-            
-    # Energy consumption for the greenhouse
-    def EnergyConsumptionGH(self, df, ghid):
-        consumption_time_gh = 0
-        df_filtered = df[(df['ghID'] == ghid)]
-        
-        for index, row in df_filtered.iterrows():
-            consumption_time_gh += self.EnergyConsumptionDEV(df, ghid, row['devID'])
-
-        return consumption_time_gh
-    
-    #/////////////////////////////////////////////////////////
-    #/////////////////////////////////////////////////////////
-    # La prossima funzione al momento non ha senso
-    
-    def analysis(self, df):
-        # Checking the shape of the DataFrame
-        print(f"The shape of the dataframe is: {df.shape}")
-        # Checking the number of missing values in each column
-        print(f"The number of missing values is: {df.isnull().sum()}")
-        # Handling missing data 
-        # df = df.dropna(inplace=True) # drop missing values
-        df = df.fillna(df.mean(), inplace=True) # fill the missing values with the mean
-
-        # datetime handling
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-        '''
-        graph with data from a certain year or month or day
-        '''
-        df['year'] = df['timestamp'].dt.year # create year column
-        df['month'] = df['timestamp'].dt.month # create month column
-        df['day'] = df['timestamp'].dt.day # create day column
-        # aggiungere orario
-    
-
-class Queries():
-# returnare il timestamp in formato decente
-    def __init__(self):
-        pass
-
-    # Get the last specific value for temperature/humidity/CO2 for a gh
-    def get_last_value(self, df, gh_id, measure):
-        selected_rows = df[df['ghID'] == gh_id]
-        filtered_rows = selected_rows[selected_rows['quantity'] == measure]
-        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=True)
-        last_row = sorted_rows.tail(1)
-
-        return last_row
-    
-    # Get the last specific value for moisture level for a gh, given a sensor
-    def get_last_moisture_level(self, df, gh_id, sens_id):
-        selected_rows = df[(df['ghID'] == gh_id) & (df['sensID'] == sens_id)]
-        filtered_rows = selected_rows[selected_rows['quantity'] == "Soil moisture"]
-        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=True)
-        last_row = sorted_rows.tail(1)
-        moisture_level = last_row['value'].iloc[0]
-
-        return moisture_level
-    
-         
-
-class DataAnalysisMicroservice():
-    
-    exposed = True
-
-    def __init__(self, conf_path, conf_DA_path):
-
-        with open(conf_path) as f:
-            self.conf = json.load(f)
-
-        with open(conf_DA_path) as f:
-            self.confDA = json.load(f)
-
-        self.DA = DataAnalysis("Data_analysis/conf_DA.json")
-
-        self.TR = ThingspeakReader("Data_analysis/conf.json")
-        self.df = self.TR.readCSV()
-
-        self.queryClass = Queries()
-
-        # Address of the catalog for adding the devices
-        self.CatAddr = "http://" + self.conf["ip"] + ":" + self.conf["port"]
-
-        # Register to catalog
-        self.registerToCat()
 
     def registerToCat(self, tries = 10):
         """
@@ -266,6 +88,99 @@ class DataAnalysisMicroservice():
         if update == False:
             raise Exception(f"Fail to establish a connection with {self.conf['ip']}")  
         
+
+    def RandomForest(self):
+        '''
+        - performs some machine learning (Random Forest Classifier) on the roses dataset
+        '''
+
+        self.df2.isna().any().any() # there are not NaN values
+        self.df2 = self.df2.drop(columns=["L (Lux)"])
+        self.df2 = self.df2.rename(columns={'clase':'class'})
+        target = self.df2['class']
+        features = self.df2.columns.drop('class')
+
+        # self.graphDFAnalysis()
+        '''
+        # Splitting the data into a training set and combined validation/test set
+        train_df_, test_df = train_test_split(self.df2, test_size=0.2, random_state=1, shuffle=True)
+
+        # Splitting the combined validation/test set into validation and test sets
+        train_df, val_df  = train_test_split(train_df_, test_size=0.20, random_state=1, shuffle=True)
+
+        # Printing the sizes of the resulting sets
+        print("Training set size:", len(train_df)) # 192
+        print("Validation set size:", len(val_df)) # 48
+        print("Test set size:", len(test_df)) # 60
+        '''
+        classifier = RandomForestClassifier()
+        pipe = Pipeline([
+            ('standardization', StandardScaler()),
+            ('featureS', VarianceThreshold()),
+            ('ridge', classifier )
+            ])
+        
+        '''
+        pipe.fit(train_df[features], train_df['class'])
+        val_predictions = pipe.predict(val_df[features])
+
+        # train, val and test scores:
+        train_score = pipe.score(train_df[features], train_df['class'])
+        print("Training set score:", train_score)
+
+        val_score = pipe.score(val_df[features], val_df['class'])
+        print("Validation set score:", val_score)
+
+        test_score = pipe.score(test_df[features], test_df['class'])
+        print("Test set score:", test_score)
+        '''
+        pipe.fit(features, target)
+        return pipe
+        
+        
+    def dftransform(self, ghid, moisture):
+        '''
+        predict the label when getting the moisture level
+        '''
+        pipe = self.RandomForest()
+        response = self.GET("getallLastValues", ghID=ghid)
+        
+        new_point = [moisture, response.get("temperature"), response.get("humidity"), response.get("CO2")]
+        predicted_class = pipe.predict(new_point)
+
+        return predicted_class
+        
+
+
+    def graphDFAnalysis(self):
+        '''
+        used to analyse the RosesGreenhDB before performing ML
+        '''
+    
+        figHS = px.scatter(self.df2, x='HS (Analog)', y='class', color='class', title='Data Clustering by Class')
+        figHS.show()
+
+        figT = px.scatter(self.df2, x='T (°)', y='class', color='class', title='Data Clustering by Class')
+        figT.show()
+
+        figCO2 = px.scatter(self.df2, x='CO2 (Analog)', y='class', color='class', title='Data Clustering by Class')
+        figCO2.show()
+
+        figHR = px.scatter(self.df2, x='HR (%)', y='class', color='class', title='Data Clustering by Class')
+        figHR.show()
+
+        fig2 = px.scatter(self.df2, x='HS (Analog)', y='T (°)', color='class', title='Data Clustering by Class')
+        fig2.show()
+
+        fig3 = px.scatter(self.df2, x='HS (Analog)', y='HR (%)', color='class', title='Data Clustering by Class')
+        fig3.show()
+
+        fig4 = px.scatter(self.df2, x='HS (Analog)', y='CO2 (Analog)', color='class', title='Data Clustering by Class')
+        fig4.show()
+
+    #//////////////////////////////////////////////////////////////////////////////////////////////////
+    #////////////////////////////////////////////////////////////////////////////////////////////////////
+
     def getGHIDlist(self):
         '''
         Function used to retrieve the ghid list, used for dropdown menu in nodered dashboard
@@ -323,9 +238,89 @@ class DataAnalysisMicroservice():
         }]
         return result
 
-    #///////////////////////////////////////////////////////////////////////////
-    #///////////////////////////////////////////////////////////////////////////
-    # GET function
+    def powerConsumptionChart(self, ghid, action, t):
+
+        # Filter DataFrame based on greenhouse ID
+        df_first_filter = self.df[(self.df['ghID'] == ghid)]
+
+        # Filter DataFrame based on the specified time period
+        end_time = pd.Timestamp.now()
+        if t == 'day':
+            start_time = end_time - pd.DateOffset(days=1)
+        elif t == 'week':
+            start_time = end_time - pd.DateOffset(weeks=1)
+        elif t == 'month':
+            start_time = end_time - pd.DateOffset(months=1)
+        else:
+            raise ValueError("Invalid time period. Supported values are 'day', 'week', or 'month'")
+
+        df_filtered = df_first_filter[(df_first_filter['timestamp'] >= int(start_time.timestamp())) & (df_first_filter['timestamp'] <= int(end_time.timestamp()))]
+
+        # Sort DataFrame by timestamp
+        df_filtered = df_filtered.sort_values(by='timestamp')
+
+        # Calculate power consumption
+        power_consumption = []
+        result = []
+
+        
+        series_count = 0
+        data_tot = []
+
+        series = []
+        devices = df_filtered['devID'].unique()
+        # Calculate power consumption for each actuator and return in a list
+        for device in devices:
+            data = []
+            labels = []
+            device_df = df_filtered[df_filtered['devID'] == device]
+            actuators = device_df['sensID'].unique()
+            for actuator in actuators:
+                if "a" in actuator:
+                    actuator_df = device_df[device_df['sensID'] == actuator]
+
+                    consumption_time = 0
+                    start = None
+
+                    for index, row in actuator_df.iterrows():
+                        if row['actuation_level'] == 1:
+                            start = row['timestamp']
+                        elif row['actuation_level'] == 0 and start is not None:
+                            stop = row['timestamp']
+                            consumption_time += (stop - start)
+                            start = None
+
+                    
+                    data.append(round(consumption_time/60, 2))
+                    labels.append(f"Power consumption for {actuator} in minutes")
+                
+            data_tot.append(data)
+            series.append(series_count)
+            series_count += 1
+        if action == "Actuator":
+            result.append({"series": series, "data": data_tot, "labels": labels})
+        elif action == "Device":
+            data_dev = []
+            labels_dev = []
+            for i,dev in enumerate(data_tot):
+                data_dev.append([round(sum(dev),2)])
+                labels_dev.append(f"Power consumption for {devices[i]} in minutes")
+            result.append({"series": [1], "data": data_dev, "labels": labels_dev})
+        elif action == "Greenhouse":
+            data_gh = 0
+            label_gh = [f"{ghid} power consumption in minutes"]
+            for dev in data_tot:
+                data_gh += round(sum(dev),2)
+            result.append({"series": [1], "data": [[data_gh]], "labels": label_gh})
+        else:
+            raise ValueError("Invalid Action.")
+        return result
+
+
+
+        #///////////////////////////////////////////////////////////////////////////
+        #///////////////////////////////////////////////////////////////////////////
+        # GET function
 
     def GET(self, *uri, **params):
         
@@ -381,50 +376,19 @@ class DataAnalysisMicroservice():
                 else:
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
-            #///////////////////////////////////////////////////////////////////////////
-            #///////////////////////////////////////////////////////////////////////////
-            # Energy consumption functions
+            #////////////////////////////////////////////////////////////////////////////////////
+            #////////////////////////////////////////////////////////////////////////////////////
+            # Get the water label
 
-            # Get the consumption time for the entire gh
-            elif uri[0] == "EnergyConsumptionGH":
-                if params.get("ghid"):
-                    ghid = params.get("ghid")
-                    consumption_time_gh = self.DA.EnergyConsumptionGH(self.df, ghid)
-                    return consumption_time_gh
-                elif params == {}:
-                    raise cherrypy.HTTPError(400, f"Missing parameters!")
-                else:
-                    raise cherrypy.HTTPError(400, f"Not recognised parameters!")
-
-            # Get the consumption time for a single device
-            elif uri[0] == "EnergyConsumptionDEV":
+            elif uri[0] == "getWaterCoefficient":
                 if params.get("ghid"):
                     ghID = params.get("ghid")
-                    if params.get("devid"):
-                        devid = params.get("devid")
-                        consumption_time_dev = self.DA.EnergyConsumptionDEV(self.df, ghid, devid)
-                        return consumption_time_dev
+                    if params.get("moisture"):
+                        moisture = params.get("moisture")
+                        label = self.dftransform(ghID, moisture)
+                        return json.dumps({"coefficient":label})
                     else:
-                        raise cherrypy.HTTPError(404, f"Device not found!")
-                elif params == {}:
-                    raise cherrypy.HTTPError(400, f"Missing parameters!")
-                else:
-                    raise cherrypy.HTTPError(400, f"Not recognised parameters!")
-                
-            # Get the consumption time for a single actuator
-            elif uri[0] == "EnergyConsumptionACT":
-                if params.get("ghid"):
-                    ghID = params.get("ghid")
-                    if params.get("devid"):
-                        devid = params.get("devid")
-                        if params.get("actid"):
-                            actid = params.get("actid")
-                            consumption_time_dev = self.DA.EnergyConsumptionACT(self.df, ghid, devid, actid)
-                            return consumption_time_dev
-                        else:
-                            raise cherrypy.HTTPError(404, f"Actuator not found")
-                    else:
-                        raise cherrypy.HTTPError(404, f"Device not found!")
+                        raise cherrypy.HTTPError(404, f"Moisture level not found!")
                 elif params == {}:
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
@@ -434,7 +398,7 @@ class DataAnalysisMicroservice():
             #///////////////////////////////////////////////////////////////////////////
             # Functions needed by node-red
 
-            # Get the list of ghids
+           # Get the list of ghids
             elif uri[0] == "getGHIDlist":
                 ghID_list = self.getGHIDlist()
                 print(ghID_list)
@@ -452,6 +416,26 @@ class DataAnalysisMicroservice():
                             return json.dumps(resultForChart)
                         else:
                             raise cherrypy.HTTPError(400, f"Timestamp parameter not found")
+                    else:
+                        raise cherrypy.HTTPError(400, f"Measure parameter not found!")
+                        
+                elif params == {}:
+                    raise cherrypy.HTTPError(400, f"Missing parameters!")
+                else:
+                    raise cherrypy.HTTPError(400, f"Not recognised parameters!")
+                
+
+            elif uri[0] == "getDataPowerConsumption":
+                if params.get("ghID"):
+                    ghid = params.get("ghID")
+                    if params.get("action"):
+                        action = params.get("action")
+                        if params.get("t"):
+                            t = params.get("t")
+                            resultForGauge = self.powerConsumptionChart(ghid, action, t)
+                            return json.dumps(resultForGauge)
+                        else:
+                            raise cherrypy.HTTPError(400, f"Time parameter not found!")
                     else:
                         raise cherrypy.HTTPError(400, f"Measure parameter not found!")
                         
@@ -515,6 +499,33 @@ class DataAnalysisMicroservice():
 
     
 
+class Queries():
+# returnare il timestamp in formato decente
+    def __init__(self):
+        pass
+
+    # Get the last specific value for temperature/humidity/CO2 for a gh
+    def get_last_value(self, df, gh_id, measure):
+        selected_rows = df[df['ghID'] == gh_id]
+        filtered_rows = selected_rows[selected_rows['quantity'] == measure]
+        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=False)
+        last_row = sorted_rows.tail(1)
+
+        return last_row
+    
+    # Get the last specific value for moisture level for a gh, given a sensor
+    def get_last_moisture_level(self, df, gh_id, sens_id):
+        selected_rows = df[(df['ghID'] == gh_id) & (df['sensID'] == sens_id)]
+        filtered_rows = selected_rows[selected_rows['quantity'] == "Soil moisture"]
+        sorted_rows = filtered_rows.sort_values(by='timestamp', ascending=False)
+        last_row = sorted_rows.tail(1)
+        moisture_level = last_row['value'].iloc[0]
+
+        return moisture_level
+    
+         
+
+
 if __name__ == "__main__": 
 	
     webService = DataAnalysisMicroservice("Data_analysis/conf.json", "Data_analysis/conf_DA.json")
@@ -529,12 +540,4 @@ if __name__ == "__main__":
     cherrypy.engine.start()
 
     webService.loop(refresh_time=30)
-'''
-if __name__ == "__main__":
-    
-    DA = DataAnalysis()
-    DA.analysis()
-    with plt.style.context("ggplot"):
-        DA.BarPlot()
-        '''
 
