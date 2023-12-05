@@ -14,7 +14,6 @@ from sklearn.model_selection import cross_val_score
 
 
 class DataAnalysisMicroservice:
-    
     exposed = True
 
     def __init__(self, conf_path, conf_DA_path):
