@@ -14,6 +14,7 @@ from sklearn.model_selection import cross_val_score
 
 
 class DataAnalysisMicroservice:
+    
     exposed = True
 
     def __init__(self, conf_path, conf_DA_path):
@@ -236,7 +237,7 @@ class DataAnalysisMicroservice:
             "labels": [""]
         }]
         return result
-    
+
     def powerConsumptionChart(self, ghid, action, t):
 
         # Filter DataFrame based on greenhouse ID
@@ -262,85 +263,64 @@ class DataAnalysisMicroservice:
         power_consumption = []
         result = []
 
-        if action == "Greenhouse":
-            # Calculate power consumption for the entire greenhouse
-            consumption_time = 0
-            start = None
+        
+        series_count = 0
+        data_tot = []
 
-            for index, row in df_filtered.iterrows():
-                if row['actuation_level'] == True:
-                    start = row['timestamp']
-                elif row['actuation_level'] == False and start is not None:
-                    stop = row['timestamp']
-                    consumption_time += (stop - start).total_seconds()
+        series = []
+        devices = df_filtered['devID'].unique()
+        # Calculate power consumption for each actuator and return in a list
+        for device in devices:
+            data = []
+            labels = []
+            device_df = df_filtered[df_filtered['devID'] == device]
+            actuators = device_df['sensID'].unique()
+            for actuator in actuators:
+                if "a" in actuator:
+                    actuator_df = device_df[device_df['sensID'] == actuator]
+
+                    consumption_time = 0
                     start = None
 
-            # Calculate power consumption (assuming energy consumption is measured in Watt-seconds)
-            power_consumption.append(consumption_time / 3600)  # Convert seconds to hours
-            #TODO controllare se devo togliere la [] in data
-            data = [{"x": f"Last {t}", "y": power_consumption}] 
-            labels = [f"Last {t}"]
-            result.append({"data": [data], "labels": labels})
-        
-        elif action == "Device":
-            # Calculate power consumption for each device in the greenhouse
-            devices = df_filtered['devID'].unique()
-            for device in devices:
-                device_df = df_filtered[df_filtered['devID'] == device]
+                    for index, row in actuator_df.iterrows():
+                        if row['actuation_level'] == 1:
+                            start = row['timestamp']
+                        elif row['actuation_level'] == 0 and start is not None:
+                            stop = row['timestamp']
+                            consumption_time += (stop - start)
+                            start = None
 
-                consumption_time = 0
-                start = None
-
-                for index, row in device_df.iterrows():
-                    if row['actuation_level'] == True:
-                        start = row['timestamp']
-                    elif row['actuation_level'] == False and start is not None:
-                        stop = row['timestamp']
-                        consumption_time += (stop - start).total_seconds()
-                        start = None
-
-                # Calculate power consumption for each device
-                power_consumption.append(consumption_time / 3600)  # Convert seconds to hours
+                    
+                    data.append(round(consumption_time/60, 2))
+                    labels.append(f"Power consumption for {actuator} in minutes")
                 
-                data = [{"x": f"Device {device}", "y": power_consumption}]
-                labels = [f"Device {device}"]
-                result.append({"data": [data], "labels": labels})
-        
-        
-        elif action == "Actuator":
-            # Calculate power consumption for each actuator and return in a list
-            actuators = df_filtered['actID'].unique()
-            for actuator in actuators:
-                actuator_df = df_filtered[df_filtered['actID'] == actuator]
-
-                consumption_time = 0
-                start = None
-
-                for index, row in actuator_df.iterrows():
-                    if row['actuation_level'] == True:
-                        start = row['timestamp']
-                    elif row['actuation_level'] == False and start is not None:
-                        stop = row['timestamp']
-                        consumption_time += (stop - start).total_seconds()
-                        start = None
-
-                # Calculate power consumption for each actuator
-                power_consumption.append(consumption_time / 3600)  # Convert seconds to hours
-
-                data = [{"x": f"Actuator {actuator}", "y": power_consumption}]
-                labels = [f"Actuator {actuator}"]
-                result.append({"data": [data], "labels": labels})
-        
+            data_tot.append(data)
+            series.append(series_count)
+            series_count += 1
+        if action == "Actuator":
+            result.append({"series": series, "data": data_tot, "labels": labels})
+        elif action == "Device":
+            data_dev = []
+            labels_dev = []
+            for i,dev in enumerate(data_tot):
+                data_dev.append([round(sum(dev),2)])
+                labels_dev.append(f"Power consumption for {devices[i]} in minutes")
+            result.append({"series": [1], "data": data_dev, "labels": labels_dev})
+        elif action == "Greenhouse":
+            data_gh = 0
+            label_gh = [f"{ghid} power consumption in minutes"]
+            for dev in data_tot:
+                data_gh += round(sum(dev),2)
+            result.append({"series": [1], "data": [[data_gh]], "labels": label_gh})
         else:
             raise ValueError("Invalid Action.")
-
-        
         return result
 
 
-    #///////////////////////////////////////////////////////////////////////////
-    #///////////////////////////////////////////////////////////////////////////
-    # GET function
+
+        #///////////////////////////////////////////////////////////////////////////
+        #///////////////////////////////////////////////////////////////////////////
+        # GET function
 
     def GET(self, *uri, **params):
         

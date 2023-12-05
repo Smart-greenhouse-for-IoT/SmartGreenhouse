@@ -33,7 +33,8 @@ class ThingspeakReader():
                     'field4': 'quantity',
                     'field5': 'value',
                     'field6': 'timestamp',
-                    'field7': 'plant_type'
+                    'field7': 'plant_type',
+                    'field8': 'actuation_level'
                 })
                 return self.df  # Return the filled DataFrame
             else:
