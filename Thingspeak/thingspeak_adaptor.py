@@ -26,8 +26,18 @@ class ThingspeakAdaptor:
         with open(confTS_path) as f:
             self.myTS = json.load(f)
 
+        self.headers = {
+            "Content-Type": "application/json",
+            "X-THINGSPEAKAPIKEY": self.myTS["TS_info"]["write_key"],
+        }
+
+        self.format = {
+            "write_api_key": self.myTS["TS_info"]["write_key"],  # conf_json
+            "updates": [],
+        }
+
         self.fields_dict = {
-            "api_key": None,  # conf_json
+            "created_at": None,
             "field1": None,  # catalog
             "field2": None,  # topic/message
             "field3": None,  # topic/message
@@ -35,7 +45,10 @@ class ThingspeakAdaptor:
             "field5": None,  # message
             "field6": None,  # message
             "field7": None,  # catalog
+            "field8": None,
         }
+
+        self.tot_dict = []
         self.url_TS = self.myTS["TS_info"]["url_TS"]
         self._topic = self.myTS["endpoints_details"][0]["topic"]
 
@@ -53,7 +66,8 @@ class ThingspeakAdaptor:
         self._pubSub.start()
 
         time.sleep(3)
-        self._pubSub.mySubscribe(self._topic)
+        for topic in self._topic:
+            self._pubSub.mySubscribe(topic)
 
         self.registerToCat()
 
@@ -103,9 +117,9 @@ class ThingspeakAdaptor:
                     update = True
                 else:
                     print(f"Service {self.myTS['servID']} could not be added!")
+                    time.sleep(3)
             except:
                 print(f"Fail to establish a connection with {self.conf_dict['ip']}")
-                time.sleep(1)
 
         if update == False:
             raise Exception(
@@ -143,19 +157,30 @@ class ThingspeakAdaptor:
                 f"Fail to establish a connection with {self.conf_dict['ip']}"
             )
 
+    def tot_dictAppend(self, partial_dict):
+        self.tot_dict.append(partial_dict)
+
     def dictCreation(self, topic, msg):
         fields = self.fields_dict.copy()
-        fields["api_key"] = self.myTS["TS_info"]["write_key"]
+
         fields["field1"] = self.retrieveGHID(msg.get("devID"))
         fields["field2"] = msg.get("devID")
         fields["field3"] = msg.get("sensID")
         fields["field4"] = msg.get("n")
         fields["field5"] = msg.get("v")
         fields["field6"] = msg.get("t")
-        fields["field7"] = self.retrievePlant_type(msg.get("devID"), msg.get("sensID"))
+        fields["delta_t"] = 1
+        if topic.split("/")[3] == "moisture_level":
+            fields["field7"] = self.retrievePlant_type(
+                msg.get("devID"), msg.get("sensID")
+            )
+
+        if topic.split("/")[2].startswith("a"):
+            fields["field8"] = msg.get("command")
+
         return fields
 
-    def sendDataToTS(self, field_dict):
+    def sendDataToTS(self):
         """
         sendDataToTS
         ------------
@@ -163,11 +188,18 @@ class ThingspeakAdaptor:
         """
 
         try:
-            response = requests.post(self.url_TS, field_dict)
-            if response.ok:
-                print("Data sent to ThingSpeak successfully!")
-            else:
-                print("Failed to send data to ThingSpeak.")
+            # formatting
+            if self.tot_dict:
+                dict = self.format.copy()
+                dict["updates"] = self.tot_dict
+
+                response = requests.post(
+                    self.url_TS, headers=self.headers, data=json.dumps(dict)
+                )
+                if response.ok:
+                    print("Data sent to ThingSpeak successfully!")
+                else:
+                    print("Failed to send data to ThingSpeak.")
         except:
             print("ThingSpeak not reachable")
 
@@ -177,11 +209,11 @@ class ThingspeakAdaptor:
         ------
 
         """
-        print("File correctly received")
+        print(f"Msg:received from topic: {topic}")
         msg_json = json.loads(msg)
         # print(msg_json)
         field_dict = self.dictCreation(topic, msg_json)
-        self.sendDataToTS(field_dict)
+        self.tot_dictAppend(field_dict)
 
     def retrieveGHID(self, devID, tries=10):
         """
@@ -236,6 +268,9 @@ class ThingspeakAdaptor:
         else:
             return None
 
+    def cleanDict(self):
+        self.tot_dict = []
+
     def loop(self, refresh_time=30):
         """
         Loop
@@ -255,6 +290,9 @@ class ThingspeakAdaptor:
 
                 # Every refresh_time the measure are done and published to the topic
                 if local_time - last_time > refresh_time:
+                    self.sendDataToTS()
+                    self.cleanDict()
+
                     self.updateToCat(tries=15)
                     # self.post_sensor_Cat()
                     last_time = time.time()

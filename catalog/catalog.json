@@ -18,9 +18,93 @@
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo",
         "link": ""
     },
-    "greenhouses": [],
-    "users": [],
+    "greenhouses": [
+        {
+            "ghID": "g1",
+            "devices": [
+                {
+                    "devID": "d1",
+                    "sensors": {
+                        "temp_hum": "s1",
+                        "CO2_level": "s2"
+                    },
+                    "actuators": {
+                        "fan_control": "a1",
+                        "vaporizer_control": "a2",
+                        "co2_control": "a7"
+                    }
+                }
+            ],
+            "usrID": "u1",
+            "gh_params": {
+                "temperature": 10,
+                "CO2": 420,
+                "humidity": 100
+            },
+            "plantsList": [
+                {
+                    "plant": "cardamono",
+                    "th_min": 20,
+                    "th_max": 47,
+                    "devID": "d1",
+                    "sensID": "s3",
+                    "actID": "a3"
+                },
+                {
+                    "plant": "cardamono",
+                    "th_min": 20,
+                    "th_max": 47,
+                    "devID": "d1",
+                    "sensID": "s4",
+                    "actID": "a4"
+                },
+                {
+                    "plant": "cardamono",
+                    "th_min": 20,
+                    "th_max": 47,
+                    "devID": "d1",
+                    "sensID": "s5",
+                    "actID": "a5"
+                },
+                {
+                    "plant": "cardamono",
+                    "th_min": 20,
+                    "th_max": 47,
+                    "devID": "d1",
+                    "sensID": "s6",
+                    "actID": "a6"
+                }
+            ],
+            "lastUpdate": "2023-11-16 11:19:57"
+        }, {
+          "ghID": "g2"
+        }
+    ],
+    "users": [
+        {
+            "usrID": "u1",
+            "name": "fede",
+            "ghID": [
+                "g1"
+            ],
+            "ownedPlants": [
+                {
+                    "plant": "cardamono",
+                    "th_min": 20,
+                    "th_max": 47
+                }
+            ],
+            "lastUpdate": "2023-11-13 17:28:25"
+        },
+        {
+            "usrID": "u2",
+            "name": "Name",
+            "ghID": [],
+            "ownedPlants": [],
+            "lastUpdate": "2023-11-13 17:37:48"
+        }
+    ],
     "devices": [],
     "services": [],
-    "lastUpdate": "2023-11-13 17:57:00"
+    "lastUpdate": "2023-12-04 18:43:55"
 }

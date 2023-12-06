@@ -48,7 +48,7 @@ class greenhouseControl():
             topic_act = self.transformTopic(topic, gh_act.get("actID"))
 
             if quantity_name in ["temperature", "CO2_level"]:
-                if measure_dict.get("v") < gh_description.get(quantity_name):
+                if measure_dict.get("v") > gh_description.get(quantity_name):
 
                     if topic_act not in self.track_actuation_dict:
                         self.startActuation(topic_act, measure_dict, )
@@ -56,7 +56,7 @@ class greenhouseControl():
                     print(f"Threshold respected for sensor {measure_dict['sensID']}")
 
             if quantity_name == "humidity":
-                if measure_dict.get("v") > gh_description.get(quantity_name):
+                if measure_dict.get("v") < gh_description.get(quantity_name):
 
                     if topic_act not in self.track_actuation_dict:
                         self.startActuation(topic_act, measure_dict)
@@ -71,7 +71,8 @@ class greenhouseControl():
 
         measure_dict_resp["devID"] = topic.split("/")[1]
         measure_dict_resp["actID"] = topic.split("/")[2]
-        measure_dict_resp["timestamp"] = time.time()
+        measure_dict_resp["sensID"] = topic.split("/")[2]
+        measure_dict_resp["t"] = time.time()
         measure_dict_resp["command"] = True
         
 
@@ -121,9 +122,9 @@ class greenhouseControl():
         try:
             req_dev = requests.post(self.addr_cat + "/addService", data=json.dumps(self.myservice))
             if req_dev.ok:
-                print(f"Plant control service {self.myservice['servID']} added successfully!")
+                print(f"GH control service {self.myservice['servID']} added successfully!")
             else:
-                print(f"Plant control service {self.myservice['servID']} could not be added!")
+                print(f"GH control service {self.myservice['servID']} could not be added!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
 
@@ -140,9 +141,9 @@ class greenhouseControl():
             #PUT the devices to the catalog
             req = requests.put(self.addr_cat + "/updateService", data=json.dumps(self.myservice))
             if req.ok:
-                print(f"Plant control service {self.myservice['servID']} updated successfully!")
+                print(f"GH control service {self.myservice['servID']} updated successfully!")
             else:
-                print(f"Plant control service {self.myservice['servID']} could not be updated!")
+                print(f"GH control service {self.myservice['servID']} could not be updated!")
         except:
             raise Exception(f"Fail to establish a connection with {self.conf_dict['ip']}")
     
