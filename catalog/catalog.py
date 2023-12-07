@@ -474,11 +474,7 @@ class REST_catalog(catalog):
 
         if len(uri) >= 1:
             # DEVICE CATALOG
-            if uri[0] == "updateDevices":
-                self.updateDevices(bodyAsDict)
-                self.saveJson()
-            
-            elif uri[0] == "addDevice":
+            if uri[0] == "addDevice":
                 if self.addDevice(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nDevice {bodyAsDict["devID"]} added successfully!')
