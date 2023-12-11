@@ -22,7 +22,8 @@ class plantsControl():
         self.track_actuation_dict = {}
         self._actuation_time = 3
 
-        self.data_url = ""
+        self.DA_info()
+        
         self.registerToCat()
 
         self._topic = self.conf_dict.get("topic")
@@ -66,19 +67,28 @@ class plantsControl():
         measure_dict_resp["timestamp"] = time.time()
         measure_dict_resp["command"] = "start"
         
-        actuation_coefficient_req = requests.get(f"{self.data_url}/getWaterCoefficient?ghid={body.get('ghID')}&moisture_level={body.get('moisture_level')}")
+        if self.DA_connected: # if there is the data analysis ms
 
-        if actuation_coefficient_req.status_code == 200:
+            actuation_coefficient_req = requests.get(f"{self.addr_DA}/getWaterCoefficient?ghid={body.get('ghID')}&moisture_level={body.get('moisture_level')}")  # Use ML for evaluating the actuation time
+
+            if actuation_coefficient_req.status_code == 200:
+                
+                actuation_coefficient_req = actuation_coefficient_req.json()
+                actuation_coefficient = actuation_coefficient_req.get('coefficient')
+            else:
+                print("Failed establishing connection with DA")
+                actuation_coefficient = 1
+        else:
+            actuation_coefficient = 1
             
-            actuation_coefficient_req = actuation_coefficient_req.json()
-            actuation_coefficient = actuation_coefficient_req.get('coefficient')
-            self._pubSub.myPublish(topic, measure_dict_resp)
+        self._pubSub.myPublish(topic, measure_dict_resp)
 
-            print(f"Actuation started, topic:{topic}")
+        print(f"Actuation started, topic:{topic}")
 
-            self.track_actuation_dict[topic] = measure_dict_resp
-            self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time*actuation_coefficient, self.stopActuation, args=(topic,))
-            self.track_actuation_dict[topic]["timer"].start()
+        self.track_actuation_dict[topic] = measure_dict_resp
+        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time*actuation_coefficient, self.stopActuation, args=(topic,))  # starting the actuation and the threading timer
+        self.track_actuation_dict[topic]["timer"].start()
+
 
     def stopActuation(self, topic_):
 
@@ -92,7 +102,6 @@ class plantsControl():
         self.track_actuation_dict.pop(topic_)
 
         print(f"Actuation stopped, topic:{topic_}")
-
 
 
 
@@ -171,7 +180,37 @@ class plantsControl():
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
-
+    def DA_info(self, tries = 10):
+        """
+        DA_info
+        -------
+        Try to contact the catalog to obtain the information of thingspeak.
+        ### Parameters obtained
+        - TsIp: IP of thingspeak rest interface
+        - TsPort: Port of thingspeak rest interface
+        """
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                req_Da = requests.get(self.addr_cat + "/service?name=data_analysis")
+                if req_Da.ok:
+                    Da =req_Da.json()
+                    DA_info = {
+                        "ip": Da["endpoints_details"][0]["ip"],
+                        "port": str(Da["endpoints_details"][0]["port"])
+                    }
+                    self.addr_DA = "http://" + DA_info["ip"] + ":" + DA_info["port"]
+                    self.DA_connected = True
+                    update = True
+                else:
+                    print("Data analysis microservice not present in the catalog!")
+                    time.sleep(1)
+            except:
+                print("The catalog web service is unreachable!")
+                time.sleep(1)
+        
     def loop(self, refresh_time = 15):
 
         last_time = 0
