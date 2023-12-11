@@ -28,7 +28,7 @@ class DataAnalysisMicroservice:
         self.TR = ThingspeakReader("Data_analysis/conf.json")
         self.df = self.TR.readCSV()
 
-        self.pipe = self.RandomForest()
+        
 
         self.queryClass = Queries()
 
@@ -62,7 +62,9 @@ class DataAnalysisMicroservice:
         '''
 
         csv_data = self.confDA.get("path_dataset2")
-        self.df2 = pd.read_csv(csv_data, sep=";", decimal='.')
+        self.df2 = pd.read_csv(csv_data, sep=",", decimal='.')
+
+        self.pipe = self.RandomForest()
 
     def registerToCat(self, tries = 10):
         """
@@ -96,11 +98,12 @@ class DataAnalysisMicroservice:
         - performs some machine learning (Random Forest Classifier) on the roses dataset
         '''
 
-        self.df2.isna().any().any() # there are not NaN values
+        # self.df2.isna().any().any() # there are not NaN values
         self.df2 = self.df2.drop(columns=["L (Lux)"])
         self.df2 = self.df2.rename(columns={'clase':'class'})
         target = self.df2['class']
         features = self.df2.columns.drop('class')
+        train = self.df2[features]
 
         # self.graphDFAnalysis()
         '''
@@ -136,7 +139,7 @@ class DataAnalysisMicroservice:
         test_score = pipe.score(test_df[features], test_df['class'])
         print("Test set score:", test_score)
         '''
-        pipe.fit(features, target)
+        pipe.fit(train, target)
         return pipe
         
         
