@@ -55,10 +55,10 @@ class DataAnalysisMicroservice:
             HR (%) : Relative greenhouse humidity
             CO2(Analog): greenhouse CO2
             class: 
-                1: soil without water - bagno tanto
-                2: environment correct - non bagno
-                3: too much hot - bagno medio
-                4: very cold - bagno poco
+                0: environment correct- No water needed
+                1: small water required - low level actuation
+                2: too much hot - medium level
+                3: soil without water  - high level
         '''
 
         csv_data = self.confDA.get("path_dataset2")
