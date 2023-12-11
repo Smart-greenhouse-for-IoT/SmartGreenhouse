@@ -148,9 +148,9 @@ class DataAnalysisMicroservice:
         predict the label when getting the moisture level
         '''
         
-        response = self.GET("getallLastValues", ghID=ghid)
+        last_rows = self.queryClass.get_all_last_values(self.df, ghid) # temperature, humidity, CO2
         
-        new_point = [moisture, response.get("temperature"), response.get("humidity"), response.get("CO2")]
+        new_point = [moisture, last_rows[0], last_rows[1], last_rows[2]]
         predicted_class = self.pipe.predict(new_point)
 
         return predicted_class
@@ -368,9 +368,10 @@ class DataAnalysisMicroservice:
             elif uri[0] == "getAllLastValues":
                 if params.get("ghID"):
                     ghID = params.get("ghID")
-                    last_temperature_row = self.queryClass.get_last_value(self.df, ghID, "Temperature")
-                    last_humidity_row = self.queryClass.get_last_value(self.df, ghID, "Humidity")
-                    last_CO2_row = self.queryClass.get_last_value(self.df, ghID, "CO2")
+                    last_rows = self.queryClass.get_all_last_values(self.df, ghID)
+                    last_temperature_row = last_rows[0]
+                    last_humidity_row = last_rows[1]
+                    last_CO2_row = last_rows[2]
 
                     return json.dumps({"temperature":last_temperature_row['value'].iloc[0],
                                        "humidity":last_humidity_row['value'].iloc[0],
@@ -518,6 +519,14 @@ class Queries():
 
         return last_row
     
+    # Get all the last values for a gh
+    def get_all_last_values(self, df, gh_id):
+        last_temperature_row = self.get_last_value(df, gh_id, "Temperature")
+        last_humidity_row = self.get_last_value(df, gh_id, "Humidity")
+        last_CO2_row = self.get_last_value(df, gh_id, "CO2")
+
+        return [last_temperature_row, last_humidity_row, last_CO2_row]
+
     # Get the last specific value for moisture level for a gh, given a sensor
     def get_last_moisture_level(self, df, gh_id, sens_id):
         selected_rows = df[(df['ghID'] == gh_id) & (df['sensID'] == sens_id)]
