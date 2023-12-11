@@ -297,7 +297,7 @@ class DataAnalysisMicroservice:
 
                     
                     data.append(round(consumption_time/60, 2))
-                    labels.append(f"Power consumption for {actuator} in minutes")
+                    labels.append(f"Power consumption for {actuator} (in minutes)")
                 
             data_tot.append(data)
             series.append(series_count)
@@ -309,11 +309,11 @@ class DataAnalysisMicroservice:
             labels_dev = []
             for i,dev in enumerate(data_tot):
                 data_dev.append([round(sum(dev),2)])
-                labels_dev.append(f"Power consumption for {devices[i]} in minutes")
+                labels_dev.append(f"Power consumption for {devices[i]} (in minutes)")
             result.append({"series": [1], "data": data_dev, "labels": labels_dev})
         elif action == "Greenhouse":
             data_gh = 0
-            label_gh = [f"{ghid} power consumption in minutes"]
+            label_gh = [f"Power consumption for {ghid} (in minutes)"]
             for dev in data_tot:
                 data_gh += round(sum(dev),2)
             result.append({"series": [1], "data": [[data_gh]], "labels": label_gh})
