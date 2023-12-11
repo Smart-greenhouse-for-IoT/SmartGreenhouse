@@ -1,6 +1,6 @@
 # Programming for IoT applications project - SmartGreenhouse
 
-![Python Version](https://img.shields.io/badge/python-3.8%20|%203.10-informational?style=flat&logo=python&logoColor=white)
+![Python Version](https://img.shields.io/badge/python-3.11%20-informational?style=flat&logo=python&logoColor=white)
 ![GitHub](https://img.shields.io/github/contributors/Smart-greenhouse-for-IoT/SmartGreenhouse?style=flat&logo=github)
 ![GitHub](https://img.shields.io/github/license/Smart-greenhouse-for-IoT/SmartGreenhouse?style=flat)
 
@@ -11,7 +11,7 @@ Project for the course Programming for IoT Applications at Politecnico di Torino
 SmartGreenhouse is an application used to control and monitor greenhouses. Based on the microservices approach the user could obtain real-time information for the owned greenhouses and plants. All the system is automatically managed through device connectors which have connected sensors and actuators for the correct functioning of the smart greenhouse.
 
 A promo video and a demo version are available on Youtube: 
-...
+- *working on*
 
 
 ## Application structure
@@ -87,4 +87,32 @@ devices exploiting the REST Web Services provided by the Device Connector. It us
 REST Web Services also to communicate with the Greenhouse Catalog by associating every 
 batch of pots with the plants it has to store. Moreover it sends information to the Greenhouse 
 Catalog about the plant varieties that have to be added or modified
+
+## Launching
+Since the application structure is based on microservices it is well suited to be used with containers. For this purpose we used Docker. In particular in each folder of each microservices it is already present the Dockerfile. 
+
+**NOTE**: it is crucial that before creating the images you set the IP address of your machine in the configuration file that can be found in every folder.
+
+Once each configuration file is updated the image can be built by running `docker build -t <image_name>`.
+When running the container remeber to expose the correct port when needed: `docker run -p <host_port>:<container_port> <image_name>`.
+### Ports
+- **catalog**: 8081 
+- **DataAnalysis**: 8090
+
+## Usage
+Once everything is up and running, with at least on device connector connected, you can start using the application.
+All the user interface is based on the telegram bot. The commands list is found below.
+### Telegram bot commands
+- ****:
+- ****:
+- ****:
+- ****:
+- ****:
+- ****:
+- ****:
+- ****:
+
+
+
+
 
