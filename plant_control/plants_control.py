@@ -22,6 +22,7 @@ class plantsControl():
         self.track_actuation_dict = {}
         self._actuation_time = 3
 
+        self.data_url = ""
         self.registerToCat()
 
         self._topic = self.conf_dict.get("topic")
@@ -46,6 +47,8 @@ class plantsControl():
             if plant_description:       
                 topic_act = self.transformTopic(topic, plant_description.get("actID"))
                 measure_dict["plant"] = plant_description.get("plant")
+                measure_dict["ghID"] = plant_description.get("ghID")
+                
                 if measure_dict.get("v") < plant_description.get("th_min"):
 
                     if topic_act not in self.track_actuation_dict:
@@ -63,14 +66,19 @@ class plantsControl():
         measure_dict_resp["timestamp"] = time.time()
         measure_dict_resp["command"] = "start"
         
+        actuation_coefficient_req = requests.get(f"{self.data_url}/getWaterCoefficient?ghid={body.get('ghID')}&moisture_level={body.get('moisture_level')}")
 
-        self._pubSub.myPublish(topic, measure_dict_resp)
+        if actuation_coefficient_req.status_code == 200:
+            
+            actuation_coefficient_req = actuation_coefficient_req.json()
+            actuation_coefficient = actuation_coefficient_req.get('coefficient')
+            self._pubSub.myPublish(topic, measure_dict_resp)
 
-        print(f"Actuation started, topic:{topic}")
+            print(f"Actuation started, topic:{topic}")
 
-        self.track_actuation_dict[topic] = measure_dict_resp
-        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
-        self.track_actuation_dict[topic]["timer"].start()
+            self.track_actuation_dict[topic] = measure_dict_resp
+            self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time*actuation_coefficient, self.stopActuation, args=(topic,))
+            self.track_actuation_dict[topic]["timer"].start()
 
     def stopActuation(self, topic_):
 

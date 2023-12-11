@@ -28,6 +28,8 @@ class DataAnalysisMicroservice:
         self.TR = ThingspeakReader("Data_analysis/conf.json")
         self.df = self.TR.readCSV()
 
+        self.pipe = self.RandomForest()
+
         self.queryClass = Queries()
 
         # Address of the catalog for adding the devices
@@ -142,11 +144,11 @@ class DataAnalysisMicroservice:
         '''
         predict the label when getting the moisture level
         '''
-        pipe = self.RandomForest()
+        
         response = self.GET("getallLastValues", ghID=ghid)
         
         new_point = [moisture, response.get("temperature"), response.get("humidity"), response.get("CO2")]
-        predicted_class = pipe.predict(new_point)
+        predicted_class = self.pipe.predict(new_point)
 
         return predicted_class
         
@@ -383,8 +385,8 @@ class DataAnalysisMicroservice:
             elif uri[0] == "getWaterCoefficient":
                 if params.get("ghid"):
                     ghID = params.get("ghid")
-                    if params.get("moisture"):
-                        moisture = params.get("moisture")
+                    if params.get("moisture_level"):
+                        moisture = params.get("moisture_level")
                         label = self.dftransform(ghID, moisture)
                         return json.dumps({"coefficient":label})
                     else:
