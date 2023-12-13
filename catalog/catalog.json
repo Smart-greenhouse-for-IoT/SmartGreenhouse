@@ -44,8 +44,8 @@
             "plantsList": [
                 {
                     "plant": "cardamono",
-                    "th_min": 20,
-                    "th_max": 47,
+                    "th_min": 90,
+                    "th_max": 95,
                     "devID": "d1",
                     "sensID": "s3",
                     "actID": "a3"
@@ -76,9 +76,6 @@
                 }
             ],
             "lastUpdate": "2023-11-16 11:19:57"
-        },
-        {
-            "ghID": "g2"
         }
     ],
     "users": [
@@ -374,28 +371,10 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-11 16:18:53"
+            "lastUpdate": "2023-12-13 13:14:01"
         }
     ],
     "services": [
-        {
-            "servID": "16",
-            "name": "data_analysis",
-            "endpoints": [
-                "REST"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "REST",
-                    "address": "http://127.0.0.1:8090",
-                    "ip": "127.0.0.1",
-                    "port": 8090
-                }
-            ],
-            "lastUpdate": "2023-12-11 16:18:56",
-            "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
-            "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
-        },
         {
             "servID": "PC01",
             "name": "plant_control",
@@ -412,8 +391,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-11 16:18:41"
+            "lastUpdate": "2023-12-13 13:14:11"
         }
     ],
-    "lastUpdate": "2023-12-11 16:18:56"
+    "lastUpdate": "2023-12-13 13:14:11"
 }

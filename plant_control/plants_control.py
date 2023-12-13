@@ -69,7 +69,7 @@ class plantsControl():
         
         if self.DA_connected: # if there is the data analysis ms
 
-            actuation_coefficient_req = requests.get(f"{self.addr_DA}/getWaterCoefficient?ghid={body.get('ghID')}&moisture_level={body.get('moisture_level')}")  # Use ML for evaluating the actuation time
+            actuation_coefficient_req = requests.get(f"{self.addr_DA}/getWaterCoefficient?ghid={body.get('ghID')}&moisture_level={body.get('v')}")  # Use ML for evaluating the actuation time
 
             if actuation_coefficient_req.status_code == 200:
                 

@@ -409,10 +409,12 @@ class REST_catalog(catalog):
                                 search_gh = gh.copy()
                                 sensors = dev["sensors"]
                                 actuators = dev["actuators"]
+                                gh_selected = gh["ghID"]
                     
                     if search_gh:
                         sensID = params["sensID"]
                         search_plant = searchDict(search_gh, "plantsList", "sensID", sensID)
+                        search_plant["ghID"] = gh_selected
 
                         if search_plant:
                             return json.dumps(search_plant)

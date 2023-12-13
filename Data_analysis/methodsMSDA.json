@@ -9,7 +9,7 @@
                 "getDevIDlist?ghID=",
                 "getActIDlist?ghID=&devID=",
                 "getDataChart?ghID=&n=&t=",
-                "getWaterCoefficient?ghid=&moisture=",
+                "getWaterCoefficient?ghid=&moisture_level=",
                 "getDataPowerConsumption?ghID=&action=&t="
             ]
         }
