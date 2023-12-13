@@ -371,7 +371,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-13 19:13:51"
+            "lastUpdate": "2023-12-13 19:19:29"
         }
     ],
     "services": [
@@ -389,7 +389,7 @@
                     "port": 8090
                 }
             ],
-            "lastUpdate": "2023-12-13 19:13:40",
+            "lastUpdate": "2023-12-13 19:19:11",
             "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
             "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
         },
@@ -409,8 +409,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-13 19:13:48"
+            "lastUpdate": "2023-12-13 19:19:22"
         }
     ],
-    "lastUpdate": "2023-12-13 19:13:51"
+    "lastUpdate": "2023-12-13 19:19:29"
 }

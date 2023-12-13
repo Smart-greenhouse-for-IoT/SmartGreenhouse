@@ -83,7 +83,7 @@ class plantsControl():
             
         self._pubSub.myPublish(topic, measure_dict_resp)
 
-        print(f"Actuation started, topic:{topic}")
+        print(f"Actuation started, topic:{topic}, {self._actuation_time*actuation_coefficient} seconds")
 
         self.track_actuation_dict[topic] = measure_dict_resp
         self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time*actuation_coefficient, self.stopActuation, args=(topic,))  # starting the actuation and the threading timer
