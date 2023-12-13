@@ -371,10 +371,28 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-13 13:14:01"
+            "lastUpdate": "2023-12-13 19:13:51"
         }
     ],
     "services": [
+        {
+            "servID": "16",
+            "name": "data_analysis",
+            "endpoints": [
+                "REST"
+            ],
+            "endpoints_details": [
+                {
+                    "endpoint": "REST",
+                    "address": "http://127.0.0.1:8090",
+                    "ip": "127.0.0.1",
+                    "port": 8090
+                }
+            ],
+            "lastUpdate": "2023-12-13 19:13:40",
+            "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
+            "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
+        },
         {
             "servID": "PC01",
             "name": "plant_control",
@@ -391,8 +409,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-13 13:14:11"
+            "lastUpdate": "2023-12-13 19:13:48"
         }
     ],
-    "lastUpdate": "2023-12-13 13:14:11"
+    "lastUpdate": "2023-12-13 19:13:51"
 }

@@ -102,8 +102,8 @@ class DataAnalysisMicroservice:
         self.df2 = self.df2.drop(columns=["L (Lux)"])
         self.df2 = self.df2.rename(columns={'clase':'class'})
         target = self.df2['class']
-        features = self.df2.columns.drop('class')
-        train = self.df2[features]
+        self.features = self.df2.columns.drop('class')
+        train = self.df2[self.features]
 
         # self.graphDFAnalysis()
         '''
@@ -147,12 +147,13 @@ class DataAnalysisMicroservice:
         '''
         predict the label when getting the moisture level
         '''
-        
         last_rows = self.queryClass.get_all_last_values(self.df, ghid) # temperature, humidity, CO2
         
-        new_point = [moisture, last_rows[0], last_rows[1], last_rows[2]]
-        predicted_class = self.pipe.predict(new_point)
+        new_point = [float(moisture), last_rows[0].get('value').values[0], last_rows[2].get('value').values[0], last_rows[1].get('value').values[0]] # temperature, CO2, Humidity
 
+        new_point_df = pd.DataFrame([new_point], columns=self.features)
+        predicted_class = int(self.pipe.predict(new_point_df)[0])
+        print(predicted_class)
         return predicted_class
         
 
