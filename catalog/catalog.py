@@ -420,7 +420,8 @@ class REST_catalog(catalog):
                             return json.dumps(search_plant)
                         else:
                             raise cherrypy.HTTPError(404, f"No plant associated with sensor {sensID}")
-                    else:
+                    else:   
+                            #TODO:controllo sensID non vuoto!
                             raise cherrypy.HTTPError(404, f"No plant associated with device {sensID}")
                 
                 else:

@@ -37,69 +37,29 @@
             ],
             "usrID": "u1",
             "gh_params": {
-                "temperature": 10,
-                "CO2": 420,
-                "humidity": 100
+                "temperature": 30,
+                "CO2_level": 420,
+                "humidity": 89
             },
-            "plantsList": [
-                {
-                    "plant": "cardamono",
-                    "th_min": 90,
-                    "th_max": 95,
-                    "devID": "d1",
-                    "sensID": "s3",
-                    "actID": "a3"
-                },
-                {
-                    "plant": "cardamono",
-                    "th_min": 20,
-                    "th_max": 47,
-                    "devID": "d1",
-                    "sensID": "s4",
-                    "actID": "a4"
-                },
-                {
-                    "plant": "cardamono",
-                    "th_min": 20,
-                    "th_max": 47,
-                    "devID": "d1",
-                    "sensID": "s5",
-                    "actID": "a5"
-                },
-                {
-                    "plant": "cardamono",
-                    "th_min": 20,
-                    "th_max": 47,
-                    "devID": "d1",
-                    "sensID": "s6",
-                    "actID": "a6"
-                }
-            ],
-            "lastUpdate": "2023-11-16 11:19:57"
+            "plantsList": [],
+            "lastUpdate": "2023-12-13 21:25:15"
         }
     ],
     "users": [
         {
             "usrID": "u1",
-            "name": "fede",
+            "name": "Name",
             "ghID": [
                 "g1"
             ],
             "ownedPlants": [
                 {
-                    "plant": "cardamono",
-                    "th_min": 20,
-                    "th_max": 47
+                    "plant": "pianta",
+                    "th_min": 95,
+                    "th_max": 98
                 }
             ],
-            "lastUpdate": "2023-11-13 17:28:25"
-        },
-        {
-            "usrID": "u2",
-            "name": "Name",
-            "ghID": [],
-            "ownedPlants": [],
-            "lastUpdate": "2023-11-13 17:37:48"
+            "lastUpdate": "2023-12-13 21:24:56"
         }
     ],
     "devices": [
@@ -371,12 +331,13 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-13 19:19:29"
+            "lastUpdate": "2023-12-13 21:25:26",
+            "ghID": ""
         }
     ],
     "services": [
         {
-            "servID": "16",
+            "servID": "DA01",
             "name": "data_analysis",
             "endpoints": [
                 "REST"
@@ -389,7 +350,7 @@
                     "port": 8090
                 }
             ],
-            "lastUpdate": "2023-12-13 19:19:11",
+            "lastUpdate": "2023-12-13 21:25:29",
             "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
             "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
         },
@@ -409,8 +370,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-13 19:19:22"
+            "lastUpdate": "2023-12-13 21:25:39"
         }
     ],
-    "lastUpdate": "2023-12-13 19:19:29"
+    "lastUpdate": "2023-12-13 21:25:39"
 }
