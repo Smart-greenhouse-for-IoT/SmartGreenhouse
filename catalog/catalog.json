@@ -331,8 +331,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-13 21:25:26",
-            "ghID": ""
+            "lastUpdate": "2023-12-15 12:13:39"
         }
     ],
     "services": [
@@ -350,7 +349,7 @@
                     "port": 8090
                 }
             ],
-            "lastUpdate": "2023-12-13 21:25:29",
+            "lastUpdate": "2023-12-15 12:13:30",
             "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
             "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
         },
@@ -370,8 +369,8 @@
                     ]
                 }
             ],
-            "lastUpdate": "2023-12-13 21:25:39"
+            "lastUpdate": "2023-12-15 12:13:21"
         }
     ],
-    "lastUpdate": "2023-12-13 21:25:39"
+    "lastUpdate": "2023-12-15 12:13:39"
 }
