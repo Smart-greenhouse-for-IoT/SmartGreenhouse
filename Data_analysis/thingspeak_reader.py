@@ -36,6 +36,7 @@ class ThingspeakReader():
                     'field7': 'plant_type',
                     'field8': 'actuation_level'
                 })
+                print("Data successfully retrieved from Thingspeak!")
                 return self.df  # Return the filled DataFrame
             else:
                 print("Failed to retrieve data from ThingSpeak.")
