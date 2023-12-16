@@ -153,7 +153,6 @@ class DataAnalysisMicroservice:
 
         new_point_df = pd.DataFrame([new_point], columns=self.features)
         predicted_class = int(self.pipe.predict(new_point_df)[0])
-        print(predicted_class)
         return predicted_class
         
 
@@ -342,12 +341,16 @@ class DataAnalysisMicroservice:
                         measure = params.get("n")
                         # use the method from the query class
                         value_row = self.queryClass.get_last_value(self.df, ghID, measure)
+                        print(f"{measure} level retrieved successfully.")
                         return json.dumps(value_row.to_dict())
                     else:
+                        print("Not recognised parameter.")
                         raise cherrypy.HTTPError(404, f"Measure not found!")
                 elif params == {}:
+                    print("Missing parameters.")
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
+                    print("Not recognised parameters.")
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
             # Get the last specific value for moisture level for a gh, given a sensor
@@ -357,12 +360,15 @@ class DataAnalysisMicroservice:
                     if params.get("sensID"):
                         sensID = params.get("sensID")
                         value_row = self.queryClass.get_last_moisture_level(self.df, ghID, sensID)
+                        print("Moisture level retrieved successfully.")
                         return json.dumps({"moisture":value_row})
                     else:
                         raise cherrypy.HTTPError(404, f"Sensor not found!")
                 elif params == {}:
+                    print("Cannot retrieve moisture level.")
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
+                    print("Cannot retrieve moisture level.")
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
             # Get the last retrieved data for temperature, humidity and CO2
@@ -373,14 +379,16 @@ class DataAnalysisMicroservice:
                     last_temperature_row = last_rows[0]
                     last_humidity_row = last_rows[1]
                     last_CO2_row = last_rows[2]
-
+                    print("Temperature, humidity and CO2 retrieved successfully.")
                     return json.dumps({"temperature":last_temperature_row['value'].iloc[0],
                                        "humidity":last_humidity_row['value'].iloc[0],
                                        "CO2":last_CO2_row['value'].iloc[0]})
 
                 elif params == {}:
+                    print("Cannot retrieve data for temperature, humidity and CO2.")
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
+                    print("Cannot retrieve data for temperature, humidity and CO2.")
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
             #////////////////////////////////////////////////////////////////////////////////////
@@ -393,12 +401,15 @@ class DataAnalysisMicroservice:
                     if params.get("moisture_level"):
                         moisture = params.get("moisture_level")
                         label = self.dftransform(ghID, moisture)
+                        print(f"The predicted coefficient is {label}.")
                         return json.dumps({"coefficient":label})
                     else:
                         raise cherrypy.HTTPError(404, f"Moisture level not found!")
                 elif params == {}:
+                    print("Cannot predict water coefficient.")
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
+                    print("Cannot predict water coefficient.")
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
             #///////////////////////////////////////////////////////////////////////////
@@ -408,7 +419,7 @@ class DataAnalysisMicroservice:
            # Get the list of ghids
             elif uri[0] == "getGHIDlist":
                 ghID_list = self.getGHIDlist()
-                print(ghID_list)
+                print(f"ghID list: {ghID_list}")
                 return ghID_list
             
             # Get the data to be used for the chart
@@ -420,15 +431,20 @@ class DataAnalysisMicroservice:
                         if params.get("t"):
                             t = params.get("t")
                             resultForChart = self.prepareDataForChart(ghid, n, t)
+                            print("Data sent to NodeRed.")
                             return json.dumps(resultForChart)
                         else:
+                            print("Impossible to send data to Nodered.")
                             raise cherrypy.HTTPError(400, f"Timestamp parameter not found")
                     else:
+                        print("Impossible to send data to Nodered.")
                         raise cherrypy.HTTPError(400, f"Measure parameter not found!")
                         
                 elif params == {}:
+                    print("Impossible to send data to Nodered.")
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
+                    print("Impossible to send data to Nodered.")
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
                 
 
@@ -440,17 +456,23 @@ class DataAnalysisMicroservice:
                         if params.get("t"):
                             t = params.get("t")
                             resultForGauge = self.powerConsumptionChart(ghid, action, t)
+                            print("Data sent to NodeRed.")
                             return json.dumps(resultForGauge)
                         else:
+                            print("Impossible to send data to Nodered.")
                             raise cherrypy.HTTPError(400, f"Time parameter not found!")
                     else:
+                        print("Impossible to send data to Nodered.")
                         raise cherrypy.HTTPError(400, f"Measure parameter not found!")
                         
                 elif params == {}:
+                    print("Impossible to send data to Nodered.")
                     raise cherrypy.HTTPError(400, f"Missing parameters!")
                 else:
+                    print("Impossible to send data to Nodered.")
                     raise cherrypy.HTTPError(400, f"Not recognised parameters!")
         else:
+            print("Error! Method not found.")
             raise cherrypy.HTTPError(404, f"Error! Method not found!")     
 
 
