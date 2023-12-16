@@ -602,9 +602,9 @@ class REST_catalog(catalog):
             elif uri[0] == "updateGreenhouse":
                 if self.updateGreenhouse(bodyAsDict) == 0:
                     self.saveJson()
-                    print('\nGreenhouse {bodyAsDict["ghID"]} updated successfully')
+                    print(f'\nGreenhouse {bodyAsDict["ghID"]} updated successfully')
                 else:
-                    print('Greenhouse {bodyAsDict["ghID"]}could not be updated')
+                    print(f'Greenhouse {bodyAsDict["ghID"]}could not be updated')
                     raise cherrypy.HTTPError(
                         400, "The greenhouse could not be updated!"
                     )

@@ -25,7 +25,6 @@ class ThingspeakReader():
 
             if response.status_code == 200:
                 csv_data = response.text
-                print(csv_data)
                 self.df = pd.read_csv(StringIO(csv_data))
                 self.df = self.df.rename(columns={
                     'field1': 'ghID',
