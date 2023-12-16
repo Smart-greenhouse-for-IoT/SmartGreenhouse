@@ -444,7 +444,8 @@ class REST_catalog(catalog):
                                 search_gh = gh.copy()
                                 sensors = dev["sensors"]
                                 actuators = dev["actuators"]
-
+                                gh_selected = gh["ghID"]
+                    
                     if search_gh:
                         sensID = params["sensID"]
                         search_plant = searchDict(
@@ -452,16 +453,14 @@ class REST_catalog(catalog):
                         )
 
                         if search_plant:
+                            search_plant["ghID"] = gh_selected
                             return json.dumps(search_plant)
                         else:
-                            raise cherrypy.HTTPError(
-                                404, f"No plant associated with sensor {sensID}"
-                            )
-                    else:
-                        raise cherrypy.HTTPError(
-                            404, f"No plant associated with device {sensID}"
-                        )
-
+                            raise cherrypy.HTTPError(404, f"No plant associated with sensor {sensID}")
+                    else:   
+                            #TODO:controllo sensID non vuoto!
+                            raise cherrypy.HTTPError(404, f"No plant associated with device {sensID}")
+                
                 else:
                     cherrypy.HTTPError(
                         400, f"Parameters are missing or are not correct!"

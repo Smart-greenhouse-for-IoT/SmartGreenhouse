@@ -28,6 +28,8 @@ class DataAnalysisMicroservice:
         self.TR = ThingspeakReader(conf_path)
         self.df = self.TR.readCSV()
 
+        
+
         self.queryClass = Queries()
 
         # Address of the catalog for adding the devices
@@ -53,14 +55,16 @@ class DataAnalysisMicroservice:
             HR (%) : Relative greenhouse humidity
             CO2(Analog): greenhouse CO2
             class: 
-                1: soil without water - bagno tanto
-                2: environment correct - non bagno
-                3: too much hot - bagno medio
-                4: very cold - bagno poco
+                0: environment correct- No water needed
+                1: small water required - low level actuation
+                2: too much hot - medium level
+                3: soil without water  - high level
         '''
 
         csv_data = self.confDA.get("path_dataset2")
-        self.df2 = pd.read_csv(csv_data, sep=";", decimal='.')
+        self.df2 = pd.read_csv(csv_data, sep=",", decimal='.')
+
+        self.pipe = self.RandomForest()
 
     def registerToCat(self, tries = 10):
         """
@@ -94,11 +98,12 @@ class DataAnalysisMicroservice:
         - performs some machine learning (Random Forest Classifier) on the roses dataset
         '''
 
-        self.df2.isna().any().any() # there are not NaN values
+        # self.df2.isna().any().any() # there are not NaN values
         self.df2 = self.df2.drop(columns=["L (Lux)"])
         self.df2 = self.df2.rename(columns={'clase':'class'})
         target = self.df2['class']
-        features = self.df2.columns.drop('class')
+        self.features = self.df2.columns.drop('class')
+        train = self.df2[self.features]
 
         # self.graphDFAnalysis()
         '''
@@ -134,7 +139,7 @@ class DataAnalysisMicroservice:
         test_score = pipe.score(test_df[features], test_df['class'])
         print("Test set score:", test_score)
         '''
-        pipe.fit(features, target)
+        pipe.fit(train, target)
         return pipe
         
         
@@ -142,12 +147,13 @@ class DataAnalysisMicroservice:
         '''
         predict the label when getting the moisture level
         '''
-        pipe = self.RandomForest()
-        response = self.GET("getallLastValues", ghID=ghid)
+        last_rows = self.queryClass.get_all_last_values(self.df, ghid) # temperature, humidity, CO2
         
-        new_point = [moisture, response.get("temperature"), response.get("humidity"), response.get("CO2")]
-        predicted_class = pipe.predict(new_point)
+        new_point = [float(moisture), last_rows[0].get('value').values[0], last_rows[2].get('value').values[0], last_rows[1].get('value').values[0]] # temperature, CO2, Humidity
 
+        new_point_df = pd.DataFrame([new_point], columns=self.features)
+        predicted_class = int(self.pipe.predict(new_point_df)[0])
+        print(predicted_class)
         return predicted_class
         
 
@@ -292,7 +298,7 @@ class DataAnalysisMicroservice:
 
                     
                     data.append(round(consumption_time/60, 2))
-                    labels.append(f"Power consumption for {actuator} in minutes")
+                    labels.append(f"Power consumption for {actuator} (in minutes)")
                 
             data_tot.append(data)
             series.append(series_count)
@@ -304,11 +310,11 @@ class DataAnalysisMicroservice:
             labels_dev = []
             for i,dev in enumerate(data_tot):
                 data_dev.append([round(sum(dev),2)])
-                labels_dev.append(f"Power consumption for {devices[i]} in minutes")
+                labels_dev.append(f"Power consumption for {devices[i]} (in minutes)")
             result.append({"series": [1], "data": data_dev, "labels": labels_dev})
         elif action == "Greenhouse":
             data_gh = 0
-            label_gh = [f"{ghid} power consumption in minutes"]
+            label_gh = [f"Power consumption for {ghid} (in minutes)"]
             for dev in data_tot:
                 data_gh += round(sum(dev),2)
             result.append({"series": [1], "data": [[data_gh]], "labels": label_gh})
@@ -363,9 +369,10 @@ class DataAnalysisMicroservice:
             elif uri[0] == "getAllLastValues":
                 if params.get("ghID"):
                     ghID = params.get("ghID")
-                    last_temperature_row = self.queryClass.get_last_value(self.df, ghID, "Temperature")
-                    last_humidity_row = self.queryClass.get_last_value(self.df, ghID, "Humidity")
-                    last_CO2_row = self.queryClass.get_last_value(self.df, ghID, "CO2")
+                    last_rows = self.queryClass.get_all_last_values(self.df, ghID)
+                    last_temperature_row = last_rows[0]
+                    last_humidity_row = last_rows[1]
+                    last_CO2_row = last_rows[2]
 
                     return json.dumps({"temperature":last_temperature_row['value'].iloc[0],
                                        "humidity":last_humidity_row['value'].iloc[0],
@@ -383,8 +390,8 @@ class DataAnalysisMicroservice:
             elif uri[0] == "getWaterCoefficient":
                 if params.get("ghid"):
                     ghID = params.get("ghid")
-                    if params.get("moisture"):
-                        moisture = params.get("moisture")
+                    if params.get("moisture_level"):
+                        moisture = params.get("moisture_level")
                         label = self.dftransform(ghID, moisture)
                         return json.dumps({"coefficient":label})
                     else:
@@ -513,6 +520,14 @@ class Queries():
 
         return last_row
     
+    # Get all the last values for a gh
+    def get_all_last_values(self, df, gh_id):
+        last_temperature_row = self.get_last_value(df, gh_id, "Temperature")
+        last_humidity_row = self.get_last_value(df, gh_id, "Humidity")
+        last_CO2_row = self.get_last_value(df, gh_id, "CO2")
+
+        return [last_temperature_row, last_humidity_row, last_CO2_row]
+
     # Get the last specific value for moisture level for a gh, given a sensor
     def get_last_moisture_level(self, df, gh_id, sens_id):
         selected_rows = df[(df['ghID'] == gh_id) & (df['sensID'] == sens_id)]

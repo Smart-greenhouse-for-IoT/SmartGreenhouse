@@ -1,5 +1,5 @@
 {
-    "servID": "16",
+    "servID": "DA01",
     "name": "data_analysis",
     "endpoints": [
         "REST"
