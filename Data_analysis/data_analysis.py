@@ -572,7 +572,7 @@ if __name__ == "__main__":
             'tools.sessions.on': True
         }
     }
-    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
+    cherrypy.config.update({'server.socket_host': webService.confDA["endpoints_details"][0]["ip"], 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
     cherrypy.tree.mount(webService, '/', cherryConf)
     cherrypy.engine.start()
 

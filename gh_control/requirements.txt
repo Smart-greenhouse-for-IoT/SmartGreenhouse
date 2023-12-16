@@ -1,4 +1,2 @@
 requests
-json
-threading
 paho-mqtt

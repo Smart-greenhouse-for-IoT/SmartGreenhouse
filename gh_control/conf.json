@@ -1,6 +1,6 @@
 {
     "ip": "192.168.1.192",
-    "port": "8080",
+    "port": "8081",
     "topic": ["smartGreenhouse/+/+/humidity", "smartGreenhouse/+/+/temperature", "smartGreenhouse/+/+/co2_level"],
     "clientID" : "GHControl"
     
