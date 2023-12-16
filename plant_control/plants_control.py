@@ -188,8 +188,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "plant_control/conf.json",
-        confMS_path = "plant_control/confMS.json")
+        conf_path = "conf.json",
+        confMS_path = "confMS.json")
 
     plant_control.loop()
     

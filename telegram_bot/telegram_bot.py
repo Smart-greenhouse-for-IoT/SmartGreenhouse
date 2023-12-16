@@ -575,9 +575,9 @@ class Telegram_Bot:
                                                         "\nPlease sign in with another user clicking on /start")
                 elif message == "/getlinkgraph":
                     #TODO: to be finished
-                    link = requests.get(self.addr_cat + f"/something")
+                    link = requests.get(self.addr_cat + f"/nodeRed").json()
                     self.bot.sendMessage(chat_ID, text=f"To acces nodered click on the following link:\n"
-                                                        f"{link}")
+                                                        f"{link['link']}")
                     
                 ##########################
                 ######### ERRORS #########
@@ -622,7 +622,7 @@ class Telegram_Bot:
                 elif message == "/addgrhouseplant" or message == "/status" or message == "/selectplant" or message == "/signout":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
-                elif message == "/plantstatus" or message == "/selectplant" or message == "/plants":
+                elif message == "/plantstatus" or message == "/selectplant" or message == "/plants" or message == "/getlinkgraph":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 elif message.startswith('/'):

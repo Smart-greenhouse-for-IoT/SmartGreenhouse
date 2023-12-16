@@ -25,7 +25,7 @@ class DataAnalysisMicroservice:
         with open(conf_DA_path) as ff:
             self.confDA = json.load(ff)
 
-        self.TR = ThingspeakReader("Data_analysis/conf.json")
+        self.TR = ThingspeakReader(conf_path)
         self.df = self.TR.readCSV()
 
         self.queryClass = Queries()

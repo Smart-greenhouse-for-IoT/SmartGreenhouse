@@ -503,6 +503,8 @@ class REST_catalog(catalog):
                         cherrypy.HTTPError(
                             400, f"Parameters are missing or are not correct!"
                         )
+            elif uri[0] == "nodeRed":
+                return json.dumps(self.catDic["nodeRed"])
 
         else:
             return json.dumps(self.methods)

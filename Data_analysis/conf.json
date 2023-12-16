@@ -1,5 +1,5 @@
 {
-    "ip": "172.17.0.2",
+    "ip": "192.168.1.192",
     "port": "8081",
     "url_TS": "https://api.thingspeak.com/update.json",
     "write_key": "6K2SF8DLAG4J7D3L",
