@@ -29,7 +29,7 @@ class catalog:
 
     def getPort(self):
         return self.catDic["catalog"]["port"]
-    
+
     def getIP(self):
         return self.catDic["catalog"]["ip"]
 
@@ -263,8 +263,8 @@ class REST_catalog(catalog):
                     if uri[1] == "recentID":
                         # Retrieve the ID of the device added most recently
                         devID = self.catDic["devices"][-1]["devID"]
-                        return json.dumps({'devID': devID})
-                    
+                        return json.dumps({"devID": devID})
+
                     # Retrieve sensors of a specified device
                     elif uri[1] == "sensors" and "devID" in params:
                         devID = params["devID"]
@@ -306,7 +306,9 @@ class REST_catalog(catalog):
                         return json.dumps(self.dictInfo("devices"))
 
                     else:
-                        cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
+                        cherrypy.HTTPError(
+                            400, f"Parameters are missing or are not correct!"
+                        )
 
             # SERVICE CATALOG
             elif uri[0] == "broker":
@@ -325,7 +327,7 @@ class REST_catalog(catalog):
                 if len(uri) > 1 and uri[1] == "recentID":
                     # Retrieve the ID of the device added most recently
                     ghID = self.catDic["greenhouses"][-1]["ghID"]
-                    return json.dumps({'ghID': ghID})
+                    return json.dumps({"ghID": ghID})
                 else:
                     if "ghID" in params:
                         ghID = params["ghID"]
@@ -333,15 +335,22 @@ class REST_catalog(catalog):
                         if search_gh:
                             return json.dumps(search_gh)
                         else:
-                            raise cherrypy.HTTPError(404, f"Greenhouse {ghID} not found!")
+                            raise cherrypy.HTTPError(
+                                404, f"Greenhouse {ghID} not found!"
+                            )
                     elif "usrID" in params:
                         usrID = params["usrID"]
-                        search_gh = searchDict(self.catDic, "greenhouses", "usrID", usrID)
+                        search_gh = searchDict(
+                            self.catDic, "greenhouses", "usrID", usrID
+                        )
                         if search_gh:
                             return json.dumps(search_gh)
                         else:
-                            raise cherrypy.HTTPError(404, f"No greenhouses associated\
-                                                            to user {usrID}")
+                            raise cherrypy.HTTPError(
+                                404,
+                                f"No greenhouses associated\
+                                                            to user {usrID}",
+                            )
                     elif "devID" in params:
                         devID = params["devID"]
                         search_gh = {}
@@ -351,46 +360,66 @@ class REST_catalog(catalog):
                                     search_gh = gh.copy()
                                     sensors = dev["sensors"]
                                     actuators = dev["actuators"]
-                        
+
                         if search_gh:
                             if "name" and "sensID" in params:
-                                name_sens = list(sensors.keys())[list(sensors.values()).index(params["sensID"])]
-                                if name_sens == "temp_hum" and params["name"] == "temperature":
+                                name_sens = list(sensors.keys())[
+                                    list(sensors.values()).index(params["sensID"])
+                                ]
+                                if (
+                                    name_sens == "temp_hum"
+                                    and params["name"] == "temperature"
+                                ):
                                     actID = actuators["fan_control"]
-                                elif name_sens == "CO2_level" and params["name"] == "CO2_level":
+                                elif (
+                                    name_sens == "CO2_level"
+                                    and params["name"] == "CO2_level"
+                                ):
                                     actID = actuators["co2_control"]
-                                elif name_sens == "temp_hum" and params["name"] == "humidity":
+                                elif (
+                                    name_sens == "temp_hum"
+                                    and params["name"] == "humidity"
+                                ):
                                     actID = actuators["vaporizer_control"]
                                 return json.dumps({"actID": actID})
 
-                            else:   
+                            else:
                                 return json.dumps(search_gh)
                         else:
-                            raise cherrypy.HTTPError(404, f"No greenhouses associated\
-                                                            to device {devID}")
+                            raise cherrypy.HTTPError(
+                                404,
+                                f"No greenhouses associated\
+                                                            to device {devID}",
+                            )
                     elif params == {}:
                         return json.dumps(self.dictInfo("greenhouses"))
                     else:
-                        cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
+                        cherrypy.HTTPError(
+                            400, f"Parameters are missing or are not correct!"
+                        )
 
             elif uri[0] == "user":
                 if len(uri) > 1 and uri[1] == "recentID":
                     # Retrieve the ID of the device added most recently
                     usrID = self.catDic["users"][-1]["usrID"]
-                    return json.dumps({'usrID': usrID})
+                    return json.dumps({"usrID": usrID})
                 else:
                     if "usrID" in params:
                         usrID = params["usrID"]
-                        search_usr= searchDict(self.catDic, "users", "usrID", usrID)
+                        search_usr = searchDict(self.catDic, "users", "usrID", usrID)
                         if search_usr:
                             if "plant" in params:
-                                #return the plant dict
+                                # return the plant dict
                                 plant_name = params["plant"].lower()
-                                search_plant = searchDict(search_usr, "ownedPlants", "plant", plant_name)
+                                search_plant = searchDict(
+                                    search_usr, "ownedPlants", "plant", plant_name
+                                )
                                 if search_plant:
                                     return json.dumps(search_plant)
                                 else:
-                                    raise cherrypy.HTTPError(404, f"Plant {plant_name} not found!")
+                                    raise cherrypy.HTTPError(
+                                        404, f"Plant {plant_name} not found!"
+                                    )
                             else:
                                 # return the requested user
                                 return json.dumps(search_usr)
@@ -401,7 +430,9 @@ class REST_catalog(catalog):
                         return json.dumps(self.dictInfo("users"))
 
                     else:
-                        cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
+                        cherrypy.HTTPError(
+                            400, f"Parameters are missing or are not correct!"
+                        )
 
             elif uri[0] == "plant":
                 if "devID" in params and "sensID" in params:
@@ -413,39 +444,51 @@ class REST_catalog(catalog):
                                 search_gh = gh.copy()
                                 sensors = dev["sensors"]
                                 actuators = dev["actuators"]
-                    
+
                     if search_gh:
                         sensID = params["sensID"]
-                        search_plant = searchDict(search_gh, "plantsList", "sensID", sensID)
+                        search_plant = searchDict(
+                            search_gh, "plantsList", "sensID", sensID
+                        )
 
                         if search_plant:
                             return json.dumps(search_plant)
                         else:
-                            raise cherrypy.HTTPError(404, f"No plant associated with sensor {sensID}")
+                            raise cherrypy.HTTPError(
+                                404, f"No plant associated with sensor {sensID}"
+                            )
                     else:
-                            raise cherrypy.HTTPError(404, f"No plant associated with device {sensID}")
-                
+                        raise cherrypy.HTTPError(
+                            404, f"No plant associated with device {sensID}"
+                        )
+
                 else:
-                    cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
-            
+                    cherrypy.HTTPError(
+                        400, f"Parameters are missing or are not correct!"
+                    )
+
             elif uri[0] == "service":
-                if len(uri) > 1: 
+                if len(uri) > 1:
                     if uri[1] == "recentID":
                         # Retrieve the ID of the service added most recently
                         servID = self.catDic["services"][-1]["servID"]
-                        return json.dumps({'servID': servID})
-                        
+                        return json.dumps({"servID": servID})
+
                     else:
                         cherrypy.HTTPError(400, f"URI and parameters are not correct!")
 
                 else:
                     if "servID" in params:
                         servID = params["servID"]
-                        search_serv = searchDict(self.catDic, "services", "servID", servID)
+                        search_serv = searchDict(
+                            self.catDic, "services", "servID", servID
+                        )
                         if search_serv:
                             return json.dumps(search_serv)
                         else:
-                            raise cherrypy.HTTPError(404, f"Service {servID} not found!")
+                            raise cherrypy.HTTPError(
+                                404, f"Service {servID} not found!"
+                            )
                     elif "name" in params:
                         name = params["name"]
                         search_serv = searchDict(self.catDic, "services", "name", name)
@@ -457,14 +500,13 @@ class REST_catalog(catalog):
                         return json.dumps(self.dictInfo("services"))
 
                     else:
-                        cherrypy.HTTPError(400, f"Parameters are missing or are not correct!")
-
-                
+                        cherrypy.HTTPError(
+                            400, f"Parameters are missing or are not correct!"
+                        )
 
         else:
             return json.dumps(self.methods)
 
-    
     def POST(self, *uri, **params):
         """
         POST
@@ -478,52 +520,58 @@ class REST_catalog(catalog):
 
         if len(uri) >= 1:
             # DEVICE CATALOG
-            if uri[0] == "updateDevices":
-                self.updateDevices(bodyAsDict)
-                self.saveJson()
-
-            elif uri[0] == "addDevice":
+            if uri[0] == "addDevice":
                 if self.addDevice(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nDevice {bodyAsDict["devID"]} added successfully!')
                 else:
-                    raise cherrypy.HTTPError(400, f'Device {bodyAsDict["devID"]} could not be added!')
+                    raise cherrypy.HTTPError(
+                        400, f'Device {bodyAsDict["devID"]} could not be added!'
+                    )
 
             # SERVICE CATALOG
             elif uri[0] == "addUser":
                 if self.addUser(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\nUser {bodyAsDict["usrID"]} added successfully!') 
+                    print(f'\nUser {bodyAsDict["usrID"]} added successfully!')
                 else:
-                    raise cherrypy.HTTPError(400, f'User {bodyAsDict["usrID"]} could not be added!')
-            
+                    raise cherrypy.HTTPError(
+                        400, f'User {bodyAsDict["usrID"]} could not be added!'
+                    )
+
             elif uri[0] == "addGreenhouse":
                 if self.addGreenhouse(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\nGreenhouse {bodyAsDict["ghID"]} added successfully!') 
+                    print(f'\nGreenhouse {bodyAsDict["ghID"]} added successfully!')
                 else:
-                    raise cherrypy.HTTPError(400, f'Greenhouse {bodyAsDict["ghID"]} could not be added!')
-            
+                    raise cherrypy.HTTPError(
+                        400, f'Greenhouse {bodyAsDict["ghID"]} could not be added!'
+                    )
+
             elif uri[0] == "addPlant":
                 if len(params.keys()) == 1 and params.get("usrID") != None:
-                    #NOTE: decidere se assegnare un ID alle piante
-                    ind_usr, found_usr = searchDict(self.catDic, "users", "usrID", params["usrID"],index=True)
+                    # NOTE: decidere se assegnare un ID alle piante
+                    ind_usr, found_usr = searchDict(
+                        self.catDic, "users", "usrID", params["usrID"], index=True
+                    )
                     if found_usr and ind_usr is not None:
                         self.catDic["users"][ind_usr]["ownedPlants"].append(bodyAsDict)
                         self.saveJson()
                         print(f"Plant added to user {params['usrID']}")
                 else:
-                    raise cherrypy.HTTPError(400, f'Invalid parameter! Format is /addPlant?usrID=')
-            
+                    raise cherrypy.HTTPError(
+                        400, f"Invalid parameter! Format is /addPlant?usrID="
+                    )
+
             elif uri[0] == "addService":
                 if self.addService(bodyAsDict) == 0:
                     self.saveJson()
                     print(f'\nService {bodyAsDict["servID"]} added successfully!')
                 else:
-                    raise cherrypy.HTTPError(400, f'Service {bodyAsDict["servID"]} could not be added!')
-            
+                    raise cherrypy.HTTPError(
+                        400, f'Service {bodyAsDict["servID"]} could not be added!'
+                    )
 
-    
     def PUT(self, *uri, **params):
         """
         PUT
@@ -577,8 +625,9 @@ class REST_catalog(catalog):
         """
 
         for ind, device in enumerate(self.catDic["devices"]):
-            last_upd = time.mktime(datetime.strptime(device["lastUpdate"],
-                                        "%Y-%m-%d %H:%M:%S").timetuple())
+            last_upd = time.mktime(
+                datetime.strptime(device["lastUpdate"], "%Y-%m-%d %H:%M:%S").timetuple()
+            )
             current_t = datetime.timestamp(datetime.now())
             if current_t - last_upd >= timeout:
                 self.catDic["devices"].pop(ind)
@@ -595,30 +644,34 @@ class REST_catalog(catalog):
         The inactivity is determined by a timeout.
         """
         for ind, service in enumerate(self.catDic["services"]):
-                last_upd = time.mktime(datetime.strptime(service["lastUpdate"],
-                                            "%Y-%m-%d %H:%M:%S").timetuple())
-                current_t = datetime.timestamp(datetime.now())
-                if current_t - last_upd >= timeout:
-                    self.catDic["services"].pop(ind)
-                    print(f"Service {service['servID']} has been removed due to inactivity!")
-                    self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    self.catDic["lastUpdate"] = self.lastUpdate
-                    self.saveJson()
+            last_upd = time.mktime(
+                datetime.strptime(
+                    service["lastUpdate"], "%Y-%m-%d %H:%M:%S"
+                ).timetuple()
+            )
+            current_t = datetime.timestamp(datetime.now())
+            if current_t - last_upd >= timeout:
+                self.catDic["services"].pop(ind)
+                print(
+                    f"Service {service['servID']} has been removed due to inactivity!"
+                )
+                self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.catDic["lastUpdate"] = self.lastUpdate
+                self.saveJson()
 
-    
-if __name__ == "__main__": 
-	
+
+if __name__ == "__main__":
     # Standard configuration to serve the url "localhost:8080"
-    conf={
-    	'/':{
-    		'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-    		'tools.sessions.on': True
-    	}
+    conf = {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
+            "tools.sessions.on": True,
+        }
     }
     webService = REST_catalog()
-    cherrypy.tree.mount(webService,'/',conf)
-    cherrypy.config.update({'server.socket_host': webService.getIP()})
-    cherrypy.config.update({'server.socket_port': webService.getPort()})
+    cherrypy.tree.mount(webService, "/", conf)
+    cherrypy.config.update({"server.socket_host": webService.getIP()})
+    cherrypy.config.update({"server.socket_port": webService.getPort()})
     cherrypy.engine.start()
     try:
         while True:
