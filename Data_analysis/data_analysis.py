@@ -565,15 +565,15 @@ class Queries():
 
 if __name__ == "__main__": 
 	
-    webService = DataAnalysisMicroservice("conf.json", "conf_DA.json")
     cherryConf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.sessions.on': True
         }
     }
-    cherrypy.config.update({'server.socket_host': webService.confDA["endpoints_details"][0]["ip"], 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
+    webService = DataAnalysisMicroservice("conf.json", "conf_DA.json")
     cherrypy.tree.mount(webService, '/', cherryConf)
+    cherrypy.config.update({'server.socket_host': "0.0.0.0", 'server.socket_port': webService.confDA["endpoints_details"][0]["port"]})
     cherrypy.engine.start()
 
     webService.loop(refresh_time=30)

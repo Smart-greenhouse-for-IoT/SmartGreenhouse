@@ -1,6 +1,5 @@
 import requests
 import json
-from sub.MyMQTT import *
 import time
 import pandas as pd
 from io import StringIO

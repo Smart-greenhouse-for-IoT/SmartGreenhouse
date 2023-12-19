@@ -25,8 +25,10 @@ class plantsControl():
         self.DA_info()
         
         self.registerToCat()
+        for end_det in self.myservice["endpoints_details"]:
+            if end_det.get("endpoint") == "MQTT":
+                self._topic = end_det["topics"]
 
-        self._topic = self.conf_dict.get("topic")
         self.broker_dict = self.get_broker()
         
         self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
@@ -75,6 +77,7 @@ class plantsControl():
                 
                 actuation_coefficient_req = actuation_coefficient_req.json()
                 actuation_coefficient = actuation_coefficient_req.get('coefficient')
+                print("Actuation coefficient evaluated through Random Forest")
             else:
                 print("Failed establishing connection with DA")
                 actuation_coefficient = 1
@@ -211,7 +214,7 @@ class plantsControl():
                 print("The catalog web service is unreachable!")
                 time.sleep(1)
         
-    def loop(self, refresh_time = 15):
+    def loop(self, refresh_time = 10):
 
         last_time = 0
         try:
@@ -238,5 +241,5 @@ if __name__ == "__main__":
         conf_path = "conf.json",
         confMS_path = "confMS.json")
 
-    plant_control.loop()
+    plant_control.loop(refresh_time = 30)
     

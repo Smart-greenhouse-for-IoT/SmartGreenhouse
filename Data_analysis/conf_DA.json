@@ -2,7 +2,8 @@
     "servID": "DA01",
     "name": "data_analysis",
     "endpoints": [
-        "REST"
+        "REST",
+        "MQTT"
     ],
     "endpoints_details": [
         {

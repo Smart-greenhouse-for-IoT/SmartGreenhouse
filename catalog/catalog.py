@@ -459,7 +459,7 @@ class REST_catalog(catalog):
                             raise cherrypy.HTTPError(404, f"No plant associated with sensor {sensID}")
                     else:   
                             #TODO:controllo sensID non vuoto!
-                            raise cherrypy.HTTPError(404, f"No plant associated with device {sensID}")
+                            raise cherrypy.HTTPError(404, f"No plant associated with device {devID}")
                 
                 else:
                     cherrypy.HTTPError(
@@ -524,10 +524,10 @@ class REST_catalog(catalog):
             if uri[0] == "addDevice":
                 if self.addDevice(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\nDevice {bodyAsDict["devID"]} added successfully!')
+                    print(f'\nDevice {bodyAsDict["name"]} added successfully!')
                 else:
                     raise cherrypy.HTTPError(
-                        400, f'Device {bodyAsDict["devID"]} could not be added!'
+                        400, f'Device {bodyAsDict["name"]} could not be added!'
                     )
 
             # SERVICE CATALOG
@@ -567,10 +567,10 @@ class REST_catalog(catalog):
             elif uri[0] == "addService":
                 if self.addService(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\nService {bodyAsDict["servID"]} added successfully!')
+                    print(f'\nService {bodyAsDict["name"]} added successfully!')
                 else:
                     raise cherrypy.HTTPError(
-                        400, f'Service {bodyAsDict["servID"]} could not be added!'
+                        400, f'Service {bodyAsDict["name"]} could not be added!'
                     )
 
     def PUT(self, *uri, **params):
@@ -586,9 +586,9 @@ class REST_catalog(catalog):
             if uri[0] == "updateDevice":
                 if self.updateDevice(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\nDevice {bodyAsDict["devID"]} updated successfully')
+                    print(f'\nDevice {bodyAsDict["name"]} updated successfully')
                 else:
-                    print(f'Device {bodyAsDict["devID"]} could not be updated')
+                    print(f'Device {bodyAsDict["name"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The device could not be updated!")
 
             elif uri[0] == "updateUser":
@@ -612,9 +612,9 @@ class REST_catalog(catalog):
             elif uri[0] == "updateService":
                 if self.updateService(bodyAsDict) == 0:
                     self.saveJson()
-                    print(f'\nService {bodyAsDict["servID"]} updated successfully')
+                    print(f'\nService {bodyAsDict["name"]} updated successfully')
                 else:
-                    print(f'Service {bodyAsDict["servID"]} could not be updated')
+                    print(f'Service {bodyAsDict["name"]} could not be updated')
                     raise cherrypy.HTTPError(400, "The service could not be updated!")
 
     def cleaningDev(self, timeout):
@@ -632,7 +632,7 @@ class REST_catalog(catalog):
             current_t = datetime.timestamp(datetime.now())
             if current_t - last_upd >= timeout:
                 self.catDic["devices"].pop(ind)
-                print(f"Device {device['devID']} has been removed due to inactivity!")
+                print(f"Device {device['name']} has been removed due to inactivity!")
                 self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 self.catDic["lastUpdate"] = self.lastUpdate
                 self.saveJson()
@@ -654,7 +654,7 @@ class REST_catalog(catalog):
             if current_t - last_upd >= timeout:
                 self.catDic["services"].pop(ind)
                 print(
-                    f"Service {service['servID']} has been removed due to inactivity!"
+                    f"Service {service['name']} has been removed due to inactivity!"
                 )
                 self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 self.catDic["lastUpdate"] = self.lastUpdate
@@ -678,5 +678,6 @@ if __name__ == "__main__":
         while True:
             webService.cleaningDev(timeout=50)
             webService.cleaningServ(timeout=50)
+            time.sleep(5)
     except KeyboardInterrupt:
         cherrypy.engine.block()

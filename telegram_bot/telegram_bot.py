@@ -14,8 +14,8 @@ class Telegram_Bot:
     Some response of the bot
     """
 
-    def __init__(self):
-        self.conf = json.load(open("setting.json"))
+    def __init__(self, conf_path):
+        self.conf = json.load(open(conf_path))
         self.tokenBot = self.conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         
@@ -798,6 +798,7 @@ class Telegram_Bot:
 
 if __name__ == "__main__":
 
-    Telegram_Bot()
+    Telegram_Bot(conf_path="conf.json")
     while 1:
+        print("Running...")
         time.sleep(10)
