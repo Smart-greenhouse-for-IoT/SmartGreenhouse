@@ -1,5 +1,4 @@
 {
     "ip": "192.168.1.192",
-    "port": "8081",
-    "clientID": "deviceConnectord001"
+    "port": "8081"
 }

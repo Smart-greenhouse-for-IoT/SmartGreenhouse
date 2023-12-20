@@ -4,6 +4,7 @@ import requests
 import json
 import time
 import datetime
+import random
 import paho.mqtt.client as PahoMQTT
 
 from sub.MyMQTT import *
@@ -90,9 +91,11 @@ class Device_Connector(object):
         # MQTT client
         # Obtaining the broker information
         self.broker_dict = self.get_broker()
+
+        clientID = f"DeviceConnector{random.getrandbits(30)}"
         
         self.client_mqtt = MyMQTT(
-            clientID = self.cat_info["clientID"],
+            clientID = clientID,
             broker = self.broker_dict["IP"],
             port = self.broker_dict["port"],
             notifier=self
