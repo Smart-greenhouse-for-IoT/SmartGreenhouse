@@ -3,6 +3,7 @@ import json
 from sub.MyMQTT import *
 import time
 import pandas as pd
+import random
 
 '''
 retrieved_data = {
@@ -45,8 +46,10 @@ class ThingspeakAdaptor():
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
 
         self.broker_dict = self.get_broker()
+
+        clientID = f"{self.conf_dict['clientID']}{random.getrandbits(30)}"
         
-        self._pubSub = MyMQTT( clientID = "ts_adaptor", broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
+        self._pubSub = MyMQTT( clientID = clientID, broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         
         self._pubSub.start()
         

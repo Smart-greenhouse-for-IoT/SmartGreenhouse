@@ -4,6 +4,7 @@ from sub.MyMQTT import *
 import time
 from datetime import datetime
 import threading
+import random
 
 
 # Open and initialize with config.json
@@ -28,8 +29,10 @@ class greenhouseControl():
                 self._topic = end_det["topics"]
             
         self.broker_dict = self.get_broker()
+
+        clientID = f"{self.conf_dict['clientID']}{random.getrandbits(30)}"
         
-        self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
+        self._pubSub = MyMQTT( clientID = clientID, broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
         for topic in self._topic:
             self._pubSub.mySubscribe(topic)

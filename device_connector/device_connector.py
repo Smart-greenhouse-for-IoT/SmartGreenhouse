@@ -92,7 +92,7 @@ class Device_Connector(object):
         # Obtaining the broker information
         self.broker_dict = self.get_broker()
 
-        clientID = f"DeviceConnector{random.getrandbits(30)}"
+        clientID = f"{self.cat_info['clientID']}{random.getrandbits(30)}"
         
         self.client_mqtt = MyMQTT(
             clientID = clientID,
