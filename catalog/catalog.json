@@ -20,8 +20,45 @@
     "nodeRed": {
         "link": "http://192.168.1.192:1880/ui/"
     },
-    "greenhouses": [],
-    "users": [],
+    "greenhouses": [
+        {
+            "ghID": "g1",
+            "devices": [
+                {
+                    "devID": "d1",
+                    "sensors": {
+                        "temp_hum": "s1",
+                        "CO2_level": "s2"
+                    },
+                    "actuators": {
+                        "fan_control": "a1",
+                        "vaporizer_control": "a2",
+                        "co2_control": "a7"
+                    }
+                }
+            ],
+            "usrID": "u1",
+            "gh_params": {
+                "temperature": 20,
+                "CO2_level": 420,
+                "humidity": 30
+            },
+            "plantsList": [],
+            "lastUpdate": "2023-12-21 18:37:40"
+        }
+    ],
+    "users": [
+        {
+            "usrID": "u1",
+            "name": "Name",
+            "ghID": [
+                "g1",
+                "g2"
+            ],
+            "ownedPlants": [],
+            "lastUpdate": "2023-12-21 18:38:52"
+        }
+    ],
     "devices": [
         {
             "devID": "d1",
@@ -285,7 +322,7 @@
                     }
                 ]
             },
-            "lastUpdate": "2023-12-19 22:32:43"
+            "lastUpdate": "2023-12-23 18:23:14"
         }
     ],
     "services": [
@@ -304,68 +341,10 @@
                     "port": 8090
                 }
             ],
-            "lastUpdate": "2023-12-19 22:32:26",
+            "lastUpdate": "2023-12-23 18:23:04",
             "path_dataset1": "sub/datasets/20210703_greenhouse_data.csv",
             "path_dataset2": "sub/datasets/RosesGreenhDB.csv"
-        },
-        {
-            "servID": "PC01",
-            "name": "plant_control",
-            "endpoints": [
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "bn": "plants_control",
-                    "topics": [
-                        "smartGreenhouse/+/+/soil_moisture"
-                    ]
-                }
-            ],
-            "lastUpdate": "2023-12-19 22:32:37"
-        },
-        {
-            "servID": "GH01",
-            "name": "gh_control",
-            "endpoints": [
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "bn": "gh_control",
-                    "topics": [
-                        "smartGreenhouse/+/+/temperature",
-                        "smartGreenhouse/+/+/CO2_level",
-                        "smartGreenhouse/+/+/humidity"
-                    ]
-                }
-            ],
-            "lastUpdate": "2023-12-19 22:32:48"
-        },
-        {
-            "servID": "TS01",
-            "name": "thingspeak",
-            "endpoints": [
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "MQTT",
-                    "topic": [
-                        "smartGreenhouse/#"
-                    ]
-                }
-            ],
-            "TS_info": {
-                "url_TS": "https://api.thingspeak.com/channels/2055720/bulk_update.json",
-                "write_key": "4IRY7G68VYBCDGKV",
-                "read_key": "PITP9J8PVKXKS720",
-                "channel_id": "2055720"
-            },
-            "lastUpdate": "2023-12-19 22:32:33"
         }
     ],
-    "lastUpdate": "2023-12-19 22:32:48"
+    "lastUpdate": "2023-12-23 18:23:14"
 }

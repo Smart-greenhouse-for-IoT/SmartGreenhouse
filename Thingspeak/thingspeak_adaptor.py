@@ -201,19 +201,19 @@ class ThingspeakAdaptor():
         """
         count = 0
         update = False
-        ghID = {}
+        greenhouse = {}
         while count < tries and not update:
             count += 1
             try:
                 req = requests.get(f'{self.addr_cat}/greenhouse?devID={devID}')
                 update = True
                 if req.status_code == 200:
-                    ghID = req.json()
+                    greenhouse = req.json()
             except:
                 print(f"Fail to establish a connection with catalog!")
                 time.sleep(1)
 
-        return ghID
+        return greenhouse["ghID"]
     
     def retrievePlant_type(self, devID, sensID, tries = 10):
         """
@@ -281,6 +281,6 @@ class ThingspeakAdaptor():
 
 if __name__ == "__main__":
     
-    TS = ThingspeakAdaptor("conf.json", "confTS.json")
-    TS.loop(refresh_time = 30)
+    TS = ThingspeakAdaptor("Thingspeak/conf.json", "Thingspeak/confTS.json")
+    TS.loop()
     
