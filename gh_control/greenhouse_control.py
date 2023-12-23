@@ -4,6 +4,7 @@ from sub.MyMQTT import *
 import time
 from datetime import datetime
 import threading
+import random
 
 
 # Open and initialize with config.json
@@ -28,8 +29,10 @@ class greenhouseControl():
                 self._topic = end_det["topics"]
             
         self.broker_dict = self.get_broker()
+
+        clientID = f"{self.conf_dict['clientID']}{random.getrandbits(30)}"
         
-        self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
+        self._pubSub = MyMQTT( clientID = clientID, broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
         for topic in self._topic:
             self._pubSub.mySubscribe(topic)
@@ -43,26 +46,26 @@ class greenhouseControl():
             measure_dict = json.loads(body)
             quantity_name = topic.split("/")[-1]
 
-            gh_act = self.getActID(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name) 
-            gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"))       
-            topic_act = self.transformTopic(topic, gh_act.get("actID"))
+            gh_act = self.getActID(measure_dict.get("devID"), measure_dict.get("sensID"), quantity_name)
+            if gh_act: 
+                gh_description = self.getThresholdsGreenhouse(measure_dict.get("devID"))       
+                topic_act = self.transformTopic(topic, gh_act.get("actID"))
 
-            if quantity_name in ["temperature", "CO2_level"]:
-                if measure_dict.get("v") > gh_description.get(quantity_name):
+                if quantity_name in ["temperature", "CO2_level"]:
+                    if measure_dict.get("v") > gh_description.get(quantity_name):
 
-                    if topic_act not in self.track_actuation_dict:
-                        self.startActuation(topic_act, measure_dict, )
-                else:
-                    print(f"Threshold respected for sensor {measure_dict['sensID']}")
+                        if topic_act not in self.track_actuation_dict:
+                            self.startActuation(topic_act, measure_dict, )
+                    else:
+                        print(f"Threshold respected for sensor {measure_dict['sensID']}")
 
-            if quantity_name == "humidity":
-                if measure_dict.get("v") < gh_description.get(quantity_name):
+                if quantity_name == "humidity":
+                    if measure_dict.get("v") < gh_description.get(quantity_name):
 
-                    if topic_act not in self.track_actuation_dict:
-                        self.startActuation(topic_act, measure_dict)
-                else:
-                    print(f"Threshold respected for sensor {measure_dict['sensID']}")
-
+                        if topic_act not in self.track_actuation_dict:
+                            self.startActuation(topic_act, measure_dict)
+                    else:
+                        print(f"Threshold respected for sensor {measure_dict['sensID']}")
                 
 
     def startActuation(self, topic, body):
@@ -174,7 +177,7 @@ class greenhouseControl():
                 return req.json() 
 
             else:
-                print(f"Request failed!")
+                print(f"No greenhouse associated to device {devID} and sensor {sensID}")
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
@@ -218,8 +221,8 @@ class greenhouseControl():
 if __name__ == "__main__":
 
     plant_control = greenhouseControl(
-        conf_path = "gh_control/conf.json",
-        confMS_path = "gh_control/confMS.json")
+        conf_path = "conf.json",
+        confMS_path = "confMS.json")
 
-    plant_control.loop()
+    plant_control.loop(refresh_time = 30)
     

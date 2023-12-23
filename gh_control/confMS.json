@@ -10,7 +10,7 @@
             "bn": "gh_control",
             "topics": [
                 "smartGreenhouse/+/+/temperature",
-                "smartGreenhouse/+/+/co2_level",
+                "smartGreenhouse/+/+/CO2_level",
                 "smartGreenhouse/+/+/humidity"
             ]
         }

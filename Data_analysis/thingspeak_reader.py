@@ -1,6 +1,5 @@
 import requests
 import json
-from sub.MyMQTT import *
 import time
 import pandas as pd
 from io import StringIO
@@ -36,6 +35,7 @@ class ThingspeakReader():
                     'field7': 'plant_type',
                     'field8': 'actuation_level'
                 })
+                print("Data successfully retrieved from Thingspeak!")
                 return self.df  # Return the filled DataFrame
             else:
                 print("Failed to retrieve data from ThingSpeak.")
@@ -45,5 +45,5 @@ class ThingspeakReader():
 
 if __name__ == "__main__":
     
-    TS = ThingspeakReader("Thingspeak\conf.json")
+    TS = ThingspeakReader("conf.json")
     df = TS.readCSV()

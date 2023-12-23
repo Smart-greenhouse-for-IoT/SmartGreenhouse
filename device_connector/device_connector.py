@@ -2,11 +2,10 @@
 
 import requests
 import json
-import sys
 import time
 import datetime
+import random
 import paho.mqtt.client as PahoMQTT
-import cherrypy
 
 from sub.MyMQTT import *
 from device_sensors.dht11 import *
@@ -38,7 +37,6 @@ class Device_Connector(object):
         # Address of the catalog for adding the devices
         self.CatAddr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
         
-        self.myIP, self.myPort = self.webServiceInfo()
         # Read all the sensors in self.mydevice list
         # and initialize it all to start obtaining their values
         self.measures = []
@@ -93,9 +91,11 @@ class Device_Connector(object):
         # MQTT client
         # Obtaining the broker information
         self.broker_dict = self.get_broker()
+
+        clientID = f"{self.cat_info['clientID']}{random.getrandbits(30)}"
         
         self.client_mqtt = MyMQTT(
-            clientID = self.cat_info["clientID"],
+            clientID = clientID,
             broker = self.broker_dict["IP"],
             port = self.broker_dict["port"],
             notifier=self
@@ -327,19 +327,13 @@ class Device_Connector(object):
         # To kill the program
         except KeyboardInterrupt: 
             print("Loop manually interrupted")
-    
-    def webServiceInfo(self):
-        ind = self.mydevice["endpoints"].index("REST")
-        ip = self.mydevice["endpoints_details"][ind]["ip"]
-        port = self.mydevice["endpoints_details"][ind]["port"] 
-        return ip, port
 
 
 if __name__=='__main__':
 
     dc = Device_Connector(
-        conf_path = "device_connector/conf.json",
-        device_path = "device_connector/devices.json"
+        conf_path = "conf.json",
+        device_path = "devices.json"
         )
 
     dc.loop(refresh_time=30)

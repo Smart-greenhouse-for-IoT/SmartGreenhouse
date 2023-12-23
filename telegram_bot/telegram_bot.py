@@ -14,8 +14,8 @@ class Telegram_Bot:
     Some response of the bot
     """
 
-    def __init__(self):
-        self.conf = json.load(open("telegram_bot/setting.json"))
+    def __init__(self, conf_path):
+        self.conf = json.load(open(conf_path))
         self.tokenBot = self.conf["token"]
         self.bot = telepot.Bot(self.tokenBot)
         
@@ -575,9 +575,9 @@ class Telegram_Bot:
                                                         "\nPlease sign in with another user clicking on /start")
                 elif message == "/getlinkgraph":
                     #TODO: to be finished
-                    link = requests.get(self.addr_cat + f"/something")
+                    link = requests.get(self.addr_cat + f"/nodeRed").json()
                     self.bot.sendMessage(chat_ID, text=f"To acces nodered click on the following link:\n"
-                                                        f"{link}")
+                                                        f"{link['link']}")
                     
                 ##########################
                 ######### ERRORS #########
@@ -622,7 +622,7 @@ class Telegram_Bot:
                 elif message == "/addgrhouseplant" or message == "/status" or message == "/selectplant" or message == "/signout":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
-                elif message == "/plantstatus" or message == "/selectplant" or message == "/plants":
+                elif message == "/plantstatus" or message == "/selectplant" or message == "/plants" or message == "/getlinkgraph":
                     self.bot.sendMessage(chat_ID, text=f"User not connected."
                                                         "\nPlease first sign in with a user clicking on /start")
                 elif message.startswith('/'):
@@ -798,6 +798,7 @@ class Telegram_Bot:
 
 if __name__ == "__main__":
 
-    Telegram_Bot()
+    Telegram_Bot(conf_path="conf.json")
     while 1:
+        print("Running...")
         time.sleep(10)

@@ -3,6 +3,7 @@ import json
 from sub.MyMQTT import *
 import time
 import pandas as pd
+import random
 
 '''
 retrieved_data = {
@@ -37,17 +38,6 @@ class ThingspeakAdaptor():
             'updates' : []
         }
         
-        self.fields_dict = {
-            'created_at': None,
-            'field1': None, # catalog
-            'field2': None, # topic/message
-            'field3': None, # topic/message
-            'field4': None, # message
-            'field5': None, # message
-            'field6': None, # message
-            'field7': None, # catalog
-            'field8': None
-        }
 
         self.tot_dict = []
         self.url_TS = self.myTS['TS_info']['url_TS']
@@ -56,8 +46,10 @@ class ThingspeakAdaptor():
         self.addr_cat = "http://" + self.conf_dict["ip"] + ":" + self.conf_dict["port"]
 
         self.broker_dict = self.get_broker()
+
+        clientID = f"{self.conf_dict['clientID']}{random.getrandbits(30)}"
         
-        self._pubSub = MyMQTT( clientID = "ts_adaptor", broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
+        self._pubSub = MyMQTT( clientID = clientID, broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         
         self._pubSub.start()
         
@@ -148,20 +140,21 @@ class ThingspeakAdaptor():
         self.tot_dict.append(partial_dict)
      
     def dictCreation(self, topic, msg):
-        fields = self.fields_dict.copy()
+        fields = {}
+        ghID = self.retrieveGHID(msg.get('devID'))
+        if ghID:
+            fields['field1'] = ghID
+            fields['field2'] = msg.get('devID')
+            fields['field3'] = msg.get('sensID')
+            fields['field4'] = msg.get('n')
+            fields['field5'] = msg.get('v')
+            fields['field6'] = msg.get('t')
+            fields['delta_t'] = 1
+            if topic.split("/")[3] == 'moisture_level':
+                fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
 
-        fields['field1'] = self.retrieveGHID(msg.get('devID'))
-        fields['field2'] = msg.get('devID')
-        fields['field3'] = msg.get('sensID')
-        fields['field4'] = msg.get('n')
-        fields['field5'] = msg.get('v')
-        fields['field6'] = msg.get('t')
-        fields['delta_t'] = 1
-        if topic.split("/")[3] == 'moisture_level':
-            fields['field7'] = self.retrievePlant_type(msg.get('devID'), msg.get('sensID'))
-
-        if topic.split("/")[2].startswith('a'):
-            fields['field8'] = msg.get('command')
+            if topic.split("/")[2].startswith('a'):
+                fields['field8'] = msg.get('command')
 
         return fields
 
@@ -197,7 +190,8 @@ class ThingspeakAdaptor():
         msg_json = json.loads(msg)
         # print(msg_json)
         field_dict = self.dictCreation(topic, msg_json)
-        self.tot_dictAppend(field_dict)
+        if field_dict:
+            self.tot_dictAppend(field_dict)
 
     def retrieveGHID(self, devID, tries = 10):
         """
@@ -207,19 +201,19 @@ class ThingspeakAdaptor():
         """
         count = 0
         update = False
+        greenhouse = {}
         while count < tries and not update:
             count += 1
             try:
-                ghID = requests.get(f'{self.addr_cat}/greenhouse?devID={devID}')
+                req = requests.get(f'{self.addr_cat}/greenhouse?devID={devID}')
                 update = True
+                if req.status_code == 200:
+                    greenhouse = req.json()
             except:
                 print(f"Fail to establish a connection with catalog!")
                 time.sleep(1)
 
-        if update == False:
-            raise Exception(f"Fail to establish a connection with catalog!")
-        
-        return ghID.json()['ghID']   
+        return greenhouse["ghID"]
     
     def retrievePlant_type(self, devID, sensID, tries = 10):
         """

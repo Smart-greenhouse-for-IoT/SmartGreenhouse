@@ -4,6 +4,7 @@ from sub.MyMQTT import *
 import time
 from datetime import datetime
 import threading
+import random
 
 
 # Open and initialize with config.json
@@ -22,12 +23,18 @@ class plantsControl():
         self.track_actuation_dict = {}
         self._actuation_time = 3
 
-        self.registerToCat()
-
-        self._topic = self.conf_dict.get("topic")
-        self.broker_dict = self.get_broker()
+        self.DA_info()
         
-        self._pubSub = MyMQTT( clientID = self.conf_dict["clientID"], broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
+        self.registerToCat()
+        for end_det in self.myservice["endpoints_details"]:
+            if end_det.get("endpoint") == "MQTT":
+                self._topic = end_det["topics"]
+
+        self.broker_dict = self.get_broker()
+
+        clientID = f"{self.conf_dict['clientID']}{random.getrandbits(30)}"
+        
+        self._pubSub = MyMQTT( clientID = clientID, broker = self.broker_dict["IP"], port = self.broker_dict["port"], notifier=self) 
         self._pubSub.start()
         
         for topic in self._topic:
@@ -46,6 +53,8 @@ class plantsControl():
             if plant_description:       
                 topic_act = self.transformTopic(topic, plant_description.get("actID"))
                 measure_dict["plant"] = plant_description.get("plant")
+                measure_dict["ghID"] = plant_description.get("ghID")
+                
                 if measure_dict.get("v") < plant_description.get("th_min"):
 
                     if topic_act not in self.track_actuation_dict:
@@ -63,14 +72,29 @@ class plantsControl():
         measure_dict_resp["timestamp"] = time.time()
         measure_dict_resp["command"] = "start"
         
+        if self.DA_connected: # if there is the data analysis ms
 
+            actuation_coefficient_req = requests.get(f"{self.addr_DA}/getWaterCoefficient?ghid={body.get('ghID')}&moisture_level={body.get('v')}")  # Use ML for evaluating the actuation time
+
+            if actuation_coefficient_req.status_code == 200:
+                
+                actuation_coefficient_req = actuation_coefficient_req.json()
+                actuation_coefficient = actuation_coefficient_req.get('coefficient')
+                print("Actuation coefficient evaluated through Random Forest")
+            else:
+                print("Failed establishing connection with DA")
+                actuation_coefficient = 1
+        else:
+            actuation_coefficient = 1
+            
         self._pubSub.myPublish(topic, measure_dict_resp)
 
-        print(f"Actuation started, topic:{topic}")
+        print(f"Actuation started, topic:{topic}, {self._actuation_time*actuation_coefficient} seconds")
 
         self.track_actuation_dict[topic] = measure_dict_resp
-        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time, self.stopActuation, args=(topic,))
+        self.track_actuation_dict[topic]["timer"] = threading.Timer(self._actuation_time*actuation_coefficient, self.stopActuation, args=(topic,))  # starting the actuation and the threading timer
         self.track_actuation_dict[topic]["timer"].start()
+
 
     def stopActuation(self, topic_):
 
@@ -84,7 +108,6 @@ class plantsControl():
         self.track_actuation_dict.pop(topic_)
 
         print(f"Actuation stopped, topic:{topic_}")
-
 
 
 
@@ -163,8 +186,38 @@ class plantsControl():
         except:
             raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
         
-
-    def loop(self, refresh_time = 15):
+    def DA_info(self, tries = 10):
+        """
+        DA_info
+        -------
+        Try to contact the catalog to obtain the information of thingspeak.
+        ### Parameters obtained
+        - TsIp: IP of thingspeak rest interface
+        - TsPort: Port of thingspeak rest interface
+        """
+        count = 0
+        update = False
+        while count < tries and not update:
+            count += 1
+            try:
+                req_Da = requests.get(self.addr_cat + "/service?name=data_analysis")
+                if req_Da.ok:
+                    Da =req_Da.json()
+                    DA_info = {
+                        "ip": Da["endpoints_details"][0]["ip"],
+                        "port": str(Da["endpoints_details"][0]["port"])
+                    }
+                    self.addr_DA = "http://" + DA_info["ip"] + ":" + DA_info["port"]
+                    self.DA_connected = True
+                    update = True
+                else:
+                    print("Data analysis microservice not present in the catalog!")
+                    time.sleep(1)
+            except:
+                print("The catalog web service is unreachable!")
+                time.sleep(1)
+        
+    def loop(self, refresh_time = 10):
 
         last_time = 0
         try:
@@ -188,8 +241,8 @@ class plantsControl():
 if __name__ == "__main__":
 
     plant_control = plantsControl(
-        conf_path = "plant_control/conf.json",
-        confMS_path = "plant_control/confMS.json")
+        conf_path = "conf.json",
+        confMS_path = "confMS.json")
 
-    plant_control.loop()
+    plant_control.loop(refresh_time = 30)
     
