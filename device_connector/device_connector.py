@@ -13,17 +13,19 @@ from device_sensors.chirp import *
 from device_sensors.actuator import *
 from device_sensors.CO2sens import *
 
+
 class Device_Connector(object):
+
     """
     Device connector class:
     -----------------------
         - get info from the catalog
-        - 
+        -
     """
+
     exposed = True
 
     def __init__(self, conf_path, device_path):
-
         self.conf_file = conf_path
         self.device_file = device_path
         # Opening the configuration files
@@ -36,7 +38,7 @@ class Device_Connector(object):
 
         # Address of the catalog for adding the devices
         self.CatAddr = "http://" + self.cat_info["ip"] + ":" + self.cat_info["port"]
-        
+
         # Read all the sensors in self.mydevice list
         # and initialize it all to start obtaining their values
         self.measures = []
@@ -45,45 +47,43 @@ class Device_Connector(object):
         count = 0
 
         # At the start the program check the sensor that are connected to the device connector
-        for sensor in self.mydevice['resources']['sensors']:
-            #FIXME: now read all the sensor, but we need to start the actuation only for the active sensor
-            
-            if sensor['device_name'] == "chirp":
+        for sensor in self.mydevice["resources"]["sensors"]:
+            # FIXME: now read all the sensor, but we need to start the actuation only for the active sensor
+
+            if sensor["device_name"] == "chirp":
                 self.sensor_index[str(sensor["sensID"])] = count
                 count += 1
 
                 moisture_conf = sensor.copy()
                 self.sensors_list.append(chirp(moisture_conf))
-                
 
-            elif sensor['device_name'] == "DHT11":
+            elif sensor["device_name"] == "DHT11":
                 self.sensor_index[str(sensor["sensID"])] = count
                 count += 1
 
                 dht_conf = sensor.copy()
                 self.sensors_list.append(DHT11(dht_conf))
 
-            elif sensor['device_name'] == "CO2sens":
+            elif sensor["device_name"] == "CO2sens":
                 self.sensor_index[str(sensor["sensID"])] = count
                 count += 1
 
                 co2_conf = sensor.copy()
                 self.sensors_list.append(CO2sensor(co2_conf))
-                
-        
+
         # At the start the program does not know wich actuators have
         # Also for the actuators, each actuator will be appended as an object
         count = 0
         self.actuator_index = {}
         self.actuator_list = []
-        for act in self.mydevice['resources']['actuators']:
-            if act['device_name'] == "actuator":
+        for act in self.mydevice["resources"]["actuators"]:
+            if act["device_name"] == "actuator":
                 self.actuator_index[str(act["actID"])] = count
                 count += 1
 
                 actuator_conf = act.copy()
                 self.actuator_list.append(actuator(actuator_conf))
-        
+
         # Register to catalog
         self.registerToCat(tries=15)
 
@@ -93,27 +93,26 @@ class Device_Connector(object):
         self.broker_dict = self.get_broker()
 
         clientID = f"{self.cat_info['clientID']}{random.getrandbits(30)}"
-        
+
         self.client_mqtt = MyMQTT(
-            clientID = clientID,
-            broker = self.broker_dict["IP"],
-            port = self.broker_dict["port"],
-            notifier=self
-            )
-        
+            clientID=clientID,
+            broker=self.broker_dict["IP"],
+            port=self.broker_dict["port"],
+            notifier=self,
+        )
+
         # Start MQTT client
         self.client_mqtt.start()
-        
+
         # Subscription to MQTT topics
         for end_det in self.mydevice["endpoints_details"]:
             if end_det.get("endpoint") == "MQTT":
                 self._topic = end_det["topics"]
-        
+
         for topic in self._topic:
             self.client_mqtt.mySubscribe(topic)
 
-
-    def notify(self,topic,payload): 
+    def notify(self, topic, payload):
         """
         notify
         ------
@@ -122,7 +121,7 @@ class Device_Connector(object):
 
         message = json.loads(payload)
         if topic.split("/")[2].startswith("a"):
-            #print(f"Command received:\n{message}\n from topic {topic}")
+            # print(f"Command received:\n{message}\n from topic {topic}")
             # Iteration over all the actuator to find the one of the topic
             for actuator in self.mydevice["resources"]["actuators"]:
                 # Check if the actuator have a topic where public the measure
@@ -134,21 +133,29 @@ class Device_Connector(object):
 
                         # If this is the correct actuator then
                         if topic in topic_list:
-                            #TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
+                            # TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
                             # Start the actuation
-                            if message['command'] == True:
-                                self.actuator_list[self.actuator_index[actuator["actID"]]].start_actuation()
+                            if message["command"] == True:
+                                self.actuator_list[
+                                    self.actuator_index[actuator["actID"]]
+                                ].start_actuation()
                                 print(f"{message['sensID']} start")
                             # Stop the actuation
-                            elif message['command'] == False:
-                                self.actuator_list[self.actuator_index[actuator["actID"]]].start_actuation()
+                            elif message["command"] == False:
+                                self.actuator_list[
+                                    self.actuator_index[actuator["actID"]]
+                                ].start_actuation()
                                 print(f"{message['sensID']} stop")
                     else:
-                        raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
+                        raise Exception(
+                            f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface"
+                        )
                 else:
-                    raise Exception(f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
-    
-    def registerToCat(self, tries = 10):
+                    raise Exception(
+                        f"Actuator {actuator['device_name']} {actuator['actID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface"
+                    )
+
+    def registerToCat(self, tries=10):
         """
         registerToCat
         -------------
@@ -162,7 +169,9 @@ class Device_Connector(object):
         while count < tries and not update:
             count += 1
             try:
-                req_dev = requests.post(self.CatAddr + "/addDevice", data=json.dumps(self.mydevice))
+                req_dev = requests.post(
+                    self.CatAddr + "/addDevice", data=json.dumps(self.mydevice)
+                )
                 if req_dev.ok:
                     print(f"Device {self.mydevice['devID']} added successfully!")
                     update = True
@@ -175,23 +184,27 @@ class Device_Connector(object):
                 time.sleep(1)
 
         if update == False:
-            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
-    
-    def updateToCat(self, tries = 10):
+            raise Exception(
+                f"Fail to establish a connection with {self.cat_info['ip']}"
+            )
+
+    def updateToCat(self, tries=10):
         """
         updateToCat
         -----------
         Update all the decice of this device connector to the catalog, to let the catalog \n
         know that this device connector and its devices are still 'alive'.
         """
-        
+
         count = 0
         update = False
         while count < tries and not update:
             count += 1
             try:
-                #PUT the devices to the catalog
-                req = requests.put(self.CatAddr + "/updateDevice", data=json.dumps(self.mydevice))
+                # PUT the devices to the catalog
+                req = requests.put(
+                    self.CatAddr + "/updateDevice", data=json.dumps(self.mydevice)
+                )
                 if req.ok:
                     update = True
                     print(f"Device {self.mydevice['devID']} updated successfully!")
@@ -203,10 +216,11 @@ class Device_Connector(object):
                 time.sleep(1)
 
         if update == False:
-            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+            raise Exception(
+                f"Fail to establish a connection with {self.cat_info['ip']}"
+            )
 
-
-    def get_broker(self, tries = 10): 
+    def get_broker(self, tries=10):
         """
         get_broker
         ----------
@@ -218,18 +232,20 @@ class Device_Connector(object):
         while count < tries and not update:
             count += 1
             try:
-                b_dict = requests.get(self.CatAddr + "/broker").json()  
+                b_dict = requests.get(self.CatAddr + "/broker").json()
                 update = True
             except:
                 print(f"Fail to establish a connection with {self.cat_info['ip']}")
                 time.sleep(1)
 
         if update == False:
-            raise Exception(f"Fail to establish a connection with {self.cat_info['ip']}")
+            raise Exception(
+                f"Fail to establish a connection with {self.cat_info['ip']}"
+            )
 
         # Return a json dict with BrokerIP and BrokerPort
-        return b_dict        
-    
+        return b_dict
+
     def updateMeasures(self):
         """
         updateMeasures
@@ -243,10 +259,9 @@ class Device_Connector(object):
 
         # For every active sensor connected to the device connector
         for sens_id in self.sensor_index.keys():
-            #print(f"Measuring with sensor {sens_id}")
-            sens = {"sensID": sens_id,
-                    "devID": self.mydevice['devID']}
-            
+            # print(f"Measuring with sensor {sens_id}")
+            sens = {"sensID": sens_id, "devID": self.mydevice["devID"]}
+
             # Obtain the measure from the sensor
             curr_meas = self.sensors_list[self.sensor_index[sens_id]].measure()
 
@@ -254,9 +269,9 @@ class Device_Connector(object):
             for i in range(len(curr_meas)):
                 # At each measure is attached the origin, sensor_id and device_id
                 curr_meas[i].update(sens)
-            #print(f"Measure: {curr_meas}")
+            # print(f"Measure: {curr_meas}")
 
-            # Add the current measure to the list containing the last measures 
+            # Add the current measure to the list containing the last measures
             # self.measures[self.sensor_index[sens_id]] = curr_meas
             self.measures.append(curr_meas)
 
@@ -268,12 +283,12 @@ class Device_Connector(object):
         microservice and thinkspeak adaptor.
         """
 
-        # Iteration over all the sensor device to publish on their topic 
+        # Iteration over all the sensor device to publish on their topic
         for sensor in self.mydevice["resources"]["sensors"]:
             # Check if the sensor have a topic where public the measure
             if "MQTT" in sensor["available_services"]:
                 measure_list = self.measures[self.sensor_index[sensor["sensID"]]]
-                
+
                 services = sensor["services_details"][0]
                 for ind, measure in enumerate(measure_list):
                     if services["service_type"] == "MQTT":
@@ -281,11 +296,15 @@ class Device_Connector(object):
                         topic_list = services["topic"]
 
                         # Publish the measure to the respective topic
-                        self.client_mqtt.myPublish(topic = topic_list[ind], msg = measure)
+                        self.client_mqtt.myPublish(topic=topic_list[ind], msg=measure)
                     else:
-                        raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
+                        raise Exception(
+                            f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface"
+                        )
             else:
-                raise Exception(f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface")
+                raise Exception(
+                    f"Sensor {sensor['device_name']} {sensor['sensID']} of greenhouse {self.mydevice['ghID']} have not an MQTT interface"
+                )
 
     def saveJson(self):
         """
@@ -293,11 +312,11 @@ class Device_Connector(object):
         --------
         Used to save the catalog as a JSON file.
         """
-        with open(self.device_file, 'w') as fw:
+        with open(self.device_file, "w") as fw:
             json.dump(self.mydevice, fw, indent=4)
             return 0
 
-    def loop(self, refresh_time = 10):
+    def loop(self, refresh_time=10):
         """
         Loop
         ----
@@ -316,24 +335,20 @@ class Device_Connector(object):
                 local_time = time.time()
 
                 # Every refresh_time the measure are done and published to the topic
-                if local_time - last_time > refresh_time: 
+                if local_time - last_time > refresh_time:
                     self.updateMeasures()
                     self.publishLastMeas()
                     self.updateToCat(tries=15)
                     # self.post_sensor_Cat()
-                    last_time = time.time() 
+                    last_time = time.time()
 
                 time.sleep(5)
         # To kill the program
-        except KeyboardInterrupt: 
+        except KeyboardInterrupt:
             print("Loop manually interrupted")
 
 
-if __name__=='__main__':
-
-    dc = Device_Connector(
-        conf_path = "conf.json",
-        device_path = "devices.json"
-        )
+if __name__ == "__main__":
+    dc = Device_Connector(conf_path="conf.json", device_path="devices.json")
 
     dc.loop(refresh_time=30)

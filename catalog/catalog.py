@@ -445,7 +445,7 @@ class REST_catalog(catalog):
                                 sensors = dev["sensors"]
                                 actuators = dev["actuators"]
                                 gh_selected = gh["ghID"]
-                    
+
                     if search_gh:
                         sensID = params["sensID"]
                         search_plant = searchDict(
@@ -456,11 +456,15 @@ class REST_catalog(catalog):
                             search_plant["ghID"] = gh_selected
                             return json.dumps(search_plant)
                         else:
-                            raise cherrypy.HTTPError(404, f"No plant associated with sensor {sensID}")
-                    else:   
-                            #TODO:controllo sensID non vuoto!
-                            raise cherrypy.HTTPError(404, f"No plant associated with device {devID}")
-                
+                            raise cherrypy.HTTPError(
+                                404, f"No plant associated with sensor {sensID}"
+                            )
+                    else:
+                        # TODO:controllo sensID non vuoto!
+                        raise cherrypy.HTTPError(
+                            404, f"No plant associated with device {devID}"
+                        )
+
                 else:
                     cherrypy.HTTPError(
                         400, f"Parameters are missing or are not correct!"
@@ -653,9 +657,7 @@ class REST_catalog(catalog):
             current_t = datetime.timestamp(datetime.now())
             if current_t - last_upd >= timeout:
                 self.catDic["services"].pop(ind)
-                print(
-                    f"Service {service['name']} has been removed due to inactivity!"
-                )
+                print(f"Service {service['name']} has been removed due to inactivity!")
                 self.lastUpdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 self.catDic["lastUpdate"] = self.lastUpdate
                 self.saveJson()

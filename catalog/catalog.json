@@ -18,11 +18,73 @@
         "token": "5513075986:AAFESB8x3EQlUJQNUIWvT9q4Bl-5KgXN5Zo"
     },
     "nodeRed": {
-        "link": "http://192.168.1.192:1880/ui/"
+        "link": "http://192.168.2.173:1880/ui/"
     },
-    "greenhouses": [],
-    "users": [],
+    "greenhouses": [
+        {
+            "ghID": "g1",
+            "devices": [
+                {
+                    "devID": "d1",
+                    "sensors": {
+                        "temp_hum": "s1",
+                        "CO2_level": "s2"
+                    },
+                    "actuators": {
+                        "fan_control": "a1",
+                        "vaporizer_control": "a2",
+                        "co2_control": "a7"
+                    }
+                }
+            ],
+            "usrID": "u1",
+            "gh_params": {
+                "temperature": 20,
+                "CO2_level": 420,
+                "humidity": 50
+            },
+            "plantsList": [],
+            "lastUpdate": "2023-12-23 18:39:51"
+        },
+        {
+            "ghID": "g2",
+            "devices": [
+                {
+                    "devID": "d2",
+                    "sensors": {
+                        "temp_hum": "s1",
+                        "CO2_level": "s2"
+                    },
+                    "actuators": {
+                        "fan_control": "a1",
+                        "vaporizer_control": "a2",
+                        "co2_control": "a7"
+                    }
+                }
+            ],
+            "usrID": "u1",
+            "gh_params": {
+                "temperature": 20,
+                "CO2_level": 420,
+                "humidity": 30
+            },
+            "plantsList": [],
+            "lastUpdate": "2023-12-23 19:33:12"
+        }
+    ],
+    "users": [
+        {
+            "usrID": "u1",
+            "name": "Name",
+            "ghID": [
+                "g1",
+                "g2"
+            ],
+            "ownedPlants": [],
+            "lastUpdate": "2023-12-23 19:32:53"
+        }
+    ],
     "devices": [],
     "services": [],
-    "lastUpdate": "2023-12-23 18:23:14"
+    "lastUpdate": "2023-12-23 19:38:02"
 }
