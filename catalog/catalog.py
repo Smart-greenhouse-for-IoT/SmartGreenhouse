@@ -5,8 +5,6 @@ import time
 from tools import searchDict, generateID
 
 
-# TODO: ghID viene aggiunta in fondo, cercare un modo per cambiare posizione
-# TODO: check on the ID formats
 class catalog:
     """
     Catalog
@@ -73,9 +71,9 @@ class catalog:
         - Used by device connector to keep the catalog updated
         - Update devices in "devices" key of catalog.json
         """
-        self.catDic["greenhouses"]["ghID" == devicesDic["ghID"]][
-            "devicesList"
-        ] = devicesDic["devicesList"]
+        self.catDic["greenhouses"]["ghID" == devicesDic["ghID"]]["devicesList"] = (
+            devicesDic["devicesList"]
+        )
 
     ######################## SERVICE CATALOG ########################
     def brokerInfo(self):
@@ -233,21 +231,12 @@ class REST_catalog(catalog):
     REST_catalog
     ------------
     ### Child class of catalog that implement REST methods
-    Methods:
-    - GET
-        - broker: retrieve broker informations
-        - getThresholds: retrieve humidity thresholds given a plant's type
-    - POST
-        - updateDevices: update devices from device connector
     """
 
     exposed = True
 
     def __init__(self):
         catalog.__init__(self)
-        self.methodsFile = "methods.json"
-        with open(self.methodsFile) as mf:
-            self.methods = json.load(mf)
 
     def GET(self, *uri, **params):
         """
@@ -460,7 +449,6 @@ class REST_catalog(catalog):
                                 404, f"No plant associated with sensor {sensID}"
                             )
                     else:
-                        # TODO:controllo sensID non vuoto!
                         raise cherrypy.HTTPError(
                             404, f"No plant associated with device {devID}"
                         )
