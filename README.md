@@ -102,15 +102,6 @@ When running the container remeber to expose the correct port when needed: `dock
 ## Usage
 Once everything is up and running, with at least on device connector connected, you can start using the application.
 All the user interface is based on the telegram bot. The commands list is found below.
-### Telegram bot commands
-- ****:
-- ****:
-- ****:
-- ****:
-- ****:
-- ****:
-- ****:
-- ****:
 
 
 
