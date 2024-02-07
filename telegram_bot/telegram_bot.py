@@ -516,10 +516,9 @@ class Telegram_Bot:
                                             self.greenhouse["gh_params"][
                                                 "temperature"
                                             ] = parameters[1]
-                                            self.greenhouse["gh_params"][
-                                                "humidity"
-                                            ] = parameters[2]
-                                            # FIXME: find a better way to assign the CO2 value
+                                            self.greenhouse["gh_params"]["humidity"] = (
+                                                parameters[2]
+                                            )
                                             self.greenhouse["gh_params"][
                                                 "CO2_level"
                                             ] = 420
@@ -889,7 +888,6 @@ class Telegram_Bot:
                         "\nPlease sign in with another user clicking on /start",
                     )
                 elif message == "/getlinkgraph":
-                    # TODO: to be finished
                     link = requests.get(self.addr_cat + f"/nodeRed").json()
                     self.bot.sendMessage(
                         chat_ID,
@@ -1190,9 +1188,6 @@ class Telegram_Bot:
             except:
                 print("The catalog web service is unreachable!")
                 time.sleep(1)
-
-        # if update == False:
-        #    raise Exception("Data analysis microservice not present in the catalog!")
 
 
 if __name__ == "__main__":

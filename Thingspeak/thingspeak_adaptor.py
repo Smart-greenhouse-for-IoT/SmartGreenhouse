@@ -179,7 +179,6 @@ class ThingspeakAdaptor:
         ------------
 
         """
-
         try:
             # formatting
             if self.tot_dict:

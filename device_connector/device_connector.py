@@ -15,7 +15,6 @@ from device_sensors.CO2sens import *
 
 
 class Device_Connector(object):
-
     """
     Device connector class:
     -----------------------
@@ -48,7 +47,6 @@ class Device_Connector(object):
 
         # At the start the program check the sensor that are connected to the device connector
         for sensor in self.mydevice["resources"]["sensors"]:
-            # FIXME: now read all the sensor, but we need to start the actuation only for the active sensor
 
             if sensor["device_name"] == "chirp":
                 self.sensor_index[str(sensor["sensID"])] = count
@@ -133,7 +131,6 @@ class Device_Connector(object):
 
                         # If this is the correct actuator then
                         if topic in topic_list:
-                            # TODO:->ALE: maybe with the communication the actuator is already on, so check if it is already on
                             # Start the actuation
                             if message["command"] == True:
                                 self.actuator_list[
