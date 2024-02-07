@@ -280,19 +280,13 @@ class DataAnalysisMicroservice:
             last_week = (
                 (current_date - pd.DateOffset(weeks=1)).to_pydatetime().timestamp()
             )
-            last_t_df = df_filtered[
-                (df_filtered["timestamp"] >= last_week)
-                & (df_filtered["timestamp"] < current_date_sec)
-            ]
+            last_t_df = df_filtered[(df_filtered["timestamp"] >= last_week)]
 
         elif t == "month":
             last_month = (
                 (current_date - pd.DateOffset(months=1)).to_pydatetime().timestamp()
             )
-            last_t_df = df_filtered[
-                (df_filtered["timestamp"] >= last_month)
-                & (df_filtered["timestamp"] < current_date_sec)
-            ]
+            last_t_df = df_filtered[(df_filtered["timestamp"] >= last_month)]
 
         else:
             print("Error in getting the input date")
@@ -396,7 +390,7 @@ class DataAnalysisMicroservice:
         # GET function
 
     def GET(self, *uri, **params):
-        self.df = self.TR.readCSV()  # Devo analizzare questo df?
+        self.df = self.TR.readCSV()
 
         if len(uri) > 0:
             # Get the last specific value for temperature/humidity/CO2 for a gh
@@ -642,7 +636,9 @@ if __name__ == "__main__":
             "tools.sessions.on": True,
         }
     }
-    webService = DataAnalysisMicroservice("conf.json", "conf_DA.json")
+    webService = DataAnalysisMicroservice(
+        "Data_analysis/conf.json", "Data_analysis/conf_DA.json"
+    )
     cherrypy.tree.mount(webService, "/", cherryConf)
     cherrypy.config.update(
         {
