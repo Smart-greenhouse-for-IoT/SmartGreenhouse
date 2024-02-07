@@ -636,9 +636,7 @@ if __name__ == "__main__":
             "tools.sessions.on": True,
         }
     }
-    webService = DataAnalysisMicroservice(
-        "Data_analysis/conf.json", "Data_analysis/conf_DA.json"
-    )
+    webService = DataAnalysisMicroservice("conf.json", "conf_DA.json")
     cherrypy.tree.mount(webService, "/", cherryConf)
     cherrypy.config.update(
         {
