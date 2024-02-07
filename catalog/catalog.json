@@ -43,8 +43,17 @@
                 "CO2_level": 420,
                 "humidity": 30
             },
-            "plantsList": [],
-            "lastUpdate": "2024-02-07 12:12:21"
+            "plantsList": [
+                {
+                    "plant": "basilico",
+                    "th_min": 40,
+                    "th_max": 60,
+                    "devID": "d1",
+                    "sensID": "s3",
+                    "actID": "a3"
+                }
+            ],
+            "lastUpdate": "2024-02-07 19:57:20"
         }
     ],
     "users": [
@@ -54,31 +63,17 @@
             "ghID": [
                 "g1"
             ],
-            "ownedPlants": [],
+            "ownedPlants": [
+                {
+                    "plant": "basilico",
+                    "th_min": 40,
+                    "th_max": 60
+                }
+            ],
             "lastUpdate": "2024-02-07 10:50:54"
         }
     ],
     "devices": [],
-    "services": [
-        {
-            "servID": "DA01",
-            "name": "data_analysis",
-            "endpoints": [
-                "REST",
-                "MQTT"
-            ],
-            "endpoints_details": [
-                {
-                    "endpoint": "REST",
-                    "address": "http://172.17.0.3:8090",
-                    "ip": "0.0.0.0",
-                    "port": 8090
-                }
-            ],
-            "lastUpdate": "2024-02-07 13:05:53",
-            "path_dataset1": "Data_analysis/sub/datasets/20210703_greenhouse_data.csv",
-            "path_dataset2": "Data_analysis/sub/datasets/RosesGreenhDB.csv"
-        }
-    ],
-    "lastUpdate": "2024-02-07 16:27:18"
+    "services": [],
+    "lastUpdate": "2024-02-07 19:58:31"
 }
