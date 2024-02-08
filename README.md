@@ -12,7 +12,7 @@ SmartGreenhouse is an application used to control and monitor greenhouses. Based
 
 A promo video and a demo version are available on Youtube: 
 * [Promo](https://youtu.be/Q7VRfrwQL4w)
-* [Demo](https://youtu.be/UprqUbHRYlE)
+* [Demo](https://youtu.be/nj4oNVTqv44)
 
 ## Application structure
 
@@ -51,20 +51,15 @@ cloud.
 - The Thingspeak adaptor behaves as an MQTT subscriber that links the selected outputs to the cloud 
 platform using REST Web Services.
 
-- The Greenhouse Air Control is a control strategy in charge of the air quality inside the 
-Greenhouse, managing temperature and CO2. Based on the comparison between the 
-measurements received from the Device Connector and the thresholds stored in the 
-Greenhouse Catalog, it turns on the actuation fans system. In the first case, when receiving 
-data, it works as an MQTT subscriber and in the second case, when sending actuation 
-commands, it works as an MQTT publisher. It is also a REST Client getting information from 
-the Greenhouse Catalog.
+- The Greenhouse control is a control strategy in charge of:
+  - Temperature control
+  - Humidity Control
+  - CO2 level control
 
-- The Greenhouse Humidity Control is a control strategy that manages the humidity inside 
-the Greenhouse. Based on the comparison between the measurements received from the 
-Device Connector and the thresholds stored in the Greenhouse Catalog, it turns on the 
-actuation vaporizers system. In the first case, when receiving data, it works as an MQTT 
-subscriber and in the second case, when sending actuation commands, it works as an MQTT 
-publisher. It is also a REST Client getting information from the Greenhouse Catalog.
+  The strategy consist of a comparison between the values measured by the sensors, which are     sent by the device connector, and the thresholds in the Greenhouse Catalog.
+  When the thresholds are not respected the actuation starts. For temperature and CO2 level    the actuation consists of a fan system, while the humidity is controlled by a vaporizer system.
+  This microservices works as a MQTT publisher when sending actuations and as an subscriber when collecting data for comparison.
+  Finally, is a REST client getting information from the Greenhouse catalog.
 
 - The Plants Control is a control strategy that manages irrigation of each batch of pots of the 
 Greenhouse independently. It receives the data from the Device Connector about the humidity 
