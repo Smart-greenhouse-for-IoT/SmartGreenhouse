@@ -15,7 +15,7 @@ class ThingspeakReader:
     def readCSV(self):
         channel_id = self.conf_dict.get("channel_id")
         read_api_key = self.conf_dict.get("read_key")
-        url = f"https://api.thingspeak.com/channels/{channel_id}/feeds.csv?api_key={read_api_key}"
+        url = f"https://api.thingspeak.com/channels/{channel_id}/feeds.csv?api_key={read_api_key}&results=5000"
 
         response = requests.get(url)
 

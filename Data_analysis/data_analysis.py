@@ -262,13 +262,6 @@ class DataAnalysisMicroservice:
         ]  # df for the selected ghid and quantity
 
         current_date = pd.to_datetime("today").date()
-        current_date_sec = (
-            current_date - pd.Timestamp("1970-01-01").date()
-        ).total_seconds()
-
-        timestamp = 1698238111.85808
-
-        date_time = datetime.fromtimestamp(timestamp)
 
         if t == "day":
             last_day = (
@@ -353,9 +346,9 @@ class DataAnalysisMicroservice:
                     start = None
 
                     for index, row in actuator_df.iterrows():
-                        if row["actuation_level"] == 1:
+                        if row["actuation_level"] == "1":
                             start = row["timestamp"]
-                        elif row["actuation_level"] == 0 and start is not None:
+                        elif row["actuation_level"] == "0" and start is not None:
                             stop = row["timestamp"]
                             consumption_time += stop - start
                             start = None
@@ -597,7 +590,7 @@ class DataAnalysisMicroservice:
 
 
 class Queries:
-    # returnare il timestamp in formato decente
+    
     def __init__(self):
         pass
 
