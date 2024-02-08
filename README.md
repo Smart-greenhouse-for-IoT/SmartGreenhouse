@@ -11,8 +11,8 @@ Project for the course Programming for IoT Applications at Politecnico di Torino
 SmartGreenhouse is an application used to control and monitor greenhouses. Based on the microservices approach the user could obtain real-time information for the owned greenhouses and plants. All the system is automatically managed through device connectors which have connected sensors and actuators for the correct functioning of the smart greenhouse.
 
 A promo video and a demo version are available on Youtube: 
-- *working on*
-
+* [Promo](https://youtu.be/Q7VRfrwQL4w)
+* [Demo](https://youtu.be/UprqUbHRYlE)
 
 ## Application structure
 
